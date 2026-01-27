@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity & Access Management - Bank Security System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="modern-ui.css">
+    <style>[data-module]:not(.visible){display:none !important;}</style>
+</head>
+<body class="text-gray-800">
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-building"></i>
+                <span>Onit MFB</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Core Modules -->
+            <div class="nav-section">
+                <div class="nav-section-title">Core Modules</div>
+                <a href="submit.html" class="nav-item" data-page="submit">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Submit Ticket</span>
+                </a>
+                <a href="tickets.html" class="nav-item" data-page="tickets">
+                    <i class="fas fa-list"></i>
+                    <span>View Tickets</span>
+                </a>
+            </div>
+
+            <!-- Security Modules -->
+            <div class="nav-section">
+                <div class="nav-section-title">Security</div>
+                <a href="iam.html" class="nav-item active" data-page="iam" data-module="iam">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Identity & Access Management</span>
+                </a>
+                <a href="pam.html" class="nav-item" data-page="pam" data-module="pam">
+                    <i class="fas fa-key"></i>
+                    <span>Privileged Access Management</span>
+                </a>
+                <a href="security-incident.html" class="nav-item" data-page="security-incident" data-module="security-incident">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Security Incident Management</span>
+                </a>
+                <a href="vulnerability.html" class="nav-item" data-page="vulnerability" data-module="vulnerability">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Vulnerability Management</span>
+                </a>
+                <a href="policy-compliance.html" class="nav-item" data-page="policy-compliance" data-module="policy-compliance">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Policy & Compliance</span>
+                </a>
+                <a href="security-dashboard.html" class="nav-item" data-page="security-dashboard" data-module="security-dashboard">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Security Dashboards</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="header-left">
+            <button id="hamburger" class="hamburger" title="Toggle Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="header-title">Identity & Access Management</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-name" id="userName">User</div>
+                <div class="user-role" id="userRole">Department</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="main-content">
+        <div class="max-w-7xl mx-auto p-6">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Identity & Access Management (IAM)</h2>
+                <p class="text-gray-600">Manage user access, approvals, periodic reviews, and AD/Entra integration</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-users text-2xl text-blue-600 mr-3"></i>
+                        <h3 class="text-lg font-semibold">User Access Control</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Manage user permissions and access levels across systems</p>
+                    <button class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Manage Users</button>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-clock text-2xl text-green-600 mr-3"></i>
+                        <h3 class="text-lg font-semibold">Periodic Reviews</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Schedule and track access reviews and certifications</p>
+                    <button class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">Schedule Review</button>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-check-circle text-2xl text-purple-600 mr-3"></i>
+                        <h3 class="text-lg font-semibold">Approval Workflows</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Configure approval processes for access requests</p>
+                    <button class="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">Configure Workflows</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4">AD/Entra Integration Status</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border rounded p-4">
+                        <h4 class="font-medium mb-2">Active Directory Sync</h4>
+                        <div class="flex items-center">
+                            <i class="fas fa-circle text-green-500 mr-2"></i>
+                            <span class="text-green-600">Connected</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Last sync: 2 minutes ago</p>
+                    </div>
+                    <div class="border rounded p-4">
+                        <h4 class="font-medium mb-2">Entra ID Integration</h4>
+                        <div class="flex items-center">
+                            <i class="fas fa-circle text-green-500 mr-2"></i>
+                            <span class="text-green-600">Active</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Last sync: 5 minutes ago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

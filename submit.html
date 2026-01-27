@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Ticket - Bank Ticketing System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="modern-ui.css">
+    <style>
+        .ticket-card {
+            transition: all 0.3s ease;
+        }
+        .ticket-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .priority-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .priority-P1 { background: #fee2e2; color: #dc2626; }
+        .priority-P2 { background: #fef3c7; color: #d97706; }
+        .priority-P3 { background: #dbeafe; color: #2563eb; }
+        .priority-P4 { background: #f3f4f6; color: #6b7280; }
+        .sla-timer {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .sla-warning { color: #d97706; }
+        .sla-breach { color: #dc2626; }
+        .sla-good { color: #059669; }
+    </style>
+</head>
+<body class="text-gray-800 light-theme">
+
+    <!-- Simplified Header for Ticket Submission -->
+    <header id="header" class="bg-blue-900 py-4 shadow-lg">
+        <div class="container mx-auto px-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-building text-white text-xl"></i>
+                    <span class="text-white font-bold text-lg">Onit MFB</span>
+                </div>
+                <h1 class="text-white text-xl font-semibold">Submit Ticket</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="user-info text-right">
+                    <div class="user-name text-white font-medium" id="userName">User</div>
+                    <div class="user-role text-blue-200 text-sm" id="userRole">Department</div>
+                </div>
+                <div class="flex gap-2">
+                    <a href="submit.html" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition">
+                        <i class="fas fa-ticket-alt mr-2"></i>Submit Ticket
+                    </a>
+                    <a href="tickets.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-list mr-2"></i>View Tickets
+                    </a>
+                    <button id="logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div id="userTypeSelection" class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+            <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 flex items-center justify-center gap-2">
+                <i class="fas fa-ticket-alt text-teal-600"></i>
+                Submit a Ticket
+            </h2>
+            <div class="space-y-4">
+                <p class="text-center text-gray-700 text-lg">What type of ticket are you submitting?</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button id="customerBtn" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-lg px-6 py-3 rounded-lg font-semibold transition text-white flex items-center justify-center gap-2">
+                        <i class="fas fa-user-circle"></i>
+                        Customer Ticket
+                    </button>
+                    <button id="internalBtn" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:shadow-lg px-6 py-3 rounded-lg font-semibold transition text-white flex items-center justify-center gap-2">
+                        <i class="fas fa-building"></i>
+                        Internal Ticket
+                    </button>
+                </div>
+            </div>
+            <div id="deptSelection" class="hidden space-y-4 mt-6 pt-6 border-t border-gray-200">
+                <label for="fromDeptSelect" class="block text-sm font-medium text-gray-700">Select Your Department:</label>
+                <select id="fromDeptSelect" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="Customer Service" class="text-gray-900">Customer Service</option>
+                    <option value="IT" class="text-gray-900">IT</option>
+                    <option value="Finance" class="text-gray-900">Finance</option>
+                    <option value="Security" class="text-gray-900">Security</option>
+                    <option value="Operations" class="text-gray-900">Operations</option>
+                    <option value="Risk & Compliance" class="text-gray-900">Risk & Compliance</option>
+                    <option value="Internal Audit" class="text-gray-900">Internal Audit</option>
+                    <option value="Management" class="text-gray-900">Management</option>
+                    <option value="Data Analysis" class="text-gray-900">Data Analysis</option>
+                </select>
+                <button id="proceedBtn" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:shadow-lg px-4 py-2 rounded-lg font-semibold transition text-white">Proceed to Ticket Form</button>
+            </div>
+        </div>
+
+        <div id="ticketFormContainer" class="hidden">
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold mb-6 text-center text-gray-900">Create Ticket</h2>
+                <form id="ticketForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Full Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="name" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div id="emailField">
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                            <input type="email" id="email" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="priority" class="block text-sm font-medium text-gray-700">Priority <span class="text-red-500">*</span></label>
+                            <select id="priority" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="P4">P4 - Low</option>
+                                <option value="P3">P3 - Medium</option>
+                                <option value="P2">P2 - High</option>
+                                <option value="P1">P1 - Critical</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="category" class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
+                            <select id="category" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="Incident">Incident</option>
+                                <option value="Request">Request</option>
+                                <option value="Problem">Problem</option>
+                                <option value="Change">Change</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="fromDept">
+                    
+                    <div id="toDeptContainer">
+                        <label for="toDept" class="block text-sm font-medium text-gray-700">Assign To Department <span class="text-red-500">*</span></label>
+                        <select id="toDept" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="">Select department</option>
+                            <option value="Customer Service">Customer Service</option>
+                            <option value="IT">IT</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Security">Security</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Risk & Compliance">Risk & Compliance</option>
+                            <option value="Internal Audit">Internal Audit</option>
+                            <option value="Management">Management</option>
+                            <option value="Data Analysis">Data Analysis</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="issueType" class="block text-sm font-medium text-gray-700">Issue Type <span class="text-red-500">*</span></label>
+                        <select id="issueType" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
+                        <textarea id="description" rows="5" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="attachment" class="block text-sm font-medium text-gray-700">Attachments (optional)</label>
+                        <input type="file" id="attachment" multiple class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-teal-600 to-teal-700 hover:shadow-lg px-4 py-2 rounded-lg font-semibold transition text-white flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane"></i>
+                            Submit Ticket
+                        </button>
+                        <button type="button" id="backBtn" class="flex-1 bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg font-semibold transition text-gray-800 flex items-center justify-center gap-2">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                    </div>
+                </form>
+                <p id="message" class="mt-4 text-center font-medium"></p>
+                <div id="successNotification" class="hidden mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Ticket created successfully!
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets List -->
+        <div id="ticketsSection" class="hidden mt-8">
+            <h2 class="text-2xl font-bold mb-4 text-gray-900">Recent Tickets</h2>
+            <div id="ticketsContainer" class="space-y-4">
+                <!-- Tickets will be loaded here -->
+            </div>
+            <div id="noTickets" class="text-center py-8">
+                <p class="text-gray-500">No tickets found</p>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer">
+        <p>&copy; 2026 Onit Microfinance Bank. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
+    <script src="script.js"></script>
+    <script>
+        alert('Script loaded'); // Debug
+        // Check login
+        if (!localStorage.getItem('userDept')) {
+            window.location.href = 'index.html';
+        }
+
+        // Set user info
+        const dept = localStorage.getItem('userDept');
+        document.getElementById('userName').textContent = 'User (' + dept + ')';
+        document.getElementById('userRole').textContent = dept + ' Department';
+
+        // Auto-assignment rules
+        const autoAssignRules = {
+            'Account Opening': 'Customer Service',
+            'Loan Inquiry': 'Customer Service',
+            'Transaction Issue': 'Customer Service',
+            'General Inquiry': 'Customer Service',
+            'Software Issue': 'IT',
+            'Hardware Problem': 'IT',
+            'Network Issue': 'IT',
+            'Access Request': 'IT',
+            'Payment Issue': 'Finance',
+            'Statement Request': 'Finance',
+            'Fee Inquiry': 'Finance',
+            'Account Balance': 'Finance',
+            'Suspicious Activity': 'Security',
+            'Password Reset': 'Security',
+            'Access Control': 'Security',
+            'Security Incident': 'Security',
+            'Process Issue': 'Operations',
+            'Documentation': 'Operations',
+            'Schedule Change': 'Operations',
+            'Resource Request': 'Operations',
+            'Compliance Check': 'Risk & Compliance',
+            'Risk Assessment': 'Risk & Compliance',
+            'Audit Request': 'Risk & Compliance',
+            'Policy Question': 'Risk & Compliance',
+            'Audit Finding': 'Internal Audit',
+            'Process Review': 'Internal Audit',
+            'Compliance Issue': 'Internal Audit',
+            'Report Request': 'Internal Audit',
+            'Strategic Issue': 'Management',
+            'Performance Review': 'Management',
+            'Budget Question': 'Management',
+            'Executive Request': 'Management',
+            'Report Generation': 'Data Analysis',
+            'Data Query': 'Data Analysis',
+            'Analytics Request': 'Data Analysis',
+            'Dashboard Issue': 'Data Analysis'
+        };
+
+        // Auto-assign department when issue type changes
+        document.getElementById('issueType').addEventListener('change', function() {
+            const issueType = this.value;
+            const assignedDept = autoAssignRules[issueType];
+            if (assignedDept) {
+                document.getElementById('toDept').value = assignedDept;
+                populateIssueTypes(); // Refresh issue types for the new department
+            }
+        });
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', function() {
+            localStorage.removeItem('userDept');
+            window.location.href = 'index.html';
+        });
+
+        // User type selection flow
+        document.getElementById('customerBtn').addEventListener('click', function() {
+            document.getElementById('userTypeSelection').style.display = 'none';
+            document.getElementById('ticketFormContainer').style.display = 'block';
+            // For customers, set defaults
+            document.getElementById('fromDept').value = 'Customer';
+            document.getElementById('name').value = 'Customer User';
+            document.getElementById('email').value = 'customer@onitbank.com';
+            // Set toDept to Customer Service by default
+            document.getElementById('toDept').value = 'Customer Service';
+            populateIssueTypes();
+        });
+
+        document.getElementById('internalBtn').addEventListener('click', function() {
+            document.getElementById('userTypeSelection').style.display = 'none';
+            document.getElementById('deptSelection').style.display = 'block';
+        });
+
+        document.getElementById('proceedBtn').addEventListener('click', function() {
+            const selectedDept = document.getElementById('fromDeptSelect').value;
+            if (!selectedDept) {
+                alert('Please select your department');
+                return;
+            }
+            document.getElementById('deptSelection').style.display = 'none';
+            document.getElementById('ticketFormContainer').style.display = 'block';
+            document.getElementById('fromDept').value = selectedDept;
+            // Auto-fill name and email for internal users
+            document.getElementById('name').value = 'Internal User';
+            document.getElementById('email').value = 'internal@onitbank.com';
+            // Populate issue types for the selected department
+            document.getElementById('toDept').value = selectedDept; // Default to same department
+            populateIssueTypes();
+        });
+
+        document.getElementById('backBtn').addEventListener('click', function() {
+            document.getElementById('ticketFormContainer').style.display = 'none';
+            document.getElementById('userTypeSelection').style.display = 'block';
+        });
+
+        // Form submission
+        document.getElementById('ticketForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            if (!validateForm()) {
+                return;
+            }
+            
+            const ticketData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                fromDept: document.getElementById('fromDept').value,
+                ticketType: document.getElementById('ticketType').value,
+                toDept: document.getElementById('toDept').value,
+                issueType: document.getElementById('issueType').value,
+                description: document.getElementById('description').value,
+                status: 'Open',
+                priority: document.getElementById('priority').value,
+                escalated: 'No',
+                attachment: document.getElementById('attachment').files.length > 0 ? Array.from(document.getElementById('attachment').files).map(f => f.name).join(', ') : '',
+                timestamp: new Date().toISOString(),
+                category: document.getElementById('category').value
+            };
+
+            // Send to API
+            fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ticketData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success notification
+                    const notification = document.getElementById('successNotification');
+                    notification.classList.remove('hidden');
+                    setTimeout(() => notification.classList.add('hidden'), 5000); // Hide after 5 seconds
+                    
+                    // Clear the form
+                    this.reset();
+                    
+                    // Show tickets section and refresh the list
+                    document.getElementById('ticketsSection').classList.remove('hidden');
+                    displayTickets();
+                } else {
+                    alert('Failed to create ticket: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error creating ticket. Please try again.');
+            });
+        });
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+            const errors = {};
+
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+
+            // Required fields
+            const requiredFields = ['name', 'email', 'priority', 'category', 'toDept', 'issueType', 'description'];
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    showError(element, `${field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')} is required`);
+                    isValid = false;
+                }
+            });
+
+            // Email validation
+            const email = document.getElementById('email').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email && !emailRegex.test(email)) {
+                showError(document.getElementById('email'), 'Please enter a valid email address');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function showError(element, message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message text-red-500 text-sm mt-1';
+            errorDiv.textContent = message;
+            element.parentNode.appendChild(errorDiv);
+        }
+
+        // Populate issue types based on department
+        function populateIssueTypes() {
+            const dept = document.getElementById('toDept').value;
+            const issueTypeSelect = document.getElementById('issueType');
+            issueTypeSelect.innerHTML = '';
+
+            const issueTypes = {
+                'Customer Service': ['Account Opening', 'Loan Inquiry', 'Transaction Issue', 'General Inquiry'],
+                'IT': ['Software Issue', 'Hardware Problem', 'Network Issue', 'Access Request'],
+                'Finance': ['Payment Issue', 'Statement Request', 'Fee Inquiry', 'Account Balance'],
+                'Security': ['Suspicious Activity', 'Password Reset', 'Access Control', 'Security Incident'],
+                'Operations': ['Process Issue', 'Documentation', 'Schedule Change', 'Resource Request'],
+                'Risk & Compliance': ['Compliance Check', 'Risk Assessment', 'Audit Request', 'Policy Question'],
+                'Internal Audit': ['Audit Finding', 'Process Review', 'Compliance Issue', 'Report Request'],
+                'Management': ['Strategic Issue', 'Performance Review', 'Budget Question', 'Executive Request'],
+                'Data Analysis': ['Report Generation', 'Data Query', 'Analytics Request', 'Dashboard Issue']
+            };
+
+            const types = issueTypes[dept] || ['General Issue'];
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                issueTypeSelect.appendChild(option);
+            });
+        }
+
+        document.getElementById('toDept').addEventListener('change', populateIssueTypes);
+        populateIssueTypes(); // Initial population
+
+        // Send notification function
+        function sendNotification(ticketData) {
+            fetch('/api/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: ticketData.email,
+                    template: 'generalNotification',
+                    data: {
+                        subject: `Ticket ${ticketData.id} Created`,
+                        title: 'Ticket Submitted Successfully',
+                        message: `Your ticket has been submitted and assigned to ${ticketData.toDept}. Ticket ID: ${ticketData.id}`
+                    }
+                })
+            }).catch(err => console.log('Notification failed:', err));
+        }
+    </script>
+</body>
+</html>

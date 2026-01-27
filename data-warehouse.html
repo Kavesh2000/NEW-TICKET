@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Warehouse - Bank Data Analysis System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="modern-ui.css">
+    <style>[data-module]:not(.visible){display:none !important;}</style>
+</head>
+<body class="text-gray-800">
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-building"></i>
+                <span>Onit MFB</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Core Modules -->
+            <div class="nav-section">
+                <div class="nav-section-title">Core Modules</div>
+                <a href="submit.html" class="nav-item" data-page="submit">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Submit Ticket</span>
+                </a>
+                <a href="tickets.html" class="nav-item" data-page="tickets">
+                    <i class="fas fa-list"></i>
+                    <span>View Tickets</span>
+                </a>
+            </div>
+
+            <!-- Data Analysis Modules -->
+            <div class="nav-section">
+                <div class="nav-section-title">Data Analysis</div>
+                <a href="data-integration.html" class="nav-item" data-page="data-integration" data-module="data-integration">
+                    <i class="fas fa-database"></i>
+                    <span>Data Integration</span>
+                </a>
+                <a href="data-warehouse.html" class="nav-item active" data-page="data-warehouse" data-module="data-warehouse">
+                    <i class="fas fa-server"></i>
+                    <span>Data Warehouse</span>
+                </a>
+                <a href="analytics-bi.html" class="nav-item" data-page="analytics-bi" data-module="analytics-bi">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics & BI Dashboards</span>
+                </a>
+                <a href="data-governance.html" class="nav-item" data-page="data-governance" data-module="data-governance">
+                    <i class="fas fa-balance-scale"></i>
+                    <span>Data Governance</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="header-left">
+            <button id="hamburger" class="hamburger" title="Toggle Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="header-title">Data Warehouse</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-name" id="userName">User</div>
+                <div class="user-role" id="userRole">Department</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="main-content">
+        <div class="max-w-7xl mx-auto p-6">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Data Warehouse</h2>
+                <p class="text-gray-600">Centralized storage, historical records, role-based access</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg p-6 shadow-md text-center">
+                    <div class="text-3xl text-blue-600 mb-2"><i class="fas fa-hdd"></i></div>
+                    <div class="text-2xl font-bold text-blue-600">2.4TB</div>
+                    <div class="text-sm text-gray-600">Total Storage</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md text-center">
+                    <div class="text-3xl text-green-600 mb-2"><i class="fas fa-table"></i></div>
+                    <div class="text-2xl font-bold text-green-600">156</div>
+                    <div class="text-sm text-gray-600">Data Tables</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md text-center">
+                    <div class="text-3xl text-purple-600 mb-2"><i class="fas fa-users"></i></div>
+                    <div class="text-2xl font-bold text-purple-600">23</div>
+                    <div class="text-sm text-gray-600">Active Users</div>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md text-center">
+                    <div class="text-3xl text-orange-600 mb-2"><i class="fas fa-clock"></i></div>
+                    <div class="text-2xl font-bold text-orange-600">99.9%</div>
+                    <div class="text-sm text-gray-600">Uptime</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Data Domains</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div class="flex items-center">
+                                <i class="fas fa-money-bill-wave text-green-600 mr-3"></i>
+                                <div>
+                                    <div class="font-medium">Financial Data</div>
+                                    <div class="text-sm text-gray-500">Transactions, accounts, balances</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">45.2GB</div>
+                                <div class="text-xs text-gray-500">1.2M records</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div class="flex items-center">
+                                <i class="fas fa-user-friends text-blue-600 mr-3"></i>
+                                <div>
+                                    <div class="font-medium">Customer Data</div>
+                                    <div class="text-sm text-gray-500">Profiles, demographics, history</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">28.7GB</div>
+                                <div class="text-xs text-gray-500">850K records</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div class="flex items-center">
+                                <i class="fas fa-cogs text-orange-600 mr-3"></i>
+                                <div>
+                                    <div class="font-medium">Operational Data</div>
+                                    <div class="text-sm text-gray-500">Processes, workflows, metrics</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">67.1GB</div>
+                                <div class="text-xs text-gray-500">2.1M records</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div class="flex items-center">
+                                <i class="fas fa-shield-alt text-red-600 mr-3"></i>
+                                <div>
+                                    <div class="font-medium">Security Data</div>
+                                    <div class="text-sm text-gray-500">Logs, incidents, compliance</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">12.3GB</div>
+                                <div class="text-xs text-gray-500">450K records</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Access Control</h3>
+                    <div class="space-y-4">
+                        <div class="p-3 border rounded">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Finance Department</span>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Read/Write</span>
+                            </div>
+                            <div class="text-sm text-gray-600">Access to financial and customer data</div>
+                        </div>
+                        <div class="p-3 border rounded">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Operations Team</span>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">Read Only</span>
+                            </div>
+                            <div class="text-sm text-gray-600">Access to operational data</div>
+                        </div>
+                        <div class="p-3 border rounded">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Security Team</span>
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">Full Access</span>
+                            </div>
+                            <div class="text-sm text-gray-600">Access to all data domains</div>
+                        </div>
+                        <div class="p-3 border rounded">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Data Analysis</span>
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">Full Access</span>
+                            </div>
+                            <div class="text-sm text-gray-600">Access to all data for analysis</div>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Manage Permissions</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4">Data Retention & Archiving</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center p-4 border rounded">
+                        <div class="text-2xl text-blue-600 mb-2"><i class="fas fa-archive"></i></div>
+                        <div class="text-lg font-bold">Hot Storage</div>
+                        <div class="text-sm text-gray-600">Last 2 years</div>
+                        <div class="text-xs text-blue-600 mt-1">Fast access, high performance</div>
+                    </div>
+                    <div class="text-center p-4 border rounded">
+                        <div class="text-2xl text-green-600 mb-2"><i class="fas fa-box"></i></div>
+                        <div class="text-lg font-bold">Warm Storage</div>
+                        <div class="text-sm text-gray-600">2-7 years</div>
+                        <div class="text-xs text-green-600 mt-1">Moderate access, cost effective</div>
+                    </div>
+                    <div class="text-center p-4 border rounded">
+                        <div class="text-2xl text-gray-600 mb-2"><i class="fas fa-snowflake"></i></div>
+                        <div class="text-lg font-bold">Cold Storage</div>
+                        <div class="text-sm text-gray-600">7+ years</div>
+                        <div class="text-xs text-gray-600 mt-1">Archive access, minimal cost</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

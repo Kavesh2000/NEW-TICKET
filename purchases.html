@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchases Management - Bank System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[data-module]:not(.visible){display:none !important;}</style>
+    <style>
+        body {
+            background: #F8FAFC;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <header class="bg-blue-900 py-4">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold text-white">Purchases Management Module</h1>
+            <nav class="mt-4">
+                <a href="index.html" class="mr-4 hover:underline text-white">Home</a>
+                <a href="#" id="logout" class="hover:underline text-white">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Access Control -->
+        <div id="accessDenied" class="hidden text-center py-12">
+            <i class="fas fa-lock text-6xl text-red-500 mb-4"></i>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Access Denied</h2>
+            <p class="text-gray-600">Purchases Management is available for administrators only.</p>
+            <p class="text-gray-600">For assistance, contact <a href="mailto:automation@maishabank.com" class="text-teal-600 hover:underline">automation@maishabank.com</a></p>
+            <a href="system.html" class="mt-4 inline-block bg-teal-600 text-white px-6 py-2 rounded-lg">Back to Dashboard</a>
+        </div>
+
+        <div id="purchasesContent">
+        <h2 class="text-3xl font-bold mb-6 text-center text-gray-900">Purchase Requests & Orders</h2>
+
+        <div class="grid md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Total Requests</h3>
+                <p class="text-3xl font-bold text-blue-600" id="totalRequests">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Pending</h3>
+                <p class="text-3xl font-bold text-yellow-600" id="pendingCount">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Ordered</h3>
+                <p class="text-3xl font-bold text-purple-600" id="orderedCount">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Received</h3>
+                <p class="text-3xl font-bold text-green-600" id="receivedCount">0</p>
+            </div>
+        </div>
+
+        <div class="flex gap-2 mb-6">
+            <button id="btnAddPurchase" class="bg-teal-600 text-white px-4 py-2 rounded">Add Purchase Request</button>
+            <button id="btnExportPurchases" class="bg-gray-200 px-4 py-2 rounded">Export CSV</button>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4 mb-4">
+            <input id="filterItem" placeholder="Filter by item" class="px-3 py-2 border rounded-md">
+            <select id="filterStatus" class="px-3 py-2 border rounded-md">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Ordered">Ordered</option>
+                <option value="Received">Received</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <input id="filterDepartment" placeholder="Filter by department" class="px-3 py-2 border rounded-md">
+            <button id="btnSearchPurchases" class="bg-teal-600 text-white px-4 py-2 rounded">Search</button>
+        </div>
+
+        <div id="purchasesContainer" class="space-y-4">
+            <!-- Purchase requests will be loaded here -->
+        </div>
+        <p id="noPurchases" class="text-center mt-8 text-gray-700">No purchase requests found.</p>
+        </div>
+    </main>
+
+    <footer class="bg-blue-900 py-4 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-white">&copy; 2026 Onit Microfinance Bank. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Check access
+        const userDept = localStorage.getItem('userDept');
+        if (!userDept || !hasModuleAccess('purchases','read')) {
+            document.getElementById('accessDenied').classList.remove('hidden');
+            document.getElementById('purchasesContent').classList.add('hidden');
+        } else {
+            document.getElementById('accessDenied').classList.add('hidden');
+            document.getElementById('purchasesContent').classList.remove('hidden');
+            document.getElementById('purchasesContent').classList.add('visible');
+        }
+
+        document.getElementById('logout').addEventListener('click', function(){ localStorage.removeItem('userDept'); window.location.href='index.html'; });
+
+        // Purchases data storage
+        const STORAGE_PURCHASES = 'purchases';
+
+        function loadPurchases() {
+            return JSON.parse(localStorage.getItem(STORAGE_PURCHASES) || '[]');
+        }
+
+        function savePurchases(items) {
+            localStorage.setItem(STORAGE_PURCHASES, JSON.stringify(items));
+        }
+
+        function formatPurchaseRow(item) {
+            const statusColors = {
+                'Pending': 'bg-yellow-100 text-yellow-800',
+                'Approved': 'bg-blue-100 text-blue-800',
+                'Ordered': 'bg-purple-100 text-purple-800',
+                'Received': 'bg-green-100 text-green-800',
+                'Cancelled': 'bg-red-100 text-red-800'
+            };
+
+            return `
+                <div class="bg-white p-4 rounded shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold">${item.itemName}</div>
+                            <div class="text-sm text-gray-600">Department: ${item.department} • Quantity: ${item.quantity} • Estimated Cost: $${item.estimatedCost}</div>
+                            <div class="text-sm text-gray-600">Requested by: ${item.requestedBy} • Date: ${new Date(item.requestDate).toLocaleDateString()}</div>
+                            <div class="text-sm text-gray-500">${item.description || ''}</div>
+                            <span class="inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${statusColors[item.status] || 'bg-gray-100 text-gray-800'}">${item.status}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editPurchase('${item.id}')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">Edit</button>
+                            <button onclick="updateStatus('${item.id}')" class="bg-green-500 text-white px-3 py-1 rounded text-sm">Update Status</button>
+                            <button onclick="deletePurchase('${item.id}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPurchases(filters = {}) {
+            const all = loadPurchases();
+            let items = all.slice();
+
+            if (filters.item) items = items.filter(i => i.itemName.toLowerCase().includes(filters.item.toLowerCase()));
+            if (filters.status) items = items.filter(i => i.status === filters.status);
+            if (filters.department) items = items.filter(i => i.department.toLowerCase().includes(filters.department.toLowerCase()));
+
+            const container = document.getElementById('purchasesContainer');
+            if (!items.length) {
+                document.getElementById('noPurchases').style.display = 'block';
+                container.innerHTML = '';
+            } else {
+                document.getElementById('noPurchases').style.display = 'none';
+                container.innerHTML = items.map(formatPurchaseRow).join('');
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const items = loadPurchases();
+            document.getElementById('totalRequests').textContent = items.length;
+            document.getElementById('pendingCount').textContent = items.filter(i => i.status === 'Pending').length;
+            document.getElementById('orderedCount').textContent = items.filter(i => i.status === 'Ordered').length;
+            document.getElementById('receivedCount').textContent = items.filter(i => i.status === 'Received').length;
+        }
+
+        document.getElementById('btnSearchPurchases').addEventListener('click', () => {
+            renderPurchases({
+                item: document.getElementById('filterItem').value,
+                status: document.getElementById('filterStatus').value,
+                department: document.getElementById('filterDepartment').value
+            });
+        });
+
+        document.getElementById('btnAddPurchase').addEventListener('click', () => {
+            const itemName = prompt('Item name:');
+            if (!itemName) return;
+
+            const department = prompt('Department:');
+            const quantity = parseInt(prompt('Quantity:', '1')) || 1;
+            const estimatedCost = parseFloat(prompt('Estimated cost:', '0')) || 0;
+            const requestedBy = prompt('Requested by:');
+            const description = prompt('Description:');
+
+            const items = loadPurchases();
+            const newItem = {
+                id: Date.now().toString(),
+                itemName,
+                department,
+                quantity,
+                estimatedCost,
+                requestedBy,
+                description,
+                status: 'Pending',
+                requestDate: new Date().toISOString()
+            };
+            items.push(newItem);
+            savePurchases(items);
+            renderPurchases();
+        });
+
+        function editPurchase(id) {
+            const items = loadPurchases();
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            const itemName = prompt('Item name:', item.itemName);
+            if (!itemName) return;
+
+            item.itemName = itemName;
+            item.department = prompt('Department:', item.department);
+            item.quantity = parseInt(prompt('Quantity:', item.quantity)) || 1;
+            item.estimatedCost = parseFloat(prompt('Estimated cost:', item.estimatedCost)) || 0;
+            item.requestedBy = prompt('Requested by:', item.requestedBy);
+            item.description = prompt('Description:', item.description);
+
+            savePurchases(items);
+            renderPurchases();
+        }
+
+        function updateStatus(id) {
+            const items = loadPurchases();
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            const newStatus = prompt('New status (Pending/Approved/Ordered/Received/Cancelled):', item.status);
+            if (!newStatus) return;
+
+            item.status = newStatus;
+            savePurchases(items);
+            renderPurchases();
+        }
+
+        function deletePurchase(id) {
+            if (!confirm('Delete this purchase request?')) return;
+            const items = loadPurchases();
+            const filtered = items.filter(i => i.id !== id);
+            savePurchases(filtered);
+            renderPurchases();
+        }
+
+        document.getElementById('btnExportPurchases').addEventListener('click', () => {
+            const items = loadPurchases();
+            if (!items.length) {
+                alert('No purchase requests to export');
+                return;
+            }
+            const csv = ['id,itemName,department,quantity,estimatedCost,requestedBy,status,requestDate,description', ...items.map(i => `${i.id},"${i.itemName}","${i.department}",${i.quantity},${i.estimatedCost},"${i.requestedBy}","${i.status}","${i.requestDate}","${i.description || ''}"`)]].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'purchases.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Initial render
+        renderPurchases();
+    </script>
+</body>
+</html>

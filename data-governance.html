@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Governance - Bank Data Analysis System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="modern-ui.css">
+    <style>[data-module]:not(.visible){display:none !important;}</style>
+</head>
+<body class="text-gray-800">
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-building"></i>
+                <span>Onit MFB</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Core Modules -->
+            <div class="nav-section">
+                <div class="nav-section-title">Core Modules</div>
+                <a href="submit.html" class="nav-item" data-page="submit">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Submit Ticket</span>
+                </a>
+                <a href="tickets.html" class="nav-item" data-page="tickets">
+                    <i class="fas fa-list"></i>
+                    <span>View Tickets</span>
+                </a>
+            </div>
+
+            <!-- Data Analysis Modules -->
+            <div class="nav-section">
+                <div class="nav-section-title">Data Analysis</div>
+                <a href="data-integration.html" class="nav-item" data-page="data-integration" data-module="data-integration">
+                    <i class="fas fa-database"></i>
+                    <span>Data Integration</span>
+                </a>
+                <a href="data-warehouse.html" class="nav-item" data-page="data-warehouse" data-module="data-warehouse">
+                    <i class="fas fa-server"></i>
+                    <span>Data Warehouse</span>
+                </a>
+                <a href="analytics-bi.html" class="nav-item" data-page="analytics-bi" data-module="analytics-bi">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics & BI Dashboards</span>
+                </a>
+                <a href="data-governance.html" class="nav-item active" data-page="data-governance" data-module="data-governance">
+                    <i class="fas fa-balance-scale"></i>
+                    <span>Data Governance</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="header-left">
+            <button id="hamburger" class="hamburger" title="Toggle Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="header-title">Data Governance</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-name" id="userName">User</div>
+                <div class="user-role" id="userRole">Department</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="main-content">
+        <div class="max-w-7xl mx-auto p-6">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Data Governance</h2>
+                <p class="text-gray-600">Data quality tracking, ownership management, issue resolution</p>
+            </div>
+
+            <!-- Governance Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Data Quality Score</h3>
+                        <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-green-600 mb-2">94.2%</div>
+                    <div class="text-sm text-gray-600">Overall data quality</div>
+                    <div class="mt-2 text-xs text-green-600">+2.1% from last month</div>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Active Issues</h3>
+                        <i class="fas fa-exclamation-triangle text-orange-600 text-2xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-orange-600 mb-2">23</div>
+                    <div class="text-sm text-gray-600">Open data issues</div>
+                    <div class="mt-2 text-xs text-red-600">-5 from last week</div>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Data Owners</h3>
+                        <i class="fas fa-users text-blue-600 text-2xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-blue-600 mb-2">156</div>
+                    <div class="text-sm text-gray-600">Assigned data stewards</div>
+                    <div class="mt-2 text-xs text-green-600">+12 new assignments</div>
+                </div>
+            </div>
+
+            <!-- Data Quality Monitoring -->
+            <div class="bg-white rounded-lg p-6 shadow-md mb-8">
+                <h3 class="text-xl font-semibold mb-4">Data Quality Monitoring</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="text-center p-4 border rounded">
+                        <div class="text-2xl font-bold text-green-600 mb-1">98.5%</div>
+                        <div class="text-sm text-gray-600">Completeness</div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: 98.5%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center p-4 border rounded">
+                        <div class="text-2xl font-bold text-blue-600 mb-1">96.8%</div>
+                        <div class="text-sm text-gray-600">Accuracy</div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 96.8%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center p-4 border rounded">
+                        <div class="text-2xl font-bold text-purple-600 mb-1">95.2%</div>
+                        <div class="text-sm text-gray-600">Consistency</div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-purple-600 h-2 rounded-full" style="width: 95.2%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center p-4 border rounded">
+                        <div class="text-2xl font-bold text-orange-600 mb-1">97.1%</div>
+                        <div class="text-sm text-gray-600">Timeliness</div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="bg-orange-600 h-2 rounded-full" style="width: 97.1%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Issues Management -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Recent Data Issues</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 border-l-4 border-red-500 bg-red-50">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium text-red-800">Missing Customer IDs</span>
+                                <span class="text-xs text-red-600">Critical</span>
+                            </div>
+                            <div class="text-sm text-red-700">Found 1,247 records with null customer IDs</div>
+                            <div class="text-xs text-gray-500 mt-1">Assigned to: Finance Dept • Due: Today</div>
+                        </div>
+                        <div class="p-3 border-l-4 border-orange-500 bg-orange-50">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium text-orange-800">Duplicate Accounts</span>
+                                <span class="text-xs text-orange-600">High</span>
+                            </div>
+                            <div class="text-sm text-orange-700">Detected 89 potential duplicate customer accounts</div>
+                            <div class="text-xs text-gray-500 mt-1">Assigned to: Operations • Due: Tomorrow</div>
+                        </div>
+                        <div class="p-3 border-l-4 border-yellow-500 bg-yellow-50">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium text-yellow-800">Outdated Contact Info</span>
+                                <span class="text-xs text-yellow-600">Medium</span>
+                            </div>
+                            <div class="text-sm text-yellow-700">15% of customer emails appear outdated</div>
+                            <div class="text-xs text-gray-500 mt-1">Assigned to: Marketing • Due: This Week</div>
+                        </div>
+                        <div class="p-3 border-l-4 border-blue-500 bg-blue-50">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium text-blue-800">Data Format Inconsistency</span>
+                                <span class="text-xs text-blue-600">Low</span>
+                            </div>
+                            <div class="text-sm text-blue-700">Phone numbers in multiple formats across systems</div>
+                            <div class="text-xs text-gray-500 mt-1">Assigned to: IT Dept • Due: Next Week</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-6 shadow-md">
+                    <h3 class="text-xl font-semibold mb-4">Data Ownership Matrix</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div>
+                                <div class="font-medium">Customer Data</div>
+                                <div class="text-sm text-gray-500">Personal & account information</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">Sarah Johnson</div>
+                                <div class="text-xs text-gray-500">Data Steward</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div>
+                                <div class="font-medium">Transaction Data</div>
+                                <div class="text-sm text-gray-500">Payment & transfer records</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">Michael Chen</div>
+                                <div class="text-xs text-gray-500">Data Steward</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div>
+                                <div class="font-medium">Risk Assessment Data</div>
+                                <div class="text-sm text-gray-500">Credit scores & risk metrics</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">Emma Rodriguez</div>
+                                <div class="text-xs text-gray-500">Data Steward</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 border rounded">
+                            <div>
+                                <div class="font-medium">Compliance Data</div>
+                                <div class="text-sm text-gray-500">Regulatory reporting data</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">David Thompson</div>
+                                <div class="text-xs text-gray-500">Data Steward</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Governance Actions -->
+            <div class="bg-white rounded-lg p-6 shadow-md">
+                <h3 class="text-xl font-semibold mb-4">Governance Actions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button class="p-4 border rounded hover:bg-gray-50 text-center">
+                        <i class="fas fa-plus-circle text-green-600 text-2xl mb-2"></i>
+                        <div class="font-medium">Create Data Policy</div>
+                        <div class="text-sm text-gray-500">Define new governance rules</div>
+                    </button>
+                    <button class="p-4 border rounded hover:bg-gray-50 text-center">
+                        <i class="fas fa-user-plus text-blue-600 text-2xl mb-2"></i>
+                        <div class="font-medium">Assign Data Owner</div>
+                        <div class="text-sm text-gray-500">Update stewardship assignments</div>
+                    </button>
+                    <button class="p-4 border rounded hover:bg-gray-50 text-center">
+                        <i class="fas fa-flag text-orange-600 text-2xl mb-2"></i>
+                        <div class="font-medium">Report Issue</div>
+                        <div class="text-sm text-gray-500">Flag data quality problems</div>
+                    </button>
+                    <button class="p-4 border rounded hover:bg-gray-50 text-center">
+                        <i class="fas fa-chart-bar text-purple-600 text-2xl mb-2"></i>
+                        <div class="font-medium">Generate Report</div>
+                        <div class="text-sm text-gray-500">Create governance reports</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

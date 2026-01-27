@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications & Alerts - Bank System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #F8FAFC;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <header class="bg-blue-900 py-4">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold text-white">Notifications & Alerts</h1>
+            <nav class="mt-4">
+                <a href="index.html" class="mr-4 hover:underline text-white">Home</a>
+                <a href="#" id="logout" class="hover:underline text-white">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold mb-6 text-center text-gray-900">Notifications & Alerts Management</h2>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+            <input id="filterType" placeholder="Filter by type" class="px-3 py-2 border rounded-md">
+            <input id="filterRecipient" placeholder="Filter by recipient" class="px-3 py-2 border rounded-md">
+            <div class="flex gap-2">
+                <input id="notifFrom" type="date" class="px-3 py-2 border rounded-md">
+                <input id="notifTo" type="date" class="px-3 py-2 border rounded-md">
+            </div>
+        </div>
+
+        <div class="flex gap-2 mb-4">
+            <button id="btnSearchNotif" class="bg-teal-600 text-white px-4 py-2 rounded">Search</button>
+            <button id="btnExportNotif" class="bg-gray-200 px-4 py-2 rounded">Export CSV</button>
+            <button id="btnClearNotif" class="bg-red-500 text-white px-4 py-2 rounded">Clear History</button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Notification Channels</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <input id="chEmail" type="checkbox" class="h-4 w-4 text-teal-600" checked>
+                        <label class="ml-2">Email</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="chSMS" type="checkbox" class="h-4 w-4 text-teal-600">
+                        <label class="ml-2">SMS</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="chTeams" type="checkbox" class="h-4 w-4 text-teal-600">
+                        <label class="ml-2">Microsoft Teams</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm">Notification Email</label>
+                        <input id="notifEmail" class="w-full px-3 py-2 border rounded" value="support@onitbank.com">
+                    </div>
+                    <button id="btnSaveChannels" class="bg-teal-600 text-white px-4 py-2 rounded">Save Channels</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Send Test Notification</h3>
+                <div class="space-y-3">
+                    <input id="testRecipient" class="w-full px-3 py-2 border rounded" placeholder="recipient@example.com">
+                    <input id="testSubject" class="w-full px-3 py-2 border rounded" placeholder="Subject">
+                    <textarea id="testMessage" class="w-full px-3 py-2 border rounded" rows="4" placeholder="Message"></textarea>
+                    <button id="btnSendTest" class="bg-blue-600 text-white px-4 py-2 rounded">Send Test</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md md:col-span-2">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Notification History</h3>
+                <div id="notificationHistory" class="space-y-2 text-sm text-gray-700 max-h-64 overflow-y-auto"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-blue-900 py-4 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-white">&copy; 2026 Onit Microfinance Bank. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Admin-only
+        const userDept = localStorage.getItem('userDept');
+        if (!userDept || userDept !== 'admin') { window.location.href = 'index.html'; }
+        document.getElementById('logout').addEventListener('click', function(){ localStorage.removeItem('userDept'); window.location.href='index.html'; });
+
+        const STORAGE_NOTIFS = 'notifications';
+        const STORAGE_NOTIF_SETTINGS = 'notificationSettings';
+
+        function loadNotifs(){ return JSON.parse(localStorage.getItem(STORAGE_NOTIFS)||'[]'); }
+        function saveNotifs(list){ localStorage.setItem(STORAGE_NOTIFS, JSON.stringify(list)); }
+        function loadNotifSettings(){ return JSON.parse(localStorage.getItem(STORAGE_NOTIF_SETTINGS)||'{}'); }
+        function saveNotifSettings(s){ localStorage.setItem(STORAGE_NOTIF_SETTINGS, JSON.stringify(s)); }
+
+        function renderHistory(filter={}){
+            const all = loadNotifs();
+            let list = all.slice();
+            if(filter.type) list = list.filter(n=> (n.type||'').toLowerCase().includes(filter.type.toLowerCase()));
+            if(filter.recipient) list = list.filter(n=> (n.to||'').toLowerCase().includes(filter.recipient.toLowerCase()));
+            if(filter.from) list = list.filter(n=> new Date(n.time) >= new Date(filter.from));
+            if(filter.to) list = list.filter(n=> new Date(n.time) <= new Date(filter.to));
+
+            const el = document.getElementById('notificationHistory');
+            if(!list.length){ el.innerHTML = '<p class="text-gray-500">No notifications</p>'; return; }
+            el.innerHTML = list.slice(0,200).map(n=>`<div class="border p-3 rounded"><div class="flex justify-between"><div><strong>${n.type}</strong> • ${n.to}</div><div class="text-sm text-gray-500">${new Date(n.time).toLocaleString()}</div></div><div class="text-sm mt-1">${n.subject}</div></div>`).join('');
+        }
+
+        document.getElementById('btnSaveChannels').addEventListener('click', ()=>{
+            const s = { email:!!document.getElementById('chEmail').checked, sms:!!document.getElementById('chSMS').checked, teams:!!document.getElementById('chTeams').checked, emailAddress:document.getElementById('notifEmail').value };
+            saveNotifSettings(s); alert('Notification channels saved');
+        });
+
+        document.getElementById('btnSendTest').addEventListener('click', ()=>{
+            const to = document.getElementById('testRecipient').value || 'test@local';
+            const subject = document.getElementById('testSubject').value || 'Test Notification';
+            const message = document.getElementById('testMessage').value || '';
+            const not = { id:'N-'+Date.now(), type:'Test', to, subject, message, status:'Sent', time:new Date().toISOString() };
+            const list = loadNotifs(); list.unshift(not); saveNotifs(list);
+            // audit
+            const logs = JSON.parse(localStorage.getItem('auditLogs')||'[]'); logs.unshift({ timestamp:new Date().toISOString(), module:'Notifications', action:'Sent test notification', user:'system', details: to }); localStorage.setItem('auditLogs', JSON.stringify(logs));
+            renderHistory({});
+            alert('Test notification queued (simulated)');
+        });
+
+        document.getElementById('btnClearNotif').addEventListener('click', ()=>{ if(!confirm('Clear notification history?')) return; saveNotifs([]); renderHistory({}); });
+        document.getElementById('btnExportNotif').addEventListener('click', ()=>{ const rows = loadNotifs(); if(!rows.length){ alert('No notifications'); return; } const csv = ['time,type,to,subject,status', ...rows.map(r=>`${r.time},"${r.type}","${r.to}","${(r.subject||'').replace(/"/g,'""')}",${r.status}`)].join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='notifications.csv'; a.click(); URL.revokeObjectURL(url); });
+
+        document.getElementById('btnSearchNotif').addEventListener('click', ()=>{
+            renderHistory({ type: document.getElementById('filterType').value, recipient: document.getElementById('filterRecipient').value, from: document.getElementById('notifFrom').value, to: document.getElementById('notifTo').value });
+        });
+
+        // init
+        (function(){ const s = loadNotifSettings(); if(s.email!==undefined){ document.getElementById('chEmail').checked = s.email; document.getElementById('chSMS').checked = s.sms||false; document.getElementById('chTeams').checked = s.teams||false; document.getElementById('notifEmail').value = s.emailAddress||''; } renderHistory({}); })();
+    </script>
+</body>
+</html>

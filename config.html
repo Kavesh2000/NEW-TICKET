@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Configuration - Bank System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #F8FAFC;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <header class="bg-blue-900 py-4">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold text-white">System Configuration</h1>
+            <nav class="mt-4">
+                <a href="index.html" class="mr-4 hover:underline text-white">Home</a>
+                <a href="#" id="logout" class="hover:underline text-white">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Access Control -->
+        <div id="accessDenied" class="hidden text-center py-12">
+            <i class="fas fa-lock text-6xl text-red-500 mb-4"></i>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Access Denied</h2>
+            <p class="text-gray-600">System Configuration is available for authorized departments only.</p>
+            <p class="text-gray-600">For assistance, contact <a href="mailto:automation@maishabank.com" class="text-teal-600 hover:underline">automation@maishabank.com</a></p>
+            <a href="system.html" class="mt-4 inline-block bg-teal-600 text-white px-6 py-2 rounded-lg">Back to Dashboard</a>
+        </div>
+
+        <div id="configContent">
+        <h2 class="text-3xl font-bold mb-6 text-center text-gray-900">System Configuration</h2>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Ticket Configuration -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Ticket Configuration</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Default Priority</label>
+                        <select id="cfgDefaultPriority" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                            <option value="P4">P4 - Low</option>
+                            <option value="P3">P3 - Medium</option>
+                            <option value="P2">P2 - High</option>
+                            <option value="P1">P1 - Critical</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Auto-Assignment Rules (JSON)</label>
+                        <textarea id="cfgAutoAssign" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" placeholder='{"Account":"Finance","IT":"IT"}'></textarea>
+                    </div>
+                    <button id="btnSaveTicketConfig" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md font-semibold">Save Ticket Config</button>
+                </div>
+            </div>
+
+            <!-- SLA Configuration -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">SLA Configuration</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">P1 Response Time (hours)</label>
+                        <input id="cfgP1" type="number" value="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">P2 Response Time (hours)</label>
+                        <input id="cfgP2" type="number" value="8" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">P3 Response Time (hours)</label>
+                        <input id="cfgP3" type="number" value="24" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">P4 Response Time (hours)</label>
+                        <input id="cfgP4" type="number" value="72" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <button id="btnSaveSLA" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md font-semibold">Save SLA Config</button>
+                </div>
+            </div>
+
+            <!-- Notification Configuration -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Notification Settings</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <input id="cfgEmailAlerts" type="checkbox" class="h-4 w-4 text-teal-600" checked>
+                        <label class="ml-2 block text-sm text-gray-900">Email notifications for SLA breaches</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="cfgSMSAlerts" type="checkbox" class="h-4 w-4 text-teal-600">
+                        <label class="ml-2 block text-sm text-gray-900">SMS alerts for critical tickets</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="cfgTeamsAlerts" type="checkbox" class="h-4 w-4 text-teal-600">
+                        <label class="ml-2 block text-sm text-gray-900">Teams notifications for escalations</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Notification Email</label>
+                        <input id="cfgNotifEmail" type="email" value="support@onitbank.com" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <button id="btnSaveNotificationConfig" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md font-semibold">Save Notification Config</button>
+                </div>
+            </div>
+
+            <!-- Integration Configuration -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-900">Integration Settings</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Core Banking API URL</label>
+                        <input id="cfgCoreBanking" type="url" placeholder="https://api.corebanking.com" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">POS System Endpoint</label>
+                        <input id="cfgPOS" type="url" placeholder="https://pos.onitbank.com/api" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Mobile Banking API</label>
+                        <input id="cfgMobile" type="url" placeholder="https://mobile.onitbank.com/api" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                    </div>
+                    <div class="flex items-center">
+                        <input id="cfgAutoSync" type="checkbox" class="h-4 w-4 text-teal-600">
+                        <label class="ml-2 block text-sm text-gray-900">Enable auto-sync with core systems</label>
+                    </div>
+                    <button id="btnSaveIntegrations" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md font-semibold">Save Integration Config</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <button id="btnResetDefaults" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md font-semibold">Reset to Default Settings</button>
+        </div>
+        </div>
+    </main>
+
+    <footer class="bg-blue-900 py-4 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-white">&copy; 2026 Onit Microfinance Bank. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Check access
+        const userDept = localStorage.getItem('userDept');
+        if (!userDept || !hasModuleAccess('config','read')) {
+            document.getElementById('accessDenied').classList.remove('hidden');
+            document.getElementById('configContent').classList.add('hidden');
+        } else {
+            document.getElementById('accessDenied').classList.add('hidden');
+            document.getElementById('configContent').classList.remove('hidden');
+        }
+        document.getElementById('logout').addEventListener('click', function(){ localStorage.removeItem('userDept'); window.location.href='index.html'; });
+
+        const CFG_KEY = 'systemConfig';
+        function loadCfg(){ return JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); }
+        function saveCfg(c){ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
+
+        function setValues(cfg){
+            document.getElementById('cfgDefaultPriority').value = cfg.defaultPriority || 'P2';
+            document.getElementById('cfgAutoAssign').value = cfg.autoAssign || JSON.stringify({Account:'Finance',IT:'IT'},null,0);
+            document.getElementById('cfgP1').value = cfg.sla?.P1 || 4;
+            document.getElementById('cfgP2').value = cfg.sla?.P2 || 8;
+            document.getElementById('cfgP3').value = cfg.sla?.P3 || 24;
+            document.getElementById('cfgP4').value = cfg.sla?.P4 || 72;
+            document.getElementById('cfgEmailAlerts').checked = cfg.notifications?.email || true;
+            document.getElementById('cfgSMSAlerts').checked = cfg.notifications?.sms || false;
+            document.getElementById('cfgTeamsAlerts').checked = cfg.notifications?.teams || false;
+            document.getElementById('cfgNotifEmail').value = cfg.notifications?.emailAddress || 'support@onitbank.com';
+            document.getElementById('cfgCoreBanking').value = cfg.integrations?.coreBanking || '';
+            document.getElementById('cfgPOS').value = cfg.integrations?.pos || '';
+            document.getElementById('cfgMobile').value = cfg.integrations?.mobile || '';
+            document.getElementById('cfgAutoSync').checked = !!cfg.integrations?.autoSync;
+        }
+
+        document.getElementById('btnSaveTicketConfig').addEventListener('click', ()=>{
+            const cfg = loadCfg(); cfg.defaultPriority = document.getElementById('cfgDefaultPriority').value; cfg.autoAssign = document.getElementById('cfgAutoAssign').value; saveCfg(cfg); alert('Ticket configuration saved');
+            const logs = JSON.parse(localStorage.getItem('auditLogs')||'[]'); logs.unshift({ timestamp:new Date().toISOString(), module:'Config', action:'Ticket config updated', user:'system', details: cfg.defaultPriority }); localStorage.setItem('auditLogs', JSON.stringify(logs));
+        });
+
+        document.getElementById('btnSaveSLA').addEventListener('click', ()=>{
+            const cfg = loadCfg(); cfg.sla = { P1: +document.getElementById('cfgP1').value, P2: +document.getElementById('cfgP2').value, P3: +document.getElementById('cfgP3').value, P4: +document.getElementById('cfgP4').value }; saveCfg(cfg); alert('SLA configuration saved');
+            const logs = JSON.parse(localStorage.getItem('auditLogs')||'[]'); logs.unshift({ timestamp:new Date().toISOString(), module:'Config', action:'SLA updated', user:'system', details: JSON.stringify(cfg.sla) }); localStorage.setItem('auditLogs', JSON.stringify(logs));
+        });
+
+        document.getElementById('btnSaveNotificationConfig').addEventListener('click', ()=>{
+            const cfg = loadCfg(); cfg.notifications = { email: document.getElementById('cfgEmailAlerts').checked, sms: document.getElementById('cfgSMSAlerts').checked, teams: document.getElementById('cfgTeamsAlerts').checked, emailAddress: document.getElementById('cfgNotifEmail').value }; saveCfg(cfg); alert('Notification settings saved');
+        });
+
+        document.getElementById('btnSaveIntegrations').addEventListener('click', ()=>{
+            const cfg = loadCfg(); cfg.integrations = { coreBanking: document.getElementById('cfgCoreBanking').value, pos: document.getElementById('cfgPOS').value, mobile: document.getElementById('cfgMobile').value, autoSync: document.getElementById('cfgAutoSync').checked }; saveCfg(cfg); alert('Integration settings saved');
+        });
+
+        document.getElementById('btnResetDefaults').addEventListener('click', ()=>{ if(!confirm('Reset to default settings?')) return; localStorage.removeItem(CFG_KEY); setValues({}); alert('Settings reset'); });
+
+        // initialize
+        setValues(loadCfg());
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Department-Based Login</title>
+</head>
+<body>
+    <h1>Testing Department-Based Login Functionality</h1>
+    <div id="testResults"></div>
+
+    <script>
+        // Simulate the employee data initialization (matching index.html)
+        function initializeEmployees() {
+            let employees = [
+                // IT Department
+                { id: 'EMP001', name: 'Stevaniah Kavela', department: 'IT', email: 'stevaniah.kavela@maishabank.com' },
+                { id: 'EMP002', name: 'Mercy Mukhwana', department: 'IT', email: 'mercy.mukhwana@maishabank.com' },
+                { id: 'EMP003', name: 'Eric Mokaya', department: 'IT', email: 'eric.mokaya@maishabank.com' },
+
+                // Operations Department
+                { id: 'EMP004', name: 'Caroline Ngugi', department: 'Operations', email: 'caroline.ngugi@maishabank.com' },
+                { id: 'EMP005', name: 'Lilian Kimani', department: 'Operations', email: 'lilian.kimani@maishabank.com' },
+                { id: 'EMP006', name: 'Maureen Kerubo', department: 'Operations', email: 'maureen.kerubo@maishabank.com' },
+                { id: 'EMP007', name: 'Alice Muthoni', department: 'Operations', email: 'alice.muthoni@maishabank.com' },
+                { id: 'EMP008', name: 'Michael Mureithi', department: 'Operations', email: 'michael.mureithi@maishabank.com' },
+
+                // Finance Department
+                { id: 'EMP009', name: 'Patrick Ndegwa', department: 'Finance', email: 'patrick.ndegwa@maishabank.com' },
+                { id: 'EMP010', name: 'Margaret Njeri', department: 'Finance', email: 'margaret.njeri@maishabank.com' },
+                { id: 'EMP011', name: 'Elizabeth Mungai', department: 'Finance', email: 'elizabeth.mungai@maishabank.com' },
+
+                // Data Analysis Department
+                { id: 'EMP012', name: 'Stevaniah Kavela', department: 'Data Analysis', email: 'stevaniah.kavela@maishabank.com' },
+
+                // Customer Service Department
+                { id: 'EMP013', name: 'Ebby Gesare', department: 'Customer Service', email: 'ebby.gesare@maishabank.com' },
+                { id: 'EMP014', name: 'Vivian Orisa', department: 'Customer Service', email: 'vivian.orisa@maishabank.com' },
+                { id: 'EMP015', name: 'Juliana Jeptoo', department: 'Customer Service', email: 'juliana.jeptoo@maishabank.com' },
+                { id: 'EMP016', name: 'Faith Bonareri', department: 'Customer Service', email: 'faith.bonareri@maishabank.com' },
+                { id: 'EMP017', name: 'Patience Mutunga', department: 'Customer Service', email: 'patience.mutunga@maishabank.com' },
+                { id: 'EMP018', name: 'Eva Mukami', department: 'Customer Service', email: 'eva.mukami@maishabank.com' },
+                { id: 'EMP019', name: 'Peter Kariuki', department: 'Customer Service', email: 'peter.kariuki@maishabank.com' },
+
+                // Admin Department
+                { id: 'EMP020', name: 'Elizabeth Mungai', department: 'admin', email: 'elizabeth.mungai@maishabank.com' },
+                { id: 'EMP021', name: 'Ken Okwero', department: 'admin', email: 'ken.okwero@maishabank.com' },
+                { id: 'EMP022', name: 'Alice Muthoni', department: 'admin', email: 'alice.muthoni@maishabank.com' },
+
+                // Security Department
+                { id: 'EMP023', name: 'Bonface Kioko', department: 'Security', email: 'bonface.kioko@maishabank.com' },
+                { id: 'EMP024', name: 'Eric Mokaya', department: 'Security', email: 'eric.mokaya@maishabank.com' },
+                { id: 'EMP025', name: 'Clive Odame', department: 'Security', email: 'clive.odame@maishabank.com' }
+            ];
+
+            localStorage.setItem('employees', JSON.stringify(employees));
+            return employees;
+        }
+
+        // Generate username from employee name (first letter + surname)
+        function generateUsername(fullName) {
+            const parts = fullName.trim().split(' ');
+            if (parts.length >= 2) {
+                const firstInitial = parts[0][0].toUpperCase();
+                const lastName = parts[parts.length - 1];
+                return firstInitial + lastName;
+            }
+            return fullName; // fallback
+        }
+
+        // Test populateUsers function (matching index.html logic)
+        function populateUsers(department) {
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const departmentUsers = employees.filter(emp => emp.department === department);
+            return departmentUsers;
+        }
+
+        // Run tests
+        function runTests() {
+            const results = document.getElementById('testResults');
+            let output = '<h2>Test Results:</h2>';
+
+            // Initialize employees
+            const employees = initializeEmployees();
+            output += `<p>✓ Initialized ${employees.length} employees</p>`;
+
+            // Test each department
+            const departments = ['IT', 'Operations', 'Finance', 'Data Analysis', 'Customer Service', 'admin', 'Security'];
+
+            departments.forEach(dept => {
+                const users = populateUsers(dept);
+                output += `<p><strong>${dept} Department:</strong> ${users.length} users</p>`;
+                output += '<ul>';
+                users.forEach(user => {
+                    const username = generateUsername(user.name).toUpperCase();
+                    output += `  <li>${username} (${user.name}) - ID: ${user.id}</li>`;
+                });
+                output += '</ul>';
+            });
+
+            // Test admin login special case
+            output += '<h3>Admin Login Test:</h3>';
+            const adminUsers = populateUsers('admin');
+            output += `<p>Admin users: ${adminUsers.length}</p>`;
+            adminUsers.forEach(user => {
+                output += `<p>${user.name} should have admin privileges</p>`;
+            });
+
+            results.innerHTML = output;
+        }
+
+        // Run tests on page load
+        window.onload = runTests;
+    </script>
+</body>
+</html>
+
+        document.getElementById('testForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.toUpperCase();
+            const pass = document.getElementById('password').value;
+
+            result.textContent = `Testing login with username: ${username}`;
+
+            // Find employees with matching username
+            let matchingEmployees = employees.filter(emp => {
+                const parts = emp.name.split(' ');
+                if (parts.length >= 2) {
+                    const generatedUsername = (parts[0][0] + parts[parts.length - 1]).toUpperCase();
+                    result.textContent += `\nChecking ${emp.name} -> ${generatedUsername}`;
+                    return generatedUsername === username;
+                }
+                return false;
+            });
+
+            // Special case for admin login
+            if (matchingEmployees.length === 0 && username === 'ADMIN') {
+                matchingEmployees = employees.filter(emp => emp.department === 'admin');
+                result.textContent += `\nSpecial admin login: found ${matchingEmployees.length} admin users`;
+            }
+
+            result.textContent += `\nFound ${matchingEmployees.length} matching employees`;
+
+            if (matchingEmployees.length === 0) {
+                result.textContent += '\nERROR: Invalid username';
+                return;
+            }
+
+            if (pass === '1234') {
+                result.textContent += '\nSUCCESS: Login would succeed';
+                result.textContent += `\nUser: ${matchingEmployees[0].name} (${matchingEmployees[0].department})`;
+            } else {
+                result.textContent += '\nERROR: Invalid password';
+            }
+        });
+    </script>
+</body>
+</html>

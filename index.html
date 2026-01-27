@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onit Microfinance Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0A2540 0%, #0F766E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .welcome {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #F8FAFC;
+            text-align: center;
+            text-shadow: 
+                1px 1px 0px #1F2937,
+                2px 2px 0px #1F2937,
+                3px 3px 0px #1F2937,
+                4px 4px 0px #1F2937,
+                5px 5px 0px #1F2937,
+                6px 6px 1px rgba(0,0,0,.1),
+                0px 0px 5px rgba(0,0,0,.1),
+                1px 1px 3px rgba(0,0,0,.3),
+                3px 3px 5px rgba(0,0,0,.2),
+                5px 5px 10px rgba(0,0,0,.25),
+                10px 10px 10px rgba(0,0,0,.2),
+                20px 20px 20px rgba(0,0,0,.15);
+        }
+        @media (max-width: 768px) {
+            .welcome {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div class="text-center">
+        <h1 id="welcomeText" class="welcome"></h1>
+        <p class="text-xl mt-4 mb-8">Your trusted microfinance partner</p>
+        <div id="loginForm" class="bg-gray-100 bg-opacity-90 p-8 rounded-lg max-w-md mx-auto shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Login</h2>
+            <form id="loginFormEl">
+                <div class="mb-4">
+                    <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
+                    <select id="department" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="">Select Your Department</option>
+                        <option value="IT">IT</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Data Analysis">Data Analysis</option>
+                        <option value="Customer Service">Customer Service</option>
+                        <option value="admin">Admin</option>
+                        <option value="Security">Security</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-700">Select User</label>
+                    <select id="username" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="">Select a department first</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md font-semibold transition text-white">Login</button>
+            </form>
+            <p id="loginMessage" class="mt-4 text-center text-red-500"></p>
+            <div class="mt-4 text-center">
+                <a href="reset-password.html" class="text-teal-600 hover:text-teal-700 text-sm">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        const text = "WELCOME TO ONIT MFB";
+        const element = document.getElementById('welcomeText');
+        let index = 0;
+
+        function typeWriter() {
+            if (index < text.length) {
+                element.innerHTML += text.charAt(index);
+                index++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+
+        window.onload = function() {
+            typeWriter();
+            // Clear any existing login session to ensure clean state
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userDept');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('isAdmin');
+        };
+
+        // Initialize employees data if not exists
+        function initializeEmployees() {
+            // Clear any existing data first to ensure clean state
+            localStorage.removeItem('employees');
+
+            let employees = [
+                // IT Department
+                { id: 'EMP001', name: 'Stevaniah Kavela', department: 'IT', email: 'stevaniah.kavela@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP002', name: 'Mercy Mukhwana', department: 'IT', email: 'mercy.mukhwana@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP003', name: 'Eric Mokaya', department: 'IT', email: 'eric.mokaya@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+
+                // Operations Department
+                { id: 'EMP004', name: 'Caroline Ngugi', department: 'Operations', email: 'caroline.ngugi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP005', name: 'Lilian Kimani', department: 'Operations', email: 'lilian.kimani@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP006', name: 'Maureen Kerubo', department: 'Operations', email: 'maureen.kerubo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP007', name: 'Alice Muthoni', department: 'Operations', email: 'alice.muthoni@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP008', name: 'Michael Mureithi', department: 'Operations', email: 'michael.mureithi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+
+                // Finance Department
+                { id: 'EMP009', name: 'Patrick Ndegwa', department: 'Finance', email: 'patrick.ndegwa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP010', name: 'Margaret Njeri', department: 'Finance', email: 'margaret.njeri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP011', name: 'Elizabeth Mungai', department: 'Finance', email: 'elizabeth.mungai@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+
+                // Data Analysis Department
+                { id: 'EMP012', name: 'Stevaniah Kavela', department: 'Data Analysis', email: 'stevaniah.kavela@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+
+                // Customer Service Department
+                { id: 'EMP013', name: 'Ebby Gesare', department: 'Customer Service', email: 'ebby.gesare@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP014', name: 'Vivian Orisa', department: 'Customer Service', email: 'vivian.orisa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP015', name: 'Juliana Jeptoo', department: 'Customer Service', email: 'juliana.jeptoo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP016', name: 'Faith Bonareri', department: 'Customer Service', email: 'faith.bonareri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP017', name: 'Patience Mutunga', department: 'Customer Service', email: 'patience.mutunga@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP018', name: 'Eva Mukami', department: 'Customer Service', email: 'eva.mukami@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP019', name: 'Peter Kariuki', department: 'Customer Service', email: 'peter.kariuki@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+
+                // Admin Department
+                { id: 'EMP020', name: 'Elizabeth Mungai', department: 'admin', email: 'elizabeth.mungai@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } },
+                { id: 'EMP021', name: 'Ken Okwero', department: 'admin', email: 'ken.okwero@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } },
+                { id: 'EMP022', name: 'Alice Muthoni', department: 'admin', email: 'alice.muthoni@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } },
+
+                // Security Department
+                { id: 'EMP023', name: 'Bonface Kioko', department: 'Security', email: 'bonface.kioko@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP024', name: 'Eric Mokaya', department: 'Security', email: 'eric.mokaya@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+                { id: 'EMP025', name: 'Clive Odame', department: 'Security', email: 'clive.odame@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } }
+            ];
+            localStorage.setItem('employees', JSON.stringify(employees));
+            console.log('Employees data initialized with', employees.length, 'employees');
+        }
+
+        // Test function for debugging usernames
+        window.testUsernames = function() {
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            console.log('Employee Usernames:');
+            employees.forEach(emp => {
+                const parts = emp.name.split(' ');
+                if (parts.length >= 2) {
+                    const username = (parts[0][0] + parts[parts.length - 1]).toUpperCase();
+                    console.log(`${emp.name} -> ${username} (${emp.department})`);
+                }
+            });
+        };
+
+        // Initialize employees data
+        initializeEmployees();
+
+        // Generate username from employee name (first letter + surname)
+        function generateUsername(fullName) {
+            const parts = fullName.trim().split(' ');
+            if (parts.length >= 2) {
+                const firstInitial = parts[0][0].toUpperCase();
+                const lastName = parts[parts.length - 1];
+                return firstInitial + lastName;
+            }
+            return fullName; // fallback
+        }
+
+        // Populate users dropdown based on selected department
+        function populateUsers(department) {
+            const userSelect = document.getElementById('username');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const departmentUsers = employees.filter(emp => emp.department === department);
+
+            // Clear existing options
+            userSelect.innerHTML = '<option value="">Select User</option>';
+
+            if (departmentUsers.length === 0) {
+                userSelect.innerHTML = '<option value="" disabled>No users found in this department</option>';
+                userSelect.disabled = true;
+                return;
+            }
+
+            // Add users to dropdown
+            departmentUsers.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify({id: emp.id, name: emp.name, email: emp.email, department: emp.department});
+                const username = generateUsername(emp.name);
+                option.textContent = username.toUpperCase();
+                userSelect.appendChild(option);
+            });
+
+            userSelect.disabled = false;
+        }
+
+        // Department change handler
+        document.getElementById('department').addEventListener('change', function(e) {
+            const department = e.target.value;
+            if (department) {
+                populateUsers(department);
+            } else {
+                document.getElementById('username').innerHTML = '<option value="">Select a department first</option>';
+                document.getElementById('username').disabled = true;
+            }
+        });
+
+        document.getElementById('loginFormEl').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const department = document.getElementById('department').value;
+            const userData = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if (!department || !userData) {
+                document.getElementById('loginMessage').textContent = 'Please select department and user';
+                return;
+            }
+
+            if (pass !== '1234') {
+                document.getElementById('loginMessage').textContent = 'Invalid password';
+                return;
+            }
+
+            const selectedEmployee = JSON.parse(userData);
+
+            // Store user information
+            localStorage.setItem('userId', selectedEmployee.id);
+            localStorage.setItem('userName', selectedEmployee.name);
+            localStorage.setItem('userEmail', selectedEmployee.email);
+            localStorage.setItem('userDept', selectedEmployee.department);
+            localStorage.setItem('isAdmin', selectedEmployee.department === 'admin');
+
+            // Log login attempt
+            const loginHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
+            loginHistory.unshift({
+                user: selectedEmployee.name,
+                username: selectedEmployee.name, // Using full name as username now
+                department: selectedEmployee.department,
+                time: new Date().toISOString(),
+                ip: 'N/A'
+            });
+            localStorage.setItem('loginHistory', JSON.stringify(loginHistory.slice(0, 100)));
+
+            // Redirect to dashboard
+            window.location.href = 'system.html';
+        });
+    </script>
+</body>
+</html>

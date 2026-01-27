@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Onit MFB Ticketing System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="modern-ui.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+    <!-- Modern Header -->
+    <header class="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-white text-xl font-bold">Manager Dashboard</h1>
+                            <p class="text-white/70 text-sm">Ticketing System Analytics</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <div class="text-white font-medium" id="userName">Manager</div>
+                        <div class="text-white/70 text-sm" id="userRole">Management</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="tickets.html" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition">
+                            <i class="fas fa-list"></i>
+                        </a>
+                        <button id="logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Key Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold text-white mb-2" id="totalTickets">0</div>
+                <div class="text-white/70">Total Tickets</div>
+                <div class="text-white/50 text-sm mt-1" id="totalChange">+0% from last month</div>
+            </div>
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold text-red-400 mb-2" id="openTickets">0</div>
+                <div class="text-white/70">Open Tickets</div>
+                <div class="text-white/50 text-sm mt-1" id="openChange">+0% from last month</div>
+            </div>
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold text-yellow-400 mb-2" id="avgResolutionTime">0h</div>
+                <div class="text-white/70">Avg Resolution Time</div>
+                <div class="text-white/50 text-sm mt-1" id="resolutionChange">-0% from last month</div>
+            </div>
+            <div class="metric-card rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold text-green-400 mb-2" id="slaCompliance">0%</div>
+                <div class="text-white/70">SLA Compliance</div>
+                <div class="text-white/50 text-sm mt-1" id="slaChange">+0% from last month</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Ticket Volume Trend -->
+            <div class="chart-container rounded-xl p-6">
+                <h3 class="text-white text-lg font-bold mb-4">Ticket Volume Trend</h3>
+                <div id="volumeChart" class="h-64 flex items-center justify-center">
+                    <div class="text-white/50">Chart will be rendered here</div>
+                </div>
+            </div>
+
+            <!-- Priority Distribution -->
+            <div class="chart-container rounded-xl p-6">
+                <h3 class="text-white text-lg font-bold mb-4">Priority Distribution</h3>
+                <div id="priorityChart" class="h-64 flex items-center justify-center">
+                    <div class="text-white/50">Chart will be rendered here</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Performance -->
+        <div class="chart-container rounded-xl p-6 mb-8">
+            <h3 class="text-white text-lg font-bold mb-4">Department Performance</h3>
+            <div id="departmentChart" class="h-64 flex items-center justify-center">
+                <div class="text-white/50">Chart will be rendered here</div>
+            </div>
+        </div>
+
+        <!-- Recent Tickets -->
+        <div class="chart-container rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-white text-lg font-bold">Recent Tickets</h3>
+                <a href="tickets.html" class="text-teal-400 hover:text-teal-300 text-sm">View All</a>
+            </div>
+            <div id="recentTickets" class="space-y-3">
+                <!-- Recent tickets will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Check login and role
+        if (!localStorage.getItem('userDept') || !['admin', 'Management'].includes(localStorage.getItem('userDept'))) {
+            window.location.href = 'index.html';
+        }
+
+        // Set user info
+        const dept = localStorage.getItem('userDept');
+        document.getElementById('userName').textContent = 'Manager';
+        document.getElementById('userRole').textContent = dept;
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', function() {
+            localStorage.removeItem('userDept');
+            window.location.href = 'index.html';
+        });
+
+        // Load dashboard data
+        loadDashboardData();
+
+        function loadDashboardData() {
+            const tickets = getTickets();
+            
+            // Calculate metrics
+            const total = tickets.length;
+            const open = tickets.filter(t => t.status === 'Open').length;
+            const closed = tickets.filter(t => t.status === 'Closed').length;
+            
+            // SLA Compliance
+            const slaCompliant = tickets.filter(t => {
+                if (!t.sla_due) return true;
+                return new Date(t.sla_due) > new Date();
+            }).length;
+            const slaPercent = total > 0 ? Math.round((slaCompliant / total) * 100) : 0;
+            
+            // Average resolution time (simplified)
+            const resolvedTickets = tickets.filter(t => t.status === 'Closed');
+            const avgResolution = resolvedTickets.length > 0 ? 
+                resolvedTickets.reduce((sum, t) => {
+                    const created = new Date(t.timestamp);
+                    const resolved = new Date(); // Assume current time for open tickets
+                    return sum + (resolved - created);
+                }, 0) / resolvedTickets.length / (1000 * 60 * 60) : 0;
+            
+            // Update metrics
+            document.getElementById('totalTickets').textContent = total;
+            document.getElementById('openTickets').textContent = open;
+            document.getElementById('avgResolutionTime').textContent = Math.round(avgResolution) + 'h';
+            document.getElementById('slaCompliance').textContent = slaPercent + '%';
+            
+            // Load recent tickets
+            loadRecentTickets(tickets);
+        }
+
+        function loadRecentTickets(tickets) {
+            const recent = tickets
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                .slice(0, 5);
+            
+            const container = document.getElementById('recentTickets');
+            container.innerHTML = recent.map(ticket => `
+                <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-ticket-alt text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="text-white font-medium text-sm">${ticket.id}</div>
+                            <div class="text-white/70 text-xs">${ticket.description.substring(0, 50)}...</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-white text-sm">${ticket.status}</div>
+                        <div class="text-white/70 text-xs">${ticket.priority}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Check login and admin access
+        const userDept = localStorage.getItem('userDept');
+        if (!userDept || userDept !== 'admin') {
+            window.location.href = 'index.html';
+        }
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', function() {
+            localStorage.removeItem('userDept');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

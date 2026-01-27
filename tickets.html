@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticketing System - Onit MFB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="modern-ui.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .ticket-card {
+            transition: all 0.3s ease;
+        }
+        .ticket-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .priority-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .priority-P1 { background: #fee2e2; color: #dc2626; }
+        .priority-P2 { background: #fef3c7; color: #d97706; }
+        .priority-P3 { background: #dbeafe; color: #2563eb; }
+        .priority-P4 { background: #f3f4f6; color: #6b7280; }
+        .sla-timer {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .sla-warning { color: #d97706; }
+        .sla-breach { color: #dc2626; }
+        .sla-good { color: #059669; }
+    </style>
+</head>
+<body class="text-gray-900 dark-theme">
+    <!-- Modern Header -->
+    <header class="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-ticket-alt text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-white text-xl font-bold">Ticketing System</h1>
+                            <p class="text-white/70 text-sm">Onit Microfinance Bank</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <div class="text-white font-medium" id="userName">User</div>
+                        <div class="text-white/70 text-sm" id="userRole">Department</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="submit.html" class="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
+                            <span class="hidden sm:inline">New Ticket</span>
+                        </a>
+                        <button id="logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Filters and Search -->
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 mb-6">
+            <div class="flex flex-col lg:flex-row gap-4 items-center">
+                <div class="flex-1">
+                    <input type="text" id="searchInput" placeholder="Search tickets..." class="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50">
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <select id="statusFilter" class="px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50">
+                        <option value="">All Status</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <select id="priorityFilter" class="px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50">
+                        <option value="">All Priority</option>
+                        <option value="P1">P1 - Critical</option>
+                        <option value="P2">P2 - High</option>
+                        <option value="P3">P3 - Medium</option>
+                        <option value="P4">P4 - Low</option>
+                    </select>
+                    <select id="categoryFilter" class="px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50">
+                        <option value="">All Categories</option>
+                        <option value="Incident">Incident</option>
+                        <option value="Request">Request</option>
+                        <option value="Problem">Problem</option>
+                        <option value="Change">Change</option>
+                    </select>
+                    <button id="clearFilters" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-white" id="totalTickets">0</div>
+                <div class="text-white/70">Total Tickets</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-red-400" id="openTickets">0</div>
+                <div class="text-white/70">Open</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-yellow-400" id="inProgressTickets">0</div>
+                <div class="text-white/70">In Progress</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-green-400" id="closedTickets">0</div>
+                <div class="text-white/70">Closed</div>
+            </div>
+        </div>
+
+        <!-- Tickets List -->
+        <div id="ticketsContainer" class="space-y-4">
+            <!-- Tickets will be loaded here -->
+        </div>
+        <div id="noTickets" class="text-center py-12">
+            <i class="fas fa-inbox text-6xl text-white/50 mb-4"></i>
+            <p class="text-white/70 text-lg">No tickets found</p>
+            <a href="submit.html" class="text-teal-400 hover:text-teal-300 underline mt-2 inline-block">Create your first ticket</a>
+        </div>
+    </main>
+
+    <!-- Quick Actions Modal -->
+    <div id="quickActionsModal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6">
+                <h3 class="text-lg font-bold mb-4" id="modalTitle">Quick Actions</h3>
+                <div id="modalContent">
+                    <!-- Actions will be populated here -->
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button id="closeModal" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg transition">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Check login
+        if (!localStorage.getItem('userDept')) {
+            window.location.href = 'index.html';
+        }
+
+        // Set user info
+        const dept = localStorage.getItem('userDept');
+        document.getElementById('userName').textContent = 'User (' + dept + ')';
+        document.getElementById('userRole').textContent = dept + ' Department';
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', function() {
+            localStorage.removeItem('userDept');
+            window.location.href = 'index.html';
+        });
+
+        // Initialize
+        displayTickets();
+
+        // Search and filters
+        document.getElementById('searchInput').addEventListener('input', filterTickets);
+        document.getElementById('statusFilter').addEventListener('change', filterTickets);
+        document.getElementById('priorityFilter').addEventListener('change', filterTickets);
+        document.getElementById('categoryFilter').addEventListener('change', filterTickets);
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('priorityFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            filterTickets();
+        });
+
+        // Modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('quickActionsModal').classList.add('hidden');
+        });
+
+        // Apply filter from dashboard
+        const filter = localStorage.getItem('ticketFilter');
+        if (filter) {
+            localStorage.removeItem('ticketFilter');
+            // Handle filter
+        }
+    </script>
+</body>
+</html>

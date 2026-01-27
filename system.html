@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onit MFB Ticketing System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>[data-module]:not(.visible){display:none !important;}</style>
+    <style>
+        body {
+            background: #F8FAFC;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(135deg, #0A2540 0%, #0F766E 100%);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 10px;
+            padding: 0 15px;
+        }
+        
+        .nav-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(248,250,252,0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 15px 0 10px 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            color: rgba(248,250,252,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: #F8FAFC;
+            padding-left: 20px;
+        }
+        
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            color: #FEF08A;
+            border-left: 3px solid #FEF08A;
+            padding-left: 12px;
+        }
+        
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 15px;
+            background: #DC2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .logout-btn:hover {
+            background: #B91C1C;
+            transform: translateX(5px);
+        }
+        
+        /* Header Styles */
+        .header {
+            margin-left: 280px;
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: margin-left 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .header.expanded {
+            margin-left: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #0A2540;
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger:hover {
+            color: #0F766E;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A2540;
+            margin: 0;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #0A2540;
+            font-size: 14px;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: #64748B;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 40px 30px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* Overlay for mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-width: 280px;
+            }
+            
+            .header {
+                margin-left: 0;
+            }
+            
+            .header.expanded {
+                margin-left: 0;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .header-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Overlay -->
+    <div id="overlay" class="overlay"></div>
+    
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-building"></i>
+                <span>Onit MFB</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <!-- Ticketing Module -->
+            <div class="nav-section">
+                <div class="nav-section-title">Core Modules</div>
+                <a href="submit.html" class="nav-item" data-page="submit">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Submit Ticket</span>
+                </a>
+                <a href="tickets.html" class="nav-item" data-page="tickets">
+                    <i class="fas fa-list"></i>
+                    <span>View Tickets</span>
+                </a>
+                <a href="leave-management.html" class="nav-item" data-page="leave-management" data-module="leave-management">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Leave Management</span>
+                </a>
+            </div>
+            
+            <!-- Finance Module -->
+            <div class="nav-section">
+                <div class="nav-section-title">Finance</div>
+                <div class="nav-section" data-module="finance">
+                <a href="finance.html" class="nav-item" data-page="finance" data-module="finance">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reconciliation</span>
+                </a>
+                </div>
+            </div>
+            
+            <!-- Admin & Management -->
+            <div class="nav-section">
+                <div class="nav-section-title">Management</div>
+                <a href="users.html" class="nav-item" data-page="users" data-module="users">
+                    <i class="fas fa-users"></i>
+                    <span>Users & Roles</span>
+                </a>
+                <a href="admin.html" class="nav-item" data-page="admin" data-module="admin">
+                    <i class="fas fa-cog"></i>
+                    <span>Admin Panel</span>
+                </a>
+                <a href="password-reset.html" class="nav-item" data-page="password-reset" data-module="password-reset">
+                    <i class="fas fa-key"></i>
+                    <span>Password Reset</span>
+                </a>
+                <a href="purchases.html" class="nav-item" data-page="purchases" data-module="purchases">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Purchases</span>
+                </a>
+            </div>
+            
+            <!-- Compliance & Reporting -->
+            <div class="nav-section">
+                <div class="nav-section-title">Compliance</div>
+                <a href="audit.html" class="nav-item" data-page="audit" data-module="audit">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Audit & Compliance</span>
+                </a>
+                <a href="reports.html" class="nav-item" data-page="reports" data-module="reporting">
+                    <i class="fas fa-file-chart-line"></i>
+                    <span>Reports & Analytics</span>
+                </a>
+            </div>
+            
+            <!-- Security -->
+            <div class="nav-section">
+                <div class="nav-section-title">Security</div>
+                <a href="iam.html" class="nav-item" data-page="iam" data-module="iam">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Identity & Access Management</span>
+                </a>
+                <a href="pam.html" class="nav-item" data-page="pam" data-module="pam">
+                    <i class="fas fa-key"></i>
+                    <span>Privileged Access Management</span>
+                </a>
+                <a href="security-incident.html" class="nav-item" data-page="security-incident" data-module="security-incident">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Security Incident Management</span>
+                </a>
+                <a href="vulnerability.html" class="nav-item" data-page="vulnerability" data-module="vulnerability">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Vulnerability Management</span>
+                </a>
+                <a href="policy-compliance.html" class="nav-item" data-page="policy-compliance" data-module="policy-compliance">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Policy & Compliance</span>
+                </a>
+                <a href="security-dashboard.html" class="nav-item" data-page="security-dashboard" data-module="security-dashboard">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Security Dashboards</span>
+                </a>
+            </div>
+            
+            <!-- Data Analysis -->
+            <div class="nav-section">
+                <div class="nav-section-title">Data Analysis</div>
+                <a href="data-integration.html" class="nav-item" data-page="data-integration" data-module="data-integration">
+                    <i class="fas fa-database"></i>
+                    <span>Data Integration</span>
+                </a>
+                <a href="data-warehouse.html" class="nav-item" data-page="data-warehouse" data-module="data-warehouse">
+                    <i class="fas fa-server"></i>
+                    <span>Data Warehouse</span>
+                </a>
+                <a href="analytics-bi.html" class="nav-item" data-page="analytics-bi" data-module="analytics-bi">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics & BI Dashboards</span>
+                </a>
+                <a href="data-governance.html" class="nav-item" data-page="data-governance" data-module="data-governance">
+                    <i class="fas fa-balance-scale"></i>
+                    <span>Data Governance</span>
+                </a>
+            </div>
+            
+            <!-- System -->
+            <div class="nav-section">
+                <div class="nav-section-title">System</div>
+                <a href="config.html" class="nav-item" data-page="config" data-module="config">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Configuration</span>
+                </a>
+                <a href="inventory.html" class="nav-item" data-page="inventory" data-module="inventory">
+                    <i class="fas fa-boxes"></i>
+                    <span>Inventory</span>
+                </a>
+                <a href="notifications.html" class="nav-item" data-page="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+    
+    <!-- Header -->
+    <header id="header" class="header">
+        <div class="header-left">
+            <button id="hamburger" class="hamburger" title="Toggle Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="header-title">Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-name" id="userName">User</div>
+                <div class="user-role" id="userRole">Department</div>
+            </div>
+        </div>
+    </header>
+
+    
+    <!-- Main Content -->
+    <main id="mainContent" class="main-content">
+        <section class="text-center mb-12">
+            <h2 class="text-4xl font-bold mb-4 text-gray-900">Welcome to Onit MFB</h2>
+            <p class="text-xl text-gray-600">Enterprise Banking Support System</p>
+        </section>
+
+        <section class="grid md:grid-cols-3 gap-8 mb-12">
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-teal-600 hover:shadow-xl transition">
+                <h3 class="text-lg font-bold mb-2 text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-ticket-alt text-teal-600"></i>
+                    Open Tickets
+                </h3>
+                <p class="text-4xl font-bold text-teal-600" id="openCount">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-amber-600 hover:shadow-xl transition">
+                <h3 class="text-lg font-bold mb-2 text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-hourglass-half text-amber-600"></i>
+                    In Progress
+                </h3>
+                <p class="text-4xl font-bold text-amber-600" id="progressCount">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-600 hover:shadow-xl transition">
+                <h3 class="text-lg font-bold mb-2 text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                    Closed This Month
+                </h3>
+                <p class="text-4xl font-bold text-green-600" id="closedCount">0</p>
+            </div>
+        </section>
+
+        <section class="text-center">
+            <a href="submit.html" class="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-8 py-4 rounded-lg font-semibold hover:shadow-lg transition inline-flex items-center gap-2">
+                <i class="fas fa-plus"></i>
+                Submit a New Ticket
+            </a>
+        </section>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 bg-gray-100 border-t border-gray-200 py-4 text-center text-sm text-gray-600 transition" style="margin-left: 280px;">
+        <p>&copy; 2026 Onit Microfinance Bank. All rights reserved.</p>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Check login
+        if (!localStorage.getItem('userDept')) {
+            window.location.href = 'index.html';
+        }
+
+        // Set user info
+        const userName = localStorage.getItem('userName');
+        const dept = localStorage.getItem('userDept');
+
+        // Generate username from full name
+        const generateUsername = (fullName) => {
+            const parts = fullName.split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[parts.length - 1]).toUpperCase();
+            }
+            return fullName.toUpperCase();
+        };
+
+        const username = generateUsername(userName);
+        document.getElementById('userName').textContent = username;
+        document.getElementById('userRole').textContent = dept;
+
+        // Hamburger menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const header = document.getElementById('header');
+        const mainContent = document.getElementById('mainContent');
+        const overlay = document.getElementById('overlay');
+
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('closed');
+            header.classList.toggle('expanded');
+            mainContent.classList.toggle('expanded');
+            overlay.classList.toggle('active');
+        });
+
+        // Close menu when clicking overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.add('closed');
+            header.classList.remove('expanded');
+            mainContent.classList.remove('expanded');
+            overlay.classList.remove('active');
+        });
+
+        // Close menu when clicking on nav items (mobile)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.add('closed');
+                    header.classList.remove('expanded');
+                    mainContent.classList.remove('expanded');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Logout
+        document.getElementById('logout').addEventListener('click', function() {
+            localStorage.removeItem('userDept');
+            window.location.href = 'index.html';
+        });
+
+        // Update dashboard
+        function updateDashboard() {
+            const tickets = getTickets ? getTickets() : [];
+            const open = tickets.filter(t => t.status === 'Open').length;
+            const progress = tickets.filter(t => t.status === 'In Progress').length;
+            const closed = tickets.filter(t => {
+                if (t.status === 'Closed') {
+                    const date = new Date(t.timestamp);
+                    const now = new Date();
+                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                }
+                return false;
+            }).length;
+            document.getElementById('openCount').textContent = open;
+            document.getElementById('progressCount').textContent = progress;
+            document.getElementById('closedCount').textContent = closed;
+        }
+
+        updateDashboard();
+
+        // Highlight active nav item
+        const currentPage = window.location.pathname.split('/').pop() || 'system.html';
+        document.querySelectorAll('.nav-item').forEach(item => {
+            if (item.getAttribute('href') === currentPage || (currentPage === '' && item.getAttribute('href') === 'system.html')) {
+                item.classList.add('active');
+            }
+        });
+
+        // Role-based module visibility
+        document.querySelectorAll('[data-module]').forEach(element => {
+            const module = element.getAttribute('data-module');
+            if (hasModuleAccess(module, 'read')) {
+                element.classList.add('visible');
+            }
+        });
+
+        // Hide nav sections with no visible items
+        document.querySelectorAll('.nav-section').forEach(section => {
+            const hasVisibleItems = section.querySelector('.nav-item.visible') !== null;
+            if (!hasVisibleItems) {
+                section.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
