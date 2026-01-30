@@ -1,13 +1,641 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onit MFB Ticketing System</title>
+    <title>Onit Portal - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>[data-module]:not(.visible){display:none !important;}</style>
     <style>
+        .sidebar-link { transition: all 0.3s ease; }
+        .sidebar-link:hover { background-color: rgba(255,255,255,0.06); transform: translateX(4px); }
+        .sidebar-link.active { background-color: rgba(255,255,255,0.08); border-left: 4px solid rgba(255,255,255,0.12); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="w-64 bg-gradient-to-b from-teal-700 to-teal-900 text-white p-6">
+            <h1 class="text-2xl font-bold mb-6">Onit Portal</h1>
+            <div class="mb-4 pb-4 border-b border-teal-600">
+                <p class="text-sm text-teal-100">Logged in as:</p>
+                <p id="userNameDisplay" class="font-semibold">-</p>
+                <p id="userTypeDisplay" class="text-xs text-teal-200">-</p>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="switchSection('dashboard')" class="sidebar-link active w-full text-left px-4 py-3 rounded">📊 Dashboard</button>
+                <button onclick="switchSection('tickets')" class="sidebar-link w-full text-left px-4 py-3 rounded">🎫 Tickets</button>
+                <button onclick="switchSection('leave')" class="sidebar-link w-full text-left px-4 py-3 rounded">🏖️ Leave Management</button>
+            </nav>
+            <div class="mt-8 pt-8 border-t border-teal-600">
+                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-auto">
+            <div id="dashboard" class="content-section active p-8">
+                <h2 class="text-3xl font-bold mb-4">Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded shadow">
+                        <p>Total Tickets: <span id="totalTickets">0</span></p>
+                        <p>Open Tickets: <span id="openTickets">0</span></p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <p>Name: <span id="infoName">-</span></p>
+                        <p>Email: <span id="infoEmail">-</span></p>
+                        <p>Type: <span id="infoType">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tickets" class="content-section p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Tickets</h2>
+                    <button onclick="showNewTicketForm()" class="bg-blue-600 text-white px-4 py-2 rounded">+ New Ticket</button>
+                </div>
+                <div id="newTicketForm" class="hidden bg-white p-6 rounded shadow mb-4">
+                    <h3 class="font-semibold mb-2">Submit New Ticket</h3>
+                    <form id="ticketFormEl" class="space-y-3">
+                        <input id="ticketSubject" placeholder="Subject" required class="w-full p-2 border rounded" />
+                        <textarea id="ticketDescription" placeholder="Description" required class="w-full p-2 border rounded"></textarea>
+                        <div class="flex gap-2">
+                            <select id="ticketPriority" class="p-2 border rounded">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded" type="submit">Submit</button>
+                            <button type="button" class="px-4 py-2 rounded bg-gray-200" onclick="hideNewTicketForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded shadow">
+                    <table class="w-full">
+                        <thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Subject</th><th class="p-2">Priority</th><th class="p-2">Status</th></tr></thead>
+                        <tbody id="ticketsList"><tr><td class="p-4 text-center" colspan="4">No tickets</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="leave" class="content-section p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Leave Management</h2>
+                    <button onclick="showNewLeaveForm()" class="bg-green-600 text-white px-4 py-2 rounded">+ Request Leave</button>
+                </div>
+                <div id="newLeaveForm" class="hidden bg-white p-6 rounded shadow mb-4">
+                    <form id="leaveFormEl" class="space-y-3">
+                        <select id="leaveType" required class="p-2 border rounded w-full"><option value="Annual">Annual</option><option value="Sick">Sick</option><option value="Personal">Personal</option></select>
+                        <input id="leaveDays" type="number" min="1" required class="w-full p-2 border rounded" placeholder="Days" />
+                        <div class="flex gap-2">
+                            <button class="bg-green-600 text-white px-4 py-2 rounded" type="submit">Submit</button>
+                            <button type="button" class="px-4 py-2 rounded bg-gray-200" onclick="hideNewLeaveForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded shadow p-4">
+                    <table class="w-full">
+                        <thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Type</th><th class="p-2">Days</th><th class="p-2">Status</th></tr></thead>
+                        <tbody id="leaveList"><tr><td class="p-4 text-center" colspan="4">No leave requests</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function switchSection(id){ document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function showNewTicketForm(){ document.getElementById('newTicketForm').classList.remove('hidden'); }
+        function hideNewTicketForm(){ document.getElementById('newTicketForm').classList.add('hidden'); }
+        function showNewLeaveForm(){ document.getElementById('newLeaveForm').classList.remove('hidden'); }
+        function hideNewLeaveForm(){ document.getElementById('newLeaveForm').classList.add('hidden'); }
+        function logout(){ localStorage.clear(); window.location.href='index.html'; }
+
+        // init
+        window.addEventListener('load', ()=>{
+            if(!localStorage.getItem('userId')) { window.location.href='index.html'; return; }
+            document.getElementById('userNameDisplay').textContent = localStorage.getItem('userName') || '-';
+            document.getElementById('userTypeDisplay').textContent = (localStorage.getItem('isAdmin')==='true') ? 'Admin' : 'User';
+            document.getElementById('infoName').textContent = localStorage.getItem('userName')||'-';
+            document.getElementById('infoEmail').textContent = localStorage.getItem('userEmail')||'-';
+            document.getElementById('infoType').textContent = (localStorage.getItem('isAdmin')==='true') ? 'Admin' : 'User';
+            loadTickets(); loadLeaveRequests(); updateStats();
+        });
+
+        function updateStats(){ const tickets=JSON.parse(localStorage.getItem('tickets')||'[]'); document.getElementById('totalTickets').textContent=tickets.length; document.getElementById('openTickets').textContent=tickets.filter(t=>t.status==='Open').length; }
+
+        function loadTickets(){ const tickets=JSON.parse(localStorage.getItem('tickets')||'[]'); const isAdmin=localStorage.getItem('isAdmin')==='true'; const userEmail=localStorage.getItem('userEmail'); const filtered=isAdmin?tickets:tickets.filter(t=>t.email===userEmail); const tbody=document.getElementById('ticketsList'); if(filtered.length===0){ tbody.innerHTML='<tr><td colspan="4" class="p-4 text-center">No tickets</td></tr>'; return; } tbody.innerHTML=filtered.map(t=>`<tr><td class="p-2">${t.id}</td><td class="p-2">${t.subject}</td><td class="p-2">${t.priority}</td><td class="p-2">${t.status}</td></tr>`).join(''); }
+
+        document.getElementById('ticketFormEl').addEventListener('submit', function(e){ e.preventDefault(); const id='TICK-'+Math.random().toString(36).slice(2,9).toUpperCase(); const ticket={ id, subject:document.getElementById('ticketSubject').value, description:document.getElementById('ticketDescription').value, priority:document.getElementById('ticketPriority').value||'Low', status:'Open', email:localStorage.getItem('userEmail'), timestamp:new Date().toISOString() }; const tickets=JSON.parse(localStorage.getItem('tickets')||'[]'); tickets.push(ticket); localStorage.setItem('tickets', JSON.stringify(tickets)); hideNewTicketForm(); this.reset(); loadTickets(); updateStats(); alert('Ticket submitted: '+id); });
+
+        function loadLeaveRequests(){ const reqs=JSON.parse(localStorage.getItem('leaveRequests')||'[]'); const isAdmin=localStorage.getItem('isAdmin')==='true'; const userEmail=localStorage.getItem('userEmail'); const filtered=isAdmin?reqs:reqs.filter(r=>r.email===userEmail); const tbody=document.getElementById('leaveList'); if(filtered.length===0){ tbody.innerHTML='<tr><td colspan="4" class="p-4 text-center">No leave requests</td></tr>'; return; } tbody.innerHTML=filtered.map(r=>`<tr><td class="p-2">${r.id}</td><td class="p-2">${r.type}</td><td class="p-2">${r.days}</td><td class="p-2">${r.status}</td></tr>`).join(''); }
+
+        document.getElementById('leaveFormEl').addEventListener('submit', function(e){ e.preventDefault(); const id='LEAVE-'+Math.random().toString(36).slice(2,9).toUpperCase(); const req={ id, type:document.getElementById('leaveType').value, days:parseInt(document.getElementById('leaveDays').value)||1, status:'Pending', email:localStorage.getItem('userEmail'), timestamp:new Date().toISOString() }; const reqs=JSON.parse(localStorage.getItem('leaveRequests')||'[]'); reqs.push(req); localStorage.setItem('leaveRequests', JSON.stringify(reqs)); hideNewLeaveForm(); this.reset(); loadLeaveRequests(); alert('Leave request submitted: '+id); });
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onit Portal - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-teal-700 to-teal-900 text-white p-6">
+            <h1 class="text-2xl font-bold mb-8">Onit Portal</h1>
+            
+            <div class="mb-4 pb-4 border-b border-teal-600">
+                <p class="text-sm text-teal-100">Logged in as:</p>
+                <p id="userNameDisplay" class="font-semibold"></p>
+                <p id="userTypeDisplay" class="text-xs text-teal-200"></p>
+            </div>
+
+            <nav class="space-y-2">
+                <button onclick="switchSection('dashboard')" class="sidebar-link active w-full text-left px-4 py-3 rounded transition">
+                    📊 Dashboard
+                </button>
+                <button onclick="switchSection('tickets')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">
+                    🎫 Tickets
+                </button>
+                <button onclick="switchSection('leave')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">
+                    🏖️ Leave Management
+                </button>
+            </nav>
+
+            <div class="mt-8 pt-8 border-t border-teal-600">
+                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Dashboard -->
+            <div id="dashboard" class="content-section active">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-4">📊 Quick Stats</h3>
+                            <div class="space-y-2">
+                                <p>Total Tickets: <span id="totalTickets" class="font-bold">0</span></p>
+                                <p>Open Tickets: <span id="openTickets" class="font-bold text-blue-600">0</span></p>
+                                <p>Leave Balance: <span id="leaveBalance" class="font-bold text-green-600">-</span></p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-4">ℹ️ User Information</h3>
+                            <div class="space-y-2">
+                                <p>Name: <span id="infoName" class="font-semibold">-</span></p>
+                                <p>Email: <span id="infoEmail" class="font-semibold">-</span></p>
+                                <p>Account Type: <span id="infoType" class="font-semibold">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Section -->
+            <div id="tickets" class="content-section">
+                <div class="p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold">Tickets</h2>
+                        <button onclick="showNewTicketForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                            + New Ticket
+                        </button>
+                    </div>
+
+                    <!-- New Ticket Form -->
+                    <div id="newTicketForm" class="hidden bg-white p-6 rounded-lg shadow mb-6">
+                        <h3 class="text-xl font-semibold mb-4">Submit New Ticket</h3>
+                        <form id="ticketFormEl" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Issue Type</label>
+                                    <select id="ticketType" required class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select Type</option>
+                                        <option value="Request">Request</option>
+                                        <option value="Issue">Issue</option>
+                                        <option value="Bug">Bug</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Priority</label>
+                                    <select id="ticketPriority" required class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select Priority</option>
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Critical">Critical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Subject</label>
+                                <input type="text" id="ticketSubject" required class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Brief description">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Description</label>
+                                <textarea id="ticketDescription" required rows="4" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Detailed description"></textarea>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Submit Ticket</button>
+                                <button type="button" onclick="hideNewTicketForm()" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Tickets List -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Ticket ID</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Subject</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Priority</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Date</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketsList" class="divide-y">
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No tickets yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Management -->
+            <div id="leave" class="content-section">
+                <div class="p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold">Leave Management</h2>
+                        <button onclick="showNewLeaveForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                            + Request Leave
+                        </button>
+                    </div>
+
+                    <!-- Leave Balances -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-blue-100 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600">Annual Leave</p>
+                            <p id="annualBalance" class="text-2xl font-bold text-blue-600">-</p>
+                        </div>
+                        <div class="bg-yellow-100 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600">Sick Leave</p>
+                            <p id="sickBalance" class="text-2xl font-bold text-yellow-600">-</p>
+                        </div>
+                        <div class="bg-purple-100 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600">Personal Leave</p>
+                            <p id="personalBalance" class="text-2xl font-bold text-purple-600">-</p>
+                        </div>
+                    </div>
+
+                    <!-- New Leave Request Form -->
+                    <div id="newLeaveForm" class="hidden bg-white p-6 rounded-lg shadow mb-6">
+                        <h3 class="text-xl font-semibold mb-4">Request Leave</h3>
+                        <form id="leaveFormEl" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Leave Type</label>
+                                    <select id="leaveType" required class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        <option value="">Select Type</option>
+                                        <option value="Annual">Annual Leave</option>
+                                        <option value="Sick">Sick Leave</option>
+                                        <option value="Personal">Personal Leave</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Number of Days</label>
+                                    <input type="number" id="leaveDays" required min="1" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Start Date</label>
+                                    <input type="date" id="leaveStartDate" required class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">End Date</label>
+                                    <input type="date" id="leaveEndDate" required class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Reason</label>
+                                <textarea id="leaveReason" rows="3" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Reason for leave (optional)"></textarea>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Submit Request</button>
+                                <button type="button" onclick="hideNewLeaveForm()" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Leave Requests List -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Request ID</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Days</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Start Date</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaveList" class="divide-y">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">No leave requests yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all links
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked link
+            event.target.classList.add('active');
+        }
+
+        function showNewTicketForm() {
+            document.getElementById('newTicketForm').classList.remove('hidden');
+        }
+
+        function hideNewTicketForm() {
+            document.getElementById('newTicketForm').classList.add('hidden');
+        }
+
+        function showNewLeaveForm() {
+            document.getElementById('newLeaveForm').classList.remove('hidden');
+        }
+
+        function hideNewLeaveForm() {
+            document.getElementById('newLeaveForm').classList.add('hidden');
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Initialize dashboard
+        window.addEventListener('load', function() {
+            if (!localStorage.getItem('userId')) {
+                window.location.href = 'index.html';
+                return;
+            }
+            initDashboard();
+            loadTickets();
+            loadLeaveData();
+        });
+
+        function initDashboard() {
+            const userName = localStorage.getItem('userName') || 'User';
+            const userEmail = localStorage.getItem('userEmail') || 'N/A';
+            const userType = localStorage.getItem('isAdmin') === 'true' ? 'Admin' : 'User';
+
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('userTypeDisplay').textContent = userType;
+            document.getElementById('infoName').textContent = userName;
+            document.getElementById('infoEmail').textContent = userEmail;
+            document.getElementById('infoType').textContent = userType;
+
+            updateQuickStats();
+        }
+
+        function updateQuickStats() {
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const openCount = tickets.filter(t => t.status === 'Open').length;
+            document.getElementById('totalTickets').textContent = tickets.length;
+            document.getElementById('openTickets').textContent = openCount;
+        }
+
+        function loadTickets() {
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const userEmail = localStorage.getItem('userEmail');
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            
+            // Filter tickets based on user type
+            let filteredTickets = isAdmin ? tickets : tickets.filter(t => t.email === userEmail);
+            
+            const tbody = document.getElementById('ticketsList');
+            
+            if (filteredTickets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No tickets</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredTickets.map(ticket => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-semibold">${ticket.id}</td>
+                    <td class="px-6 py-4">${ticket.subject || ticket.type}</td>
+                    <td class="px-6 py-4">${ticket.type}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-sm font-semibold ${getPriorityClass(ticket.priority)}">
+                            ${ticket.priority}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-sm font-semibold ${getStatusClass(ticket.status)}">
+                            ${ticket.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">${new Date(ticket.timestamp).toLocaleDateString()}</td>
+                    <td class="px-6 py-4">
+                        <button onclick="viewTicket('${ticket.id}')" class="text-blue-600 hover:underline">View</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadLeaveData() {
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const userId = localStorage.getItem('userId');
+            const employee = employees.find(e => e.id === userId);
+
+            if (employee && employee.leaveBalances) {
+                document.getElementById('annualBalance').textContent = employee.leaveBalances.annual || 0;
+                document.getElementById('sickBalance').textContent = employee.leaveBalances.sick || 0;
+                document.getElementById('personalBalance').textContent = employee.leaveBalances.personal || 0;
+                document.getElementById('leaveBalance').textContent = (employee.leaveBalances.annual || 0) + ' days';
+            }
+
+            loadLeaveRequests();
+        }
+
+        function loadLeaveRequests() {
+            const requests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const userEmail = localStorage.getItem('userEmail');
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            
+            let filteredRequests = isAdmin ? requests : requests.filter(r => r.email === userEmail);
+            
+            const tbody = document.getElementById('leaveList');
+            
+            if (filteredRequests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No leave requests</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredRequests.map(req => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-semibold">${req.id}</td>
+                    <td class="px-6 py-4">${req.type}</td>
+                    <td class="px-6 py-4">${req.days}</td>
+                    <td class="px-6 py-4">${new Date(req.startDate).toLocaleDateString()}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-sm font-semibold ${getRequestStatusClass(req.status)}">
+                            ${req.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">${new Date(req.timestamp).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getPriorityClass(priority) {
+            const classes = {
+                'Critical': 'bg-red-200 text-red-800',
+                'High': 'bg-orange-200 text-orange-800',
+                'Medium': 'bg-yellow-200 text-yellow-800',
+                'Low': 'bg-green-200 text-green-800'
+            };
+            return classes[priority] || 'bg-gray-200 text-gray-800';
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'Open': 'bg-blue-200 text-blue-800',
+                'In Progress': 'bg-purple-200 text-purple-800',
+                'Resolved': 'bg-green-200 text-green-800',
+                'Closed': 'bg-gray-200 text-gray-800'
+            };
+            return classes[status] || 'bg-gray-200 text-gray-800';
+        }
+
+        function getRequestStatusClass(status) {
+            const classes = {
+                'Pending': 'bg-yellow-200 text-yellow-800',
+                'Approved': 'bg-green-200 text-green-800',
+                'Rejected': 'bg-red-200 text-red-800'
+            };
+            return classes[status] || 'bg-gray-200 text-gray-800';
+        }
+
+        function viewTicket(ticketId) {
+            alert('Viewing ticket: ' + ticketId);
+        }
+
+        // Handle ticket form submission
+        document.getElementById('ticketFormEl').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const ticketId = 'TICK-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            const ticket = {
+                id: ticketId,
+                type: document.getElementById('ticketType').value,
+                subject: document.getElementById('ticketSubject').value,
+                description: document.getElementById('ticketDescription').value,
+                priority: document.getElementById('ticketPriority').value,
+                status: 'Open',
+                email: localStorage.getItem('userEmail'),
+                timestamp: new Date().toISOString()
+            };
+
+            let tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            tickets.push(ticket);
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+
+            hideNewTicketForm();
+            this.reset();
+            loadTickets();
+            updateQuickStats();
+            alert('Ticket submitted successfully! ID: ' + ticketId);
+        });
+
+        // Handle leave request form submission
+        document.getElementById('leaveFormEl').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const leaveId = 'LEAVE-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            const request = {
+                id: leaveId,
+                type: document.getElementById('leaveType').value,
+                days: parseInt(document.getElementById('leaveDays').value),
+                startDate: document.getElementById('leaveStartDate').value,
+                endDate: document.getElementById('leaveEndDate').value,
+                reason: document.getElementById('leaveReason').value,
+                status: 'Pending',
+                email: localStorage.getItem('userEmail'),
+                timestamp: new Date().toISOString()
+            };
+
+            let requests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            requests.push(request);
+            localStorage.setItem('leaveRequests', JSON.stringify(requests));
+
+            hideNewLeaveForm();
+            this.reset();
+            loadLeaveRequests();
+            alert('Leave request submitted! ID: ' + leaveId);
+        });
+    </script>
+</body>
+</html>
         body {
             background: #F8FAFC;
             min-height: 100vh;

@@ -44,38 +44,54 @@
     <div class="text-center">
         <h1 id="welcomeText" class="welcome"></h1>
         <p class="text-xl mt-4 mb-8">Your trusted microfinance partner</p>
-        <div id="loginForm" class="bg-gray-100 bg-opacity-90 p-8 rounded-lg max-w-md mx-auto shadow-lg">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Login</h2>
-            <form id="loginFormEl">
-                <div class="mb-4">
-                    <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
-                    <select id="department" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                        <option value="">Select Your Department</option>
-                        <option value="IT">IT</option>
-                        <option value="Operations">Operations</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Data Analysis">Data Analysis</option>
-                        <option value="Customer Service">Customer Service</option>
-                        <option value="admin">Admin</option>
-                        <option value="Security">Security</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="username" class="block text-sm font-medium text-gray-700">Select User</label>
-                    <select id="username" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                        <option value="">Select a department first</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                </div>
-                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md font-semibold transition text-white">Login</button>
-            </form>
-            <p id="loginMessage" class="mt-4 text-center text-red-500"></p>
-            <div class="mt-4 text-center">
-                <a href="reset-password.html" class="text-teal-600 hover:text-teal-700 text-sm">Forgot Password?</a>
+        
+        <!-- Portal Selection -->
+        <div id="portalSelect" class="bg-gray-100 bg-opacity-90 p-8 rounded-lg max-w-2xl mx-auto shadow-lg mb-8">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Select Portal</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <button id="userPortalBtn" class="bg-blue-600 hover:bg-blue-700 px-6 py-4 rounded-lg font-semibold transition text-white text-lg">
+                    User Portal
+                </button>
+                <button id="adminPortalBtn" class="bg-red-600 hover:bg-red-700 px-6 py-4 rounded-lg font-semibold transition text-white text-lg">
+                    Admin Portal
+                </button>
             </div>
+        </div>
+        
+        <!-- User Login Form -->
+        <div id="userLoginForm" class="bg-gray-100 bg-opacity-90 p-8 rounded-lg max-w-md mx-auto shadow-lg hidden">
+            <button id="backFromUserBtn" class="text-blue-600 hover:text-blue-700 text-sm mb-4">← Back</button>
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">User Login</h2>
+            <form id="userLoginFormEl">
+                <div class="mb-4">
+                    <label for="userEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="userEmail" required placeholder="you@domain.com" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label for="userPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="userPassword" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-semibold transition text-white">Login</button>
+            </form>
+            <p id="userLoginMessage" class="mt-4 text-center text-red-500"></p>
+        </div>
+        
+        <!-- Admin Login Form -->
+        <div id="adminLoginForm" class="bg-gray-100 bg-opacity-90 p-8 rounded-lg max-w-md mx-auto shadow-lg hidden">
+            <button id="backFromAdminBtn" class="text-red-600 hover:text-red-700 text-sm mb-4">← Back</button>
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Admin Login</h2>
+            <form id="adminLoginFormEl">
+                <div class="mb-4">
+                    <label for="adminUsername" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="adminUsername" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" value="Admin" readonly>
+                </div>
+                <div class="mb-4">
+                    <label for="adminPassword" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="adminPassword" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md font-semibold transition text-white">Login</button>
+            </form>
+            <p id="adminLoginMessage" class="mt-4 text-center text-red-500"></p>
         </div>
     </div>
     <script>
@@ -91,170 +107,179 @@
             }
         }
 
-        window.onload = function() {
-            typeWriter();
-            // Clear any existing login session to ensure clean state
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userDept');
-            localStorage.removeItem('userId');
-            localStorage.removeItem('isAdmin');
-        };
-
-        // Initialize employees data if not exists
+        // Initialize employees data (reinitialize if old schema detected)
         function initializeEmployees() {
-            // Clear any existing data first to ensure clean state
-            localStorage.removeItem('employees');
+            const existing = localStorage.getItem('employees');
+            if (existing) {
+                try {
+                    const parsed = JSON.parse(existing);
+                    // If parsed data already contains `type` field, assume new schema and keep it
+                    if (Array.isArray(parsed) && parsed.some(e => Object.prototype.hasOwnProperty.call(e, 'type'))) {
+                        return;
+                    }
+                    // Otherwise fall through to reinitialize with new schema
+                } catch (e) {
+                    // If parse fails, reinitialize
+                }
+            }
 
             let employees = [
-                // IT Department
-                { id: 'EMP001', name: 'Stevaniah Kavela', department: 'IT', email: 'stevaniah.kavela@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP002', name: 'Mercy Mukhwana', department: 'IT', email: 'mercy.mukhwana@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP003', name: 'Eric Mokaya', department: 'IT', email: 'eric.mokaya@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-                // Operations Department
-                { id: 'EMP004', name: 'Caroline Ngugi', department: 'Operations', email: 'caroline.ngugi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP005', name: 'Lilian Kimani', department: 'Operations', email: 'lilian.kimani@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP006', name: 'Maureen Kerubo', department: 'Operations', email: 'maureen.kerubo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP007', name: 'Alice Muthoni', department: 'Operations', email: 'alice.muthoni@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP008', name: 'Michael Mureithi', department: 'Operations', email: 'michael.mureithi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-                // Finance Department
-                { id: 'EMP009', name: 'Patrick Ndegwa', department: 'Finance', email: 'patrick.ndegwa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP010', name: 'Margaret Njeri', department: 'Finance', email: 'margaret.njeri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP011', name: 'Elizabeth Mungai', department: 'Finance', email: 'elizabeth.mungai@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-                // Data Analysis Department
-                { id: 'EMP012', name: 'Stevaniah Kavela', department: 'Data Analysis', email: 'stevaniah.kavela@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-                // Customer Service Department
-                { id: 'EMP013', name: 'Ebby Gesare', department: 'Customer Service', email: 'ebby.gesare@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP014', name: 'Vivian Orisa', department: 'Customer Service', email: 'vivian.orisa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP015', name: 'Juliana Jeptoo', department: 'Customer Service', email: 'juliana.jeptoo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP016', name: 'Faith Bonareri', department: 'Customer Service', email: 'faith.bonareri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP017', name: 'Patience Mutunga', department: 'Customer Service', email: 'patience.mutunga@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP018', name: 'Eva Mukami', department: 'Customer Service', email: 'eva.mukami@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP019', name: 'Peter Kariuki', department: 'Customer Service', email: 'peter.kariuki@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-                // Admin Department
-                { id: 'EMP020', name: 'Elizabeth Mungai', department: 'admin', email: 'elizabeth.mungai@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } },
-                { id: 'EMP021', name: 'Ken Okwero', department: 'admin', email: 'ken.okwero@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } },
-                { id: 'EMP022', name: 'Alice Muthoni', department: 'admin', email: 'alice.muthoni@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } },
-
-                // Security Department
-                { id: 'EMP023', name: 'Bonface Kioko', department: 'Security', email: 'bonface.kioko@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP024', name: 'Eric Mokaya', department: 'Security', email: 'eric.mokaya@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-                { id: 'EMP025', name: 'Clive Odame', department: 'Security', email: 'clive.odame@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } }
+                // Regular Users (numeric IDs)
+                { id: '1', name: 'John Smith', type: 'user', email: 'john.smith@onit.com', leaveBalances: { annual: 20, sick: 10, personal: 5 } },
+                { id: '2', name: 'Jane Doe', type: 'user', email: 'jane.doe@onit.com', leaveBalances: { annual: 20, sick: 10, personal: 5 } },
+                { id: '3', name: 'Michael Johnson', type: 'user', email: 'michael.johnson@onit.com', leaveBalances: { annual: 20, sick: 10, personal: 5 } },
+                { id: '4', name: 'Sarah Williams', type: 'user', email: 'sarah.williams@onit.com', leaveBalances: { annual: 20, sick: 10, personal: 5 } },
+                { id: '5', name: 'David Brown', type: 'user', email: 'david.brown@onit.com', leaveBalances: { annual: 20, sick: 10, personal: 5 } },
+                // Admins
+                { id: '6', name: 'Admin One', type: 'admin', email: 'admin1@onit.com', leaveBalances: { annual: 25, sick: 15, personal: 10 } },
+                { id: '7', name: 'Admin Two', type: 'admin', email: 'admin2@onit.com', leaveBalances: { annual: 25, sick: 15, personal: 10 } },
+                { id: '8', name: 'System Admin', type: 'admin', email: 'sysadmin@onit.com', leaveBalances: { annual: 25, sick: 15, personal: 10 } }
             ];
+            // Assign random departments to users that don't have one (helpful for testing assignment)
+            const departments = ['IT','Finance','HR','Support','Operations'];
+            employees = employees.map(e => {
+                if (!e.department || String(e.department).trim() === '') {
+                    // Prefer admin users to have an Admin or Operations department
+                    if ((e.type||'').toLowerCase() === 'admin') {
+                        e.department = 'Operations';
+                    } else {
+                        e.department = departments[Math.floor(Math.random()*departments.length)];
+                    }
+                }
+                return e;
+            });
             localStorage.setItem('employees', JSON.stringify(employees));
-            console.log('Employees data initialized with', employees.length, 'employees');
+            // Initialize numeric ID counters for various entities
+            const nextIds = JSON.parse(localStorage.getItem('nextIds') || '{}');
+            nextIds.employees = Math.max(nextIds.employees || 1, 9);
+            nextIds.tickets = nextIds.tickets || 1;
+            nextIds.leaveRequests = nextIds.leaveRequests || 1;
+            nextIds.claims = nextIds.claims || 1;
+            localStorage.setItem('nextIds', JSON.stringify(nextIds));
+            console.log('Employees data initialized');
         }
 
-        // Test function for debugging usernames
-        window.testUsernames = function() {
-            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
-            console.log('Employee Usernames:');
-            employees.forEach(emp => {
-                const parts = emp.name.split(' ');
-                if (parts.length >= 2) {
-                    const username = (parts[0][0] + parts[parts.length - 1]).toUpperCase();
-                    console.log(`${emp.name} -> ${username} (${emp.department})`);
-                }
-            });
+        window.onload = function() {
+            typeWriter();
+            // Clear any existing login session
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('isAdmin');
+            
+            // Initialize employees
+            initializeEmployees();
+            
+            // Setup portal selection
+            setupPortalSelection();
         };
 
-        // Initialize employees data
-        initializeEmployees();
+        function setupPortalSelection() {
+            const userPortalBtn = document.getElementById('userPortalBtn');
+            const adminPortalBtn = document.getElementById('adminPortalBtn');
+            const backFromUserBtn = document.getElementById('backFromUserBtn');
+            const backFromAdminBtn = document.getElementById('backFromAdminBtn');
 
-        // Generate username from employee name (first letter + surname)
-        function generateUsername(fullName) {
-            const parts = fullName.trim().split(' ');
-            if (parts.length >= 2) {
-                const firstInitial = parts[0][0].toUpperCase();
-                const lastName = parts[parts.length - 1];
-                return firstInitial + lastName;
-            }
-            return fullName; // fallback
+            userPortalBtn.addEventListener('click', () => showUserLogin());
+            adminPortalBtn.addEventListener('click', () => showAdminLogin());
+            backFromUserBtn.addEventListener('click', () => showPortalSelect());
+            backFromAdminBtn.addEventListener('click', () => showPortalSelect());
+
+            // Setup login forms
+            document.getElementById('userLoginFormEl').addEventListener('submit', handleUserLogin);
+            document.getElementById('adminLoginFormEl').addEventListener('submit', handleAdminLogin);
+
+            // No dropdowns: users login with email, admin uses fixed username
         }
 
-        // Populate users dropdown based on selected department
-        function populateUsers(department) {
-            const userSelect = document.getElementById('username');
-            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
-            const departmentUsers = employees.filter(emp => emp.department === department);
+        function showPortalSelect() {
+            document.getElementById('portalSelect').classList.remove('hidden');
+            document.getElementById('userLoginForm').classList.add('hidden');
+            document.getElementById('adminLoginForm').classList.add('hidden');
+        }
 
-            // Clear existing options
-            userSelect.innerHTML = '<option value="">Select User</option>';
+        function showUserLogin() {
+            document.getElementById('portalSelect').classList.add('hidden');
+            document.getElementById('userLoginForm').classList.remove('hidden');
+            document.getElementById('adminLoginForm').classList.add('hidden');
+        }
 
-            if (departmentUsers.length === 0) {
-                userSelect.innerHTML = '<option value="" disabled>No users found in this department</option>';
-                userSelect.disabled = true;
+        function showAdminLogin() {
+            document.getElementById('portalSelect').classList.add('hidden');
+            document.getElementById('userLoginForm').classList.add('hidden');
+            document.getElementById('adminLoginForm').classList.remove('hidden');
+        }
+
+        // No dropdown population required for email/password or fixed Admin username
+
+        function handleUserLogin(e) {
+            e.preventDefault();
+            const email = (document.getElementById('userEmail').value || '').trim().toLowerCase();
+            const pass = document.getElementById('userPassword').value;
+
+            if (!email) {
+                document.getElementById('userLoginMessage').textContent = 'Please enter your email';
                 return;
             }
 
-            // Add users to dropdown
-            departmentUsers.forEach(emp => {
-                const option = document.createElement('option');
-                option.value = JSON.stringify({id: emp.id, name: emp.name, email: emp.email, department: emp.department});
-                const username = generateUsername(emp.name);
-                option.textContent = username.toUpperCase();
-                userSelect.appendChild(option);
-            });
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const user = employees.find(u => u.type === 'user' && (u.email || '').toLowerCase() === email);
+            if (!user) {
+                document.getElementById('userLoginMessage').textContent = 'User not found';
+                return;
+            }
 
-            userSelect.disabled = false;
+            // Support per-user password (if set) otherwise fall back to legacy global password '1234'
+            const expected = (user.password && String(user.password)) ? String(user.password) : '1234';
+            if (pass !== expected) {
+                document.getElementById('userLoginMessage').textContent = 'Invalid password';
+                return;
+            }
+
+            // If the user is required to change password, store a pending marker and redirect to change page
+            if (user.mustChangePassword) {
+                // Save pending user email to allow change-password.html to validate
+                localStorage.setItem('pendingUserEmail', user.email);
+                // We still allow the temporary password to authenticate; redirect to change screen
+                window.location.href = 'change-password.html';
+                return;
+            }
+
+            localStorage.setItem('userId', user.id);
+            localStorage.setItem('userName', user.name);
+            localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('userType', user.type);
+            localStorage.setItem('isAdmin', 'false');
+
+            window.location.href = 'system-clean.html';
         }
 
-        // Department change handler
-        document.getElementById('department').addEventListener('change', function(e) {
-            const department = e.target.value;
-            if (department) {
-                populateUsers(department);
-            } else {
-                document.getElementById('username').innerHTML = '<option value="">Select a department first</option>';
-                document.getElementById('username').disabled = true;
-            }
-        });
-
-        document.getElementById('loginFormEl').addEventListener('submit', function(e) {
+        function handleAdminLogin(e) {
             e.preventDefault();
+            const username = (document.getElementById('adminUsername').value || '').trim();
+            const pass = document.getElementById('adminPassword').value;
 
-            const department = document.getElementById('department').value;
-            const userData = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-
-            if (!department || !userData) {
-                document.getElementById('loginMessage').textContent = 'Please select department and user';
+            if (username !== 'Admin') {
+                document.getElementById('adminLoginMessage').textContent = 'Invalid admin username';
                 return;
             }
 
             if (pass !== '1234') {
-                document.getElementById('loginMessage').textContent = 'Invalid password';
+                document.getElementById('adminLoginMessage').textContent = 'Invalid password';
                 return;
             }
 
-            const selectedEmployee = JSON.parse(userData);
+            // Set admin session (simple client-side representation)
+            localStorage.setItem('userId', 'ADMIN');
+            localStorage.setItem('userName', 'Admin');
+            localStorage.setItem('userEmail', 'admin@onit.local');
+            localStorage.setItem('userType', 'admin');
+            localStorage.setItem('isAdmin', 'true');
 
-            // Store user information
-            localStorage.setItem('userId', selectedEmployee.id);
-            localStorage.setItem('userName', selectedEmployee.name);
-            localStorage.setItem('userEmail', selectedEmployee.email);
-            localStorage.setItem('userDept', selectedEmployee.department);
-            localStorage.setItem('isAdmin', selectedEmployee.department === 'admin');
-
-            // Log login attempt
-            const loginHistory = JSON.parse(localStorage.getItem('loginHistory') || '[]');
-            loginHistory.unshift({
-                user: selectedEmployee.name,
-                username: selectedEmployee.name, // Using full name as username now
-                department: selectedEmployee.department,
-                time: new Date().toISOString(),
-                ip: 'N/A'
-            });
-            localStorage.setItem('loginHistory', JSON.stringify(loginHistory.slice(0, 100)));
-
-            // Redirect to dashboard
-            window.location.href = 'system.html';
-        });
+            // Redirect to admin management panel
+            window.location.href = 'admin.html';
+        }
     </script>
 </body>
 </html>

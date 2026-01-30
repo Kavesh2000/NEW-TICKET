@@ -3,226 +3,808 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Dashboard - Onit MFB Ticketing System</title>
+    <title>Admin Panel - Onit MFB</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="modern-ui.css">
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+        .sidebar-link {
+            transition: all 0.3s ease;
         }
-        .metric-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
-        .chart-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
         }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        :root{
+            --bg-1:#0f172a; --accent:#ef4444; --card:#ffffff;
+        }
+        body{ background: linear-gradient(180deg,#f8fafc 0%, #f1f5f9 100%); color:var(--bg-1); }
+        .card{ background:var(--card); border-radius:12px; box-shadow:0 10px 30px rgba(2,6,23,0.06); padding:1rem; }
+        .btn{ display:inline-flex; align-items:center; gap:.5rem; padding:.5rem 1rem; border-radius:10px; font-weight:600; cursor:pointer; }
+        .btn-primary{ background: linear-gradient(90deg,var(--accent),#dc2626); color:white; border:none; }
+        .btn-secondary{ background:#f1f5f9; color:var(--bg-1); border:none; }
     </style>
 </head>
-<body class="text-gray-900">
-    <!-- Modern Header -->
-    <header class="bg-white/10 backdrop-blur-md border-b border-white/20">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-chart-line text-white text-lg"></i>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-red-700 to-red-900 text-white p-6">
+            <h1 class="text-2xl font-bold mb-8">Admin Panel</h1>
+            
+            <div class="mb-4 pb-4 border-b border-red-600">
+                <p class="text-sm text-red-100">Logged in as:</p>
+                <p id="userNameDisplay" class="font-semibold"></p>
+                <p id="userTypeDisplay" class="text-xs text-red-200">Administrator</p>
+            </div>
+
+            <nav class="space-y-2">
+                <button onclick="switchSection('dashboard')" class="sidebar-link active w-full text-left px-4 py-3 rounded transition">
+                    📊 Dashboard
+                </button>
+                <button onclick="switchSection('tickets')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">
+                    🎫 Manage Tickets
+                </button>
+                <button onclick="switchSection('leave')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">
+                    🏖️ Manage Leave
+                </button>
+                <button onclick="switchSection('claims')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">💼 Manage Claims</button>
+                <button onclick="switchSection('users')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">👥 Manage Users</button>
+            </nav>
+
+            <div class="mt-8 pt-8 border-t border-red-600">
+                <button onclick="logout()" class="w-full bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Dashboard -->
+            <div id="dashboard" class="content-section active">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-6">Admin Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="card">
+                                        <h3 class="text-lg font-semibold mb-2">System Stats</h3>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <p class="text-sm text-gray-600">Total Tickets</p>
+                                                <p class="font-bold text-xl" id="totalTickets">0</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm text-gray-600">Open Tickets</p>
+                                                <p class="font-bold text-xl" id="openTickets">0</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm text-gray-600">In Progress</p>
+                                                <p class="font-bold text-xl" id="progressTickets">0</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm text-gray-600">Total Users</p>
+                                                <p class="font-bold text-xl" id="totalUsers">0</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <h3 class="text-lg font-semibold mb-2">Performance</h3>
+                                        <div class="space-y-2">
+                                            <p class="text-sm text-gray-600">Resolved This Month: <span id="resolvedMonth" class="font-bold">0</span></p>
+                                            <p class="text-sm text-gray-600">Pending Leaves: <span id="pendingLeaves" class="font-bold">0</span></p>
+                                            <p class="text-sm text-gray-600">Avg Resolution Time: <span id="avgTime" class="font-bold">-</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <h3 class="text-lg font-semibold mb-2">Admin Info</h3>
+                                        <div class="space-y-2">
+                                            <p class="text-sm text-gray-600">Name: <span id="infoName" class="font-semibold">-</span></p>
+                                            <p class="text-sm text-gray-600">Email: <span id="infoEmail" class="font-semibold">-</span></p>
+                                            <p class="text-sm text-gray-600">Role: <span id="infoRole" class="font-semibold">Administrator</span></p>
+                                        </div>
+                                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Management -->
+            <div id="tickets" class="content-section">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-6">Manage Tickets</h2>
+                    
+                    <!-- Tickets List -->
+                    <div class="card overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Ticket ID</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Assigned</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">User</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Subject</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Priority</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketsList" class="divide-y">
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No tickets</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div>
-                            <h1 class="text-white text-xl font-bold">Manager Dashboard</h1>
-                            <p class="text-white/70 text-sm">Ticketing System Analytics</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Management -->
+            <div id="leave" class="content-section">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-6">Manage Leave Requests</h2>
+                    
+                    <!-- Leave Requests List -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-200">
+                                    <tr>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Request ID</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">User</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Email</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Days</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Start Date</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">End Date</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Resume Date</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                                            <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                        </tr>
+                                </thead>
+                                <tbody id="leaveList" class="divide-y">
+                                    <tr>
+                                        <td colspan="10" class="px-6 py-4 text-center text-gray-500">No leave requests</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-right">
-                        <div class="text-white font-medium" id="userName">Manager</div>
-                        <div class="text-white/70 text-sm" id="userRole">Management</div>
+            </div>
+
+            <!-- Claims Management -->
+            <div id="claims" class="content-section">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-6">Manage Expense Claims</h2>
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Claim ID</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">User</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Email</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Amount</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Date</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="claimsListAdmin" class="divide-y">
+                                    <tr>
+                                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No claims</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="flex gap-2">
-                        <a href="tickets.html" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition">
-                            <i class="fas fa-list"></i>
-                        </a>
-                        <button id="logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
+                </div>
+            </div>
+            
+            <!-- Users Management -->
+            <div id="users" class="content-section">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-6">Manage Users</h2>
+                    <div class="mb-4">
+                        <button onclick="showNewUserForm()" class="btn btn-primary">+ New User</button>
+                        <button onclick="seedDepartments()" class="btn btn-secondary ml-2">Seed Departments</button>
+                    </div>
+                    <div id="newUserForm" class="hidden card mb-6">
+                        <h3 class="font-semibold mb-3">Create / Edit User</h3>
+                        <form id="userForm" class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-sm font-medium">Full Name</label>
+                                    <input id="userFullName" class="w-full p-2 border rounded mt-1" required />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium">Email</label>
+                                    <input id="userEmailInput" type="email" class="w-full p-2 border rounded mt-1" required />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-sm font-medium">Department</label>
+                                    <input id="userDeptInput" class="w-full p-2 border rounded mt-1" />
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium">Type</label>
+                                    <select id="userTypeInput" class="w-full p-2 border rounded mt-1"><option value="user">User</option><option value="admin">Admin</option></select>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 justify-end">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="button" onclick="hideNewUserForm()" class="btn btn-secondary">Cancel</button>
+                            </div>
+                            <input type="hidden" id="userEditId" />
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-200">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">ID</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Name</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Email</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Department</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersList" class="divide-y">
+                                    <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No users</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- Leave balances summary for admins -->
+                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden p-6">
+                        <h3 class="font-semibold mb-3">Leave Balances (All Users)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">User</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Email</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Annual</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Sick</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Personal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="balancesTable" class="divide-y">
+                                    <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No data</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
-        <!-- Key Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="text-3xl font-bold text-white mb-2" id="totalTickets">0</div>
-                <div class="text-white/70">Total Tickets</div>
-                <div class="text-white/50 text-sm mt-1" id="totalChange">+0% from last month</div>
-            </div>
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="text-3xl font-bold text-red-400 mb-2" id="openTickets">0</div>
-                <div class="text-white/70">Open Tickets</div>
-                <div class="text-white/50 text-sm mt-1" id="openChange">+0% from last month</div>
-            </div>
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="text-3xl font-bold text-yellow-400 mb-2" id="avgResolutionTime">0h</div>
-                <div class="text-white/70">Avg Resolution Time</div>
-                <div class="text-white/50 text-sm mt-1" id="resolutionChange">-0% from last month</div>
-            </div>
-            <div class="metric-card rounded-xl p-6 text-center">
-                <div class="text-3xl font-bold text-green-400 mb-2" id="slaCompliance">0%</div>
-                <div class="text-white/70">SLA Compliance</div>
-                <div class="text-white/50 text-sm mt-1" id="slaChange">+0% from last month</div>
-            </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Ticket Volume Trend -->
-            <div class="chart-container rounded-xl p-6">
-                <h3 class="text-white text-lg font-bold mb-4">Ticket Volume Trend</h3>
-                <div id="volumeChart" class="h-64 flex items-center justify-center">
-                    <div class="text-white/50">Chart will be rendered here</div>
-                </div>
-            </div>
-
-            <!-- Priority Distribution -->
-            <div class="chart-container rounded-xl p-6">
-                <h3 class="text-white text-lg font-bold mb-4">Priority Distribution</h3>
-                <div id="priorityChart" class="h-64 flex items-center justify-center">
-                    <div class="text-white/50">Chart will be rendered here</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Department Performance -->
-        <div class="chart-container rounded-xl p-6 mb-8">
-            <h3 class="text-white text-lg font-bold mb-4">Department Performance</h3>
-            <div id="departmentChart" class="h-64 flex items-center justify-center">
-                <div class="text-white/50">Chart will be rendered here</div>
-            </div>
-        </div>
-
-        <!-- Recent Tickets -->
-        <div class="chart-container rounded-xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-white text-lg font-bold">Recent Tickets</h3>
-                <a href="tickets.html" class="text-teal-400 hover:text-teal-300 text-sm">View All</a>
-            </div>
-            <div id="recentTickets" class="space-y-3">
-                <!-- Recent tickets will be loaded here -->
-            </div>
-        </div>
-    </main>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
-    <script src="script.js"></script>
     <script>
-        // Check login and role
-        if (!localStorage.getItem('userDept') || !['admin', 'Management'].includes(localStorage.getItem('userDept'))) {
+        function switchSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function logout() {
+            // Clear only session keys so admin/user data remains persisted
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('pendingUserEmail');
             window.location.href = 'index.html';
         }
 
-        // Set user info
-        const dept = localStorage.getItem('userDept');
-        document.getElementById('userName').textContent = 'Manager';
-        document.getElementById('userRole').textContent = dept;
+        function pushSentEmail(to, subject, body){ const sent = JSON.parse(localStorage.getItem('sentEmails')||'[]'); sent.push({to,subject,body,sentAt:new Date().toISOString()}); localStorage.setItem('sentEmails', JSON.stringify(sent)); }
 
-        // Logout
-        document.getElementById('logout').addEventListener('click', function() {
-            localStorage.removeItem('userDept');
-            window.location.href = 'index.html';
+        function openAdminModal(action, ticketId){
+            // Reuse system modal but namespaced for admin; populate and show
+            const modal = document.getElementById('ticketModal');
+            if (!modal) return; // ensure modal exists
+            // use same global functions in system-clean modal
+            // set action via openTicketModal if available
+            try {
+                openTicketModal(action, ticketId);
+            } catch(e){
+                // fallback: prompt
+                if(action === 'progress') approveTicketImmediate(ticketId, action);
+                else {
+                    const notes = prompt('Notes (optional):');
+                    approveTicketImmediate(ticketId, action, notes);
+                }
+            }
+        }
+
+        function approveTicketImmediate(ticketId, action, notes){
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const ticket = tickets.find(t => t.id === ticketId);
+            if (!ticket) return;
+            const actorId = localStorage.getItem('userId');
+            const actor = employees.find(e => e.id === actorId) || { name: localStorage.getItem('userName') };
+            if (action === 'progress') ticket.status = 'In Progress';
+            else if (action === 'resolve') { ticket.status = 'Resolved'; ticket.resolvedAt = new Date().toISOString(); ticket.resolvedBy = actorId; ticket.resolvedByName = actor.name; }
+            else if (action === 'close') { ticket.status = 'Closed'; ticket.closedAt = new Date().toISOString(); ticket.closedBy = actorId; ticket.closedByName = actor.name; }
+            ticket.history = ticket.history || [];
+            ticket.history.push({ action: action, by: actorId, byName: actor.name, at: new Date().toISOString(), notes: notes || '' });
+            if (notes) ticket.resolutionNotes = (ticket.resolutionNotes||'') + '\n' + notes;
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            try { pushSentEmail(ticket.email, `Your ticket ${ticket.id} ${ticket.status}`, notes || ''); } catch(e){}
+            if (ticket.assignedTo) try { pushSentEmail((employees.find(e=>e.id===ticket.assignedTo)||{}).email||'', `Ticket ${ticket.id} ${ticket.status}`, notes || ''); } catch(e){}
+            loadTickets(); updateStats();
+        }
+
+        function approveLeave(leaveId, approved) {
+            const requests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const request = requests.find(r => r.id === leaveId);
+            if (request) {
+                const prevStatus = request.status;
+                request.status = approved ? 'Approved' : 'Rejected';
+                // If rejecting, capture a reason from the admin
+                if (!approved && prevStatus === 'Pending') {
+                    const reason = prompt('Provide a reason for rejecting this leave request:');
+                    request.rejectReason = reason || 'No reason provided';
+                    request.rejectedAt = new Date().toISOString();
+                    request.rejectedBy = localStorage.getItem('userName') || 'Admin';
+                }
+                localStorage.setItem('leaveRequests', JSON.stringify(requests));
+                // If approving and it was previously pending, deduct days from employee balance
+                if (approved && prevStatus === 'Pending') {
+                    try {
+                        const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+                        const emp = employees.find(e => (e.email||'').toLowerCase() === (request.email||'').toLowerCase());
+                        if (emp) {
+                            emp.leaveBalances = emp.leaveBalances || { annual:0, sick:0, personal:0 };
+                            const typeKey = (request.type || '').toLowerCase();
+                            // Map common variants
+                            const key = typeKey === 'annual' || typeKey === 'annual leave' ? 'annual' : (typeKey === 'sick' ? 'sick' : (typeKey === 'personal' ? 'personal' : typeKey));
+                            const deduct = parseFloat(request.days) || 0;
+                            if (typeof emp.leaveBalances[key] === 'number') {
+                                emp.leaveBalances[key] = Math.max(0, emp.leaveBalances[key] - deduct);
+                            } else {
+                                // initialize if missing
+                                emp.leaveBalances[key] = Math.max(0, -deduct);
+                            }
+                            localStorage.setItem('employees', JSON.stringify(employees));
+                        }
+                    } catch (e) {
+                        console.error('Failed to deduct leave balance', e);
+                    }
+                }
+                loadLeaveRequests();
+                loadUsers();
+                loadLeaveBalances();
+            }
+        }
+
+        function approveClaim(claimId, approved) {
+            const claims = JSON.parse(localStorage.getItem('claims') || '[]');
+            const claim = claims.find(c => c.id === claimId);
+            if (claim) {
+                claim.status = approved ? 'Approved' : 'Rejected';
+                localStorage.setItem('claims', JSON.stringify(claims));
+                loadClaims();
+            }
+        }
+
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('isAdmin') !== 'true') {
+                window.location.href = 'index.html';
+                return;
+            }
+            initDashboard();
+            // Auto-seed departments for existing users who lack one (so assignment works immediately)
+            seedDepartmentsIfMissing();
+            loadTickets();
+            loadLeaveRequests();
+            loadClaims();
+            loadUsers();
         });
 
-        // Load dashboard data
-        loadDashboardData();
-
-        function loadDashboardData() {
-            const tickets = getTickets();
-            
-            // Calculate metrics
-            const total = tickets.length;
-            const open = tickets.filter(t => t.status === 'Open').length;
-            const closed = tickets.filter(t => t.status === 'Closed').length;
-            
-            // SLA Compliance
-            const slaCompliant = tickets.filter(t => {
-                if (!t.sla_due) return true;
-                return new Date(t.sla_due) > new Date();
-            }).length;
-            const slaPercent = total > 0 ? Math.round((slaCompliant / total) * 100) : 0;
-            
-            // Average resolution time (simplified)
-            const resolvedTickets = tickets.filter(t => t.status === 'Closed');
-            const avgResolution = resolvedTickets.length > 0 ? 
-                resolvedTickets.reduce((sum, t) => {
-                    const created = new Date(t.timestamp);
-                    const resolved = new Date(); // Assume current time for open tickets
-                    return sum + (resolved - created);
-                }, 0) / resolvedTickets.length / (1000 * 60 * 60) : 0;
-            
-            // Update metrics
-            document.getElementById('totalTickets').textContent = total;
-            document.getElementById('openTickets').textContent = open;
-            document.getElementById('avgResolutionTime').textContent = Math.round(avgResolution) + 'h';
-            document.getElementById('slaCompliance').textContent = slaPercent + '%';
-            
-            // Load recent tickets
-            loadRecentTickets(tickets);
+        function initDashboard() {
+            const userName = localStorage.getItem('userName') || 'Admin';
+            const userEmail = localStorage.getItem('userEmail') || 'N/A';
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('infoName').textContent = userName;
+            document.getElementById('infoEmail').textContent = userEmail;
+            updateStats();
         }
 
-        function loadRecentTickets(tickets) {
-            const recent = tickets
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-                .slice(0, 5);
+        // Numeric auto-increment ID helper (shared)
+        function getNextId(key){
+            const next = JSON.parse(localStorage.getItem('nextIds') || '{}');
+            if (!next[key]) next[key] = 1;
+            const id = next[key]++;
+            localStorage.setItem('nextIds', JSON.stringify(next));
+            return String(id);
+        }
+
+        function updateStats() {
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const claims = JSON.parse(localStorage.getItem('claims') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+
+            document.getElementById('totalTickets').textContent = tickets.length;
+            document.getElementById('openTickets').textContent = tickets.filter(t => t.status === 'Open').length;
+            document.getElementById('progressTickets').textContent = tickets.filter(t => t.status === 'In Progress').length;
+            document.getElementById('totalUsers').textContent = employees.filter(e => e.type === 'user').length;
+            document.getElementById('resolvedMonth').textContent = tickets.filter(t => t.status === 'Resolved').length;
+            document.getElementById('pendingLeaves').textContent = leaveRequests.filter(r => r.status === 'Pending').length;
+            // pending claims
+            const pendingClaims = claims.filter(c => c.status === 'Pending').length;
+            const pendingEl = document.getElementById('pendingClaims');
+            if (pendingEl) pendingEl.textContent = pendingClaims;
+        }
+
+        function loadTickets() {
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const tbody = document.getElementById('ticketsList');
             
-            const container = document.getElementById('recentTickets');
-            container.innerHTML = recent.map(ticket => `
-                <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-ticket-alt text-white text-sm"></i>
-                        </div>
-                        <div>
-                            <div class="text-white font-medium text-sm">${ticket.id}</div>
-                            <div class="text-white/70 text-xs">${ticket.description.substring(0, 50)}...</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-white text-sm">${ticket.status}</div>
-                        <div class="text-white/70 text-xs">${ticket.priority}</div>
-                    </div>
-                </div>
+            if (tickets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No tickets</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = tickets.map(ticket => {
+                const user = employees.find(e => e.email === ticket.email);
+                const displayName = user ? user.name : (ticket.name || ticket.email || 'Unknown');
+                const assignee = employees.find(e => e.id === ticket.assignedTo);
+                const assigneeName = assignee ? assignee.name : (ticket.assignedToName || 'Unassigned');
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-semibold">${ticket.id}</td>
+                        <td class="px-6 py-4">${assigneeName}</td>
+                        <td class="px-6 py-4">${displayName}</td>
+                        <td class="px-6 py-4">${ticket.subject || ticket.type}</td>
+                        <td class="px-6 py-4">${ticket.type}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-sm font-semibold ${getPriorityClass(ticket.priority)}">
+                                ${ticket.priority}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-sm font-semibold ${getStatusClass(ticket.status)}">
+                                ${ticket.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 space-x-2">
+                            <button onclick="openAdminModal('progress','${ticket.id}')" class="text-blue-600 hover:underline text-sm">Progress</button>
+                            <button onclick="openAdminModal('resolve','${ticket.id}')" class="text-green-600 hover:underline text-sm">Resolve</button>
+                            <button onclick="openAdminModal('close','${ticket.id}')" class="text-gray-600 hover:underline text-sm">Close</button>
+                            <button onclick="openAdminModal('comment','${ticket.id}')" class="text-gray-600 hover:underline text-sm">Comment</button>
+                            <button onclick="openAdminModal('reassign','${ticket.id}')" class="text-indigo-600 hover:underline text-sm">Reassign</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadLeaveRequests() {
+            const requests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const tbody = document.getElementById('leaveList');
+            
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="px-6 py-4 text-center text-gray-500">No leave requests</td></tr>';
+                return;
+            }
+
+            function fmt(d) { try { return d ? new Date(d).toLocaleDateString() : ''; } catch(e){ return d||''; } }
+
+            tbody.innerHTML = requests.map(req => {
+                const user = employees.find(e => e.email === req.email);
+                const displayName = user ? user.name : (req.name || req.email || 'Unknown');
+                const displayEmail = user ? user.email : (req.email || '');
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-semibold">${req.id}</td>
+                        <td class="px-6 py-4">${displayName}</td>
+                        <td class="px-6 py-4">${displayEmail}</td>
+                        <td class="px-6 py-4">${req.type}</td>
+                        <td class="px-6 py-4">${req.days}</td>
+                        <td class="px-6 py-4">${fmt(req.startDate)}</td>
+                        <td class="px-6 py-4">${fmt(req.endDate)}</td>
+                        <td class="px-6 py-4">${fmt(req.resumeDate)}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-sm font-semibold ${getRequestStatusClass(req.status)}">
+                                ${req.status}
+                            </span>
+                            ${req.status === 'Rejected' && req.rejectReason ? `<div class="text-xs text-red-600 mt-1">Reason: ${req.rejectReason}</div>` : ''}
+                        </td>
+                        <td class="px-6 py-4 space-x-2">
+                            ${req.status === 'Pending' ? `
+                                <button onclick="approveLeave('${req.id}', true)" class="text-green-600 hover:underline text-sm">Approve</button>
+                                <button onclick="approveLeave('${req.id}', false)" class="text-red-600 hover:underline text-sm">Reject</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadClaims() {
+            const requests = JSON.parse(localStorage.getItem('claims') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const tbody = document.getElementById('claimsListAdmin');
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">No claims</td></tr>';
+                return;
+            }
+            function fmt(d){ try{ return d ? new Date(d).toLocaleDateString() : ''; } catch(e){ return d||''; } }
+            tbody.innerHTML = requests.map(req => {
+                const user = employees.find(e => e.email === req.email);
+                const displayName = user ? user.name : (req.name || req.email || 'Unknown');
+                const displayEmail = user ? user.email : (req.email || '');
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-semibold">${req.id}</td>
+                        <td class="px-6 py-4">${displayName}</td>
+                        <td class="px-6 py-4">${displayEmail}</td>
+                        <td class="px-6 py-4">${req.type}</td>
+                        <td class="px-6 py-4">${req.amount}</td>
+                        <td class="px-6 py-4">${fmt(req.date)}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-sm font-semibold ${getRequestStatusClass(req.status)}">${req.status}</span>
+                        </td>
+                        <td class="px-6 py-4 space-x-2">
+                            ${req.status === 'Pending' ? `
+                                <button onclick="approveClaim('${req.id}', true)" class="text-green-600 hover:underline text-sm">Approve</button>
+                                <button onclick="approveClaim('${req.id}', false)" class="text-red-600 hover:underline text-sm">Reject</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function adminCommentTicket(ticketId){
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const t = tickets.find(x=>x.id===ticketId);
+            if(!t) { alert('Ticket not found'); return; }
+            const actorId = localStorage.getItem('userId');
+            const actor = employees.find(e=>e.id===actorId) || { name: localStorage.getItem('userName') };
+            const note = prompt('Admin comment:');
+            if(!note) return;
+            t.history = t.history || [];
+            t.history.push({ action: 'comment', by: actorId, byName: actor.name, at: new Date().toISOString(), notes: note });
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            try { pushSentEmail(t.email, 'Admin comment on ticket '+t.id, note); } catch(e){}
+            loadTickets();
+            alert('Comment added.');
+        }
+
+        function reassignTicket(ticketId){
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const t = tickets.find(x=>x.id===ticketId);
+            if(!t) { alert('Ticket not found'); return; }
+            const list = employees.map(e=> `${e.id}: ${e.name} (${e.email}) [${e.department||''}]`).join('\n');
+            const pick = prompt('Choose assignee by entering ID or email:\n\n' + list);
+            if(!pick) return;
+            let assignee = employees.find(e=>e.id===pick) || employees.find(e=> (e.email||'').toLowerCase() === pick.toLowerCase());
+            if(!assignee) { alert('Assignee not found'); return; }
+            t.assignedTo = assignee.id;
+            t.assignedToName = assignee.name;
+            t.assignedDept = assignee.department || t.department || '';
+            t.assignedAt = new Date().toISOString();
+            t.history = t.history || [];
+            t.history.push({ action: 'reassigned', by: localStorage.getItem('userId'), byName: localStorage.getItem('userName'), at: new Date().toISOString(), notes: 'Reassigned to '+assignee.name });
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            try { pushSentEmail(assignee.email, 'Ticket assigned: '+t.id, 'You were assigned ticket '+t.id); } catch(e){}
+            loadTickets();
+            alert('Ticket reassigned to ' + assignee.name);
+        }
+
+        function reopenTicket(ticketId){
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const t = tickets.find(x=>x.id===ticketId);
+            if(!t) { alert('Ticket not found'); return; }
+            const reason = prompt('Reason for reopening (optional):');
+            t.status = 'Open';
+            t.history = t.history || [];
+            t.history.push({ action: 'reopened', by: localStorage.getItem('userId'), byName: localStorage.getItem('userName'), at: new Date().toISOString(), notes: reason || '' });
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            loadTickets();
+            alert('Ticket reopened.');
+        }
+
+        // Users management
+        function showNewUserForm(){
+            document.getElementById('userForm').reset();
+            document.getElementById('userEditId').value = '';
+            document.getElementById('newUserForm').classList.remove('hidden');
+        }
+        function hideNewUserForm(){ document.getElementById('newUserForm').classList.add('hidden'); }
+
+        function loadUsers(){
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const tbody = document.getElementById('usersList');
+            if (!employees || employees.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No users</td></tr>'; return; }
+            tbody.innerHTML = employees.map(e => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-semibold">${e.id || ''}</td>
+                    <td class="px-6 py-4">${e.name || ''}</td>
+                    <td class="px-6 py-4">${e.email || ''}</td>
+                    <td class="px-6 py-4">${e.department || ''}</td>
+                    <td class="px-6 py-4">${e.type || 'user'}</td>
+                    <td class="px-6 py-4 space-x-2">
+                        <button onclick="editUser('${e.id}')" class="text-blue-600 hover:underline text-sm">Edit</button>
+                        <button onclick="deleteUser('${e.id}')" class="text-red-600 hover:underline text-sm">Delete</button>
+                        <button onclick="resetUserPassword('${e.id}')" class="text-indigo-600 hover:underline text-sm">Reset</button>
+                    </td>
+                </tr>
             `).join('');
-        }
-    </script>
-</body>
-</html>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
-    <script src="script.js"></script>
-    <script>
-        // Check login and admin access
-        const userDept = localStorage.getItem('userDept');
-        if (!userDept || userDept !== 'admin') {
-            window.location.href = 'index.html';
+            // Also populate balances table
+            const balancesBody = document.getElementById('balancesTable');
+            if (!employees || employees.length === 0) {
+                balancesBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No data</td></tr>';
+            } else {
+                balancesBody.innerHTML = employees.map(u => {
+                    const bal = u.leaveBalances || { annual: 0, sick: 0, personal: 0 };
+                    return `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4">${u.name||''}</td>
+                            <td class="px-6 py-4">${u.email||''}</td>
+                            <td class="px-6 py-4">${bal.annual || 0}</td>
+                            <td class="px-6 py-4">${bal.sick || 0}</td>
+                            <td class="px-6 py-4">${bal.personal || 0}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
         }
 
-        // Logout
-        document.getElementById('logout').addEventListener('click', function() {
-            localStorage.removeItem('userDept');
-            window.location.href = 'index.html';
+        function editUser(id){
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const e = employees.find(x=>x.id===id);
+            if(!e) return; document.getElementById('userFullName').value = e.name||''; document.getElementById('userEmailInput').value = e.email||''; document.getElementById('userDeptInput').value = e.department||''; document.getElementById('userTypeInput').value = e.type||'user'; document.getElementById('userEditId').value = e.id||''; document.getElementById('newUserForm').classList.remove('hidden');
+        }
+
+        function deleteUser(id){
+            if(!confirm('Delete user '+id+'?')) return;
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            employees = employees.filter(e=>e.id!==id);
+            localStorage.setItem('employees', JSON.stringify(employees));
+            loadUsers(); updateStats();
+        }
+
+        document.getElementById('userForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            const idField = document.getElementById('userEditId').value;
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const newId = idField || getNextId('employees');
+            const userObj = { id: newId, name: document.getElementById('userFullName').value.trim(), email: document.getElementById('userEmailInput').value.trim().toLowerCase(), department: document.getElementById('userDeptInput').value.trim(), type: document.getElementById('userTypeInput').value };
+            if (idField) {
+                employees = employees.map(x=> x.id===idField ? Object.assign(x, userObj) : x);
+            } else {
+                employees.push(userObj);
+            }
+            localStorage.setItem('employees', JSON.stringify(employees));
+            hideNewUserForm(); this.reset(); loadUsers(); updateStats(); alert('User saved.');
         });
+
+        function resetUserPassword(id) {
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const u = employees.find(x => x.id === id);
+            if (!u) {
+                alert('User not found');
+                return;
+            }
+            const newPass = 'Welcome@123';
+            u.password = newPass;
+            u.passwordResetAt = new Date().toISOString();
+            // Force the user to change password at next login
+            u.mustChangePassword = true;
+            localStorage.setItem('employees', JSON.stringify(employees));
+            loadUsers();
+            updateStats();
+
+            // Save a sent-email record for auditing / inbox simulation
+            const sent = JSON.parse(localStorage.getItem('sentEmails') || '[]');
+            const subject = 'Your Onit MFB temporary password';
+            const body = `Hello ${u.name || ''},%0D%0A%0D%0AYour password has been reset by the administrator.%0D%0ATemporary password: ${newPass}%0D%0AYou will be required to change this password at your next login.%0D%0A%0D%0ARegards,%0D%0AOnit MFB Admin`;
+            sent.push({ to: u.email, subject: subject, body: decodeURIComponent(body), sentAt: new Date().toISOString() });
+            localStorage.setItem('sentEmails', JSON.stringify(sent));
+
+            // Try opening the user's default mail client with the notification (mailto)
+            try {
+                window.open(`mailto:${encodeURIComponent(u.email)}?subject=${encodeURIComponent(subject)}&body=${body}`);
+            } catch (e) {
+                // ignore
+            }
+
+            alert('Password for ' + (u.name || u.email) + ' has been reset to:\n' + newPass + '\nAn email notification was created. Advise the user to change it after login.');
+        }
+
+        // Seed random departments for users who do not have one (for testing)
+        function seedDepartments(){
+            const departments = ['IT','Finance','HR','Support','Operations'];
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            if(!employees || employees.length===0){ alert('No users to seed.'); return; }
+            employees = employees.map(e => {
+                if(!e.department || (e.department||'').trim()===''){
+                    e.department = departments[Math.floor(Math.random()*departments.length)];
+                }
+                return e;
+            });
+            localStorage.setItem('employees', JSON.stringify(employees));
+            loadUsers();
+            updateStats();
+            alert('Departments seeded for users without departments.');
+        }
+
+        // Assign departments only to users missing a department (no alert)
+        function seedDepartmentsIfMissing(){
+            const departments = ['IT','Finance','HR','Support','Operations'];
+            let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            if(!employees || employees.length===0) return;
+            let changed = false;
+            employees = employees.map(e => {
+                if(!e.department || (e.department||'').trim()===''){
+                    if ((e.type||'').toLowerCase() === 'admin') e.department = 'Operations';
+                    else e.department = departments[Math.floor(Math.random()*departments.length)];
+                    changed = true;
+                }
+                return e;
+            });
+            if (changed) {
+                localStorage.setItem('employees', JSON.stringify(employees));
+            }
+        }
+
+        function getPriorityClass(priority) {
+            const classes = {
+                'Critical': 'bg-red-200 text-red-800',
+                'High': 'bg-orange-200 text-orange-800',
+                'Medium': 'bg-yellow-200 text-yellow-800',
+                'Low': 'bg-green-200 text-green-800'
+            };
+            return classes[priority] || 'bg-gray-200 text-gray-800';
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'Open': 'bg-blue-200 text-blue-800',
+                'In Progress': 'bg-purple-200 text-purple-800',
+                'Resolved': 'bg-green-200 text-green-800',
+                'Closed': 'bg-gray-200 text-gray-800'
+            };
+            return classes[status] || 'bg-gray-200 text-gray-800';
+        }
+
+        function getRequestStatusClass(status) {
+            const classes = {
+                'Pending': 'bg-yellow-200 text-yellow-800',
+                'Approved': 'bg-green-200 text-green-800',
+                'Rejected': 'bg-red-200 text-red-800'
+            };
+            return classes[status] || 'bg-gray-200 text-gray-800';
+        }
     </script>
 </body>
 </html>

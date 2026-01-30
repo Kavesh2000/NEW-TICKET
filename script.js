@@ -34,9 +34,119 @@ const initDb = () => {
     }
 };
 
-// Function to generate ticket ID
+// ===== AUTOMATED TICKET SYSTEM =====
+// Automated Agent Assignment System
+const AGENT_ASSIGNMENTS = {
+    'Customer Service': ['Agent-CS-001', 'Agent-CS-002', 'Agent-CS-003'],
+    'IT': ['Agent-IT-001', 'Agent-IT-002', 'Agent-IT-003'],
+    'Finance': ['Agent-FIN-001', 'Agent-FIN-002', 'Agent-FIN-003'],
+    'Security': ['Agent-SEC-001', 'Agent-SEC-002', 'Agent-SEC-003'],
+    'Operations': ['Agent-OPS-001', 'Agent-OPS-002', 'Agent-OPS-003'],
+    'Risk & Compliance': ['Agent-RC-001', 'Agent-RC-002', 'Agent-RC-003'],
+    'Internal Audit': ['Agent-IA-001', 'Agent-IA-002', 'Agent-IA-003'],
+    'Management': ['Agent-MGT-001', 'Agent-MGT-002', 'Agent-MGT-003'],
+    'Data Analysis': ['Agent-DA-001', 'Agent-DA-002', 'Agent-DA-003']
+};
+
+// Agent load tracking for load-balanced assignment
+const agentLoadMap = {};
+
+// Function to generate ticket ID - AUTOMATIC
 function generateTicketId() {
-    return 'TICK-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+    const counter = String(parseInt(localStorage.getItem('ticketCounter') || '10000') + 1).padStart(6, '0');
+    localStorage.setItem('ticketCounter', counter);
+    return 'TICK-' + counter;
+}
+
+// Function to get current timestamp - AUTOMATIC
+function getCurrentTimestamp() {
+    return new Date().toISOString();
+}
+
+// Function to auto-assign priority based on issue type and category
+function autoAssignPriority(issueType, category) {
+    const criticalIssues = ['Security Incident', 'Password Reset', 'Suspicious Activity', 'System Down', 'Data Breach', 'Access Control'];
+    const highIssues = ['Access Request', 'Hardware Problem', 'Network Issue', 'Payment Issue', 'Compliance Check'];
+    const mediumIssues = ['Software Issue', 'Account Opening', 'Loan Inquiry', 'Process Issue', 'Report Request'];
+    
+    if (criticalIssues.includes(issueType)) return 'P1';
+    if (highIssues.includes(issueType)) return 'P2';
+    if (mediumIssues.includes(issueType)) return 'P3';
+    
+    if (category === 'Incident') return 'P2';
+    if (category === 'Problem') return 'P3';
+    if (category === 'Change') return 'P4';
+    
+    return 'P4';
+}
+
+// Function to auto-assign agent to ticket (load-balanced)
+function autoAssignAgent(department) {
+    const agents = AGENT_ASSIGNMENTS[department] || AGENT_ASSIGNMENTS['Customer Service'];
+    
+    // Get agent with lowest load
+    let selectedAgent = agents[0];
+    let minLoad = agentLoadMap[selectedAgent] || 0;
+    
+    for (let agent of agents) {
+        const load = agentLoadMap[agent] || 0;
+        if (load < minLoad) {
+            minLoad = load;
+            selectedAgent = agent;
+        }
+    }
+    
+    // Increment agent load
+    agentLoadMap[selectedAgent] = (agentLoadMap[selectedAgent] || 0) + 1;
+    
+    return selectedAgent;
+}
+
+// Function to route ticket to correct department
+function routeTicketToDepartment(issueType, fromDept) {
+    const routing = {
+        'Account Opening': 'Customer Service',
+        'Loan Inquiry': 'Customer Service',
+        'Transaction Issue': 'Customer Service',
+        'General Inquiry': 'Customer Service',
+        'Software Issue': 'IT',
+        'Hardware Problem': 'IT',
+        'Network Issue': 'IT',
+        'Access Request': 'IT',
+        'System Down': 'IT',
+        'Payment Issue': 'Finance',
+        'Statement Request': 'Finance',
+        'Fee Inquiry': 'Finance',
+        'Account Balance': 'Finance',
+        'Budget Question': 'Finance',
+        'Suspicious Activity': 'Security',
+        'Password Reset': 'Security',
+        'Access Control': 'Security',
+        'Security Incident': 'Security',
+        'Data Breach': 'Security',
+        'Process Issue': 'Operations',
+        'Documentation': 'Operations',
+        'Schedule Change': 'Operations',
+        'Resource Request': 'Operations',
+        'Facilities': 'Operations',
+        'Compliance Check': 'Risk & Compliance',
+        'Risk Assessment': 'Risk & Compliance',
+        'Audit Request': 'Risk & Compliance',
+        'Policy Question': 'Risk & Compliance',
+        'Audit Finding': 'Internal Audit',
+        'Process Review': 'Internal Audit',
+        'Compliance Issue': 'Internal Audit',
+        'Report Request': 'Internal Audit',
+        'Strategic Issue': 'Management',
+        'Performance Review': 'Management',
+        'Executive Request': 'Management',
+        'Report Generation': 'Data Analysis',
+        'Data Query': 'Data Analysis',
+        'Analytics Request': 'Data Analysis',
+        'Dashboard Issue': 'Data Analysis'
+    };
+    
+    return routing[issueType] || fromDept || 'Customer Service';
 }
 
 initDb();
@@ -146,45 +256,42 @@ function autoAssignDepartment(issueType) {
     return assignments[issueType] || 'Customer Service';
 }
 
-// Function to get issue types based on user type
-function getIssueTypes(isInternal) {
-    if (isInternal) {
-        return [
-            { value: 'IT Support', text: 'IT Support' },
-            { value: 'HR Issues', text: 'HR Issues' },
-            { value: 'Facilities', text: 'Facilities' },
-            { value: 'Internal Process', text: 'Internal Process' },
-            { value: 'other', text: 'Other' }
-        ];
-    } else {
-        return [
-            { value: 'account', text: 'How do I check my account balance?' },
-            { value: 'transaction', text: 'How do I transfer money between accounts?' },
-            { value: 'security', text: 'What should I do if I suspect fraudulent activity?' },
-            { value: 'loan', text: 'How do I apply for a loan?' },
-            { value: 'other', text: 'Other' }
-        ];
-    }
+// Function to get issue types based on department
+function getIssueTypes(department) {
+    const issueTypes = {
+        'Customer Service': ['Account Opening', 'Loan Inquiry', 'Transaction Issue', 'General Inquiry', 'Other'],
+        'IT': ['Software Issue', 'Hardware Problem', 'Network Issue', 'Access Request', 'System Down', 'Other'],
+        'Finance': ['Payment Issue', 'Statement Request', 'Fee Inquiry', 'Account Balance', 'Budget Question', 'Other'],
+        'Security': ['Suspicious Activity', 'Password Reset', 'Access Control', 'Security Incident', 'Data Breach', 'Other'],
+        'Operations': ['Process Issue', 'Documentation', 'Schedule Change', 'Resource Request', 'Facilities', 'Other'],
+        'Risk & Compliance': ['Compliance Check', 'Risk Assessment', 'Audit Request', 'Policy Question', 'Other'],
+        'Internal Audit': ['Audit Finding', 'Process Review', 'Compliance Issue', 'Report Request', 'Other'],
+        'Management': ['Strategic Issue', 'Performance Review', 'Budget Question', 'Executive Request', 'Other'],
+        'Data Analysis': ['Report Generation', 'Data Query', 'Analytics Request', 'Dashboard Issue', 'Other']
+    };
+    
+    return issueTypes[department] || issueTypes['Customer Service'];
 }
 
-// Function to populate issue types
-function populateIssueTypes(isInternal) {
+// Function to populate issue types based on department
+function populateIssueTypes(department) {
     const issueTypeSelect = document.getElementById('issueType');
+    if (!issueTypeSelect) return;
+    
     issueTypeSelect.innerHTML = '<option value="" class="text-gray-900">Select an issue</option>';
-    const options = getIssueTypes(isInternal);
-    options.forEach(option => {
+    const options = getIssueTypes(department || 'Customer Service');
+    options.forEach(issueType => {
         const opt = document.createElement('option');
-        opt.value = option.value;
-        opt.textContent = option.text;
+        opt.value = issueType;
+        opt.textContent = issueType;
         opt.className = 'text-gray-900';
         issueTypeSelect.appendChild(opt);
     });
 }
 
-// Function to update UI based on user type
-function updateUIForUserType(fromDept) {
-    const isInternal = fromDept && fromDept !== 'Customer';
-    populateIssueTypes(isInternal);
+// Function to update UI based on department
+function updateUIForDepartment(dept) {
+    populateIssueTypes(dept);
 }
 
 // Function to update a ticket
@@ -237,8 +344,17 @@ function updateTicket(id, updates) {
     logAudit('Update Ticket', id, localStorage.getItem('userDept') || 'Unknown');
 }
 
-// Function to save ticket to database
+// Function to save ticket to database - AUTOMATED FIELDS
 function saveTicket(ticket) {
+    // Ensure automatic fields are set
+    if (!ticket.id) ticket.id = generateTicketId();
+    if (!ticket.timestamp) ticket.timestamp = getCurrentTimestamp();
+    if (!ticket.priority) ticket.priority = autoAssignPriority(ticket.issueType, ticket.category || 'Request');
+    if (!ticket.toDept) ticket.toDept = routeTicketToDepartment(ticket.issueType, ticket.fromDept);
+    if (!ticket.assigned_to) ticket.assigned_to = autoAssignAgent(ticket.toDept);
+    if (!ticket.sla_due) ticket.sla_due = calculateSLADue(ticket.priority, ticket.timestamp);
+    if (!ticket.status) ticket.status = 'Open';
+    
     if (db) {
         db.run("INSERT INTO tickets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
             ticket.id, ticket.name, ticket.email, ticket.fromDept, ticket.ticketType, ticket.toDept, 
@@ -500,7 +616,7 @@ function downloadCSV() {
         });
 }
 
-// Function to display tickets for users (filtered by department)
+// Function to display tickets for users (filtered by department) - ROLE-BASED VISIBILITY
 function displayTickets(searchTerm = '', statusFilter = '', priorityFilter = '', categoryFilter = '') {
     const container = document.getElementById('ticketsContainer');
     const noTickets = document.getElementById('noTickets');
@@ -525,11 +641,16 @@ function displayTickets(searchTerm = '', statusFilter = '', priorityFilter = '',
                 let filteredTickets;
                 const deptKey = getDeptKey(userDept);
                 const role = (RBAC[deptKey] && RBAC[deptKey].ticketing) || 'none';
+                
+                // Role-based visibility filtering
                 if (deptKey === 'admin' || role === 'owner' || role === 'full') {
+                    // Admin/Owner sees all tickets
                     filteredTickets = tickets;
                 } else if (role === 'user') {
+                    // Users see tickets assigned to their dept or created by them
                     filteredTickets = tickets.filter(ticket => ticket.toDept === userDept || ticket.fromDept === userDept);
                 } else if (role === 'read' || role === 'limited') {
+                    // Read-only role sees all (if read) or only assigned (if limited)
                     filteredTickets = role === 'read' ? tickets : tickets.filter(ticket => ticket.toDept === userDept);
                 } else {
                     filteredTickets = [];
@@ -540,7 +661,8 @@ function displayTickets(searchTerm = '', statusFilter = '', priorityFilter = '',
                     filteredTickets = filteredTickets.filter(ticket =>
                         ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         ticket.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        ticket.description.toLowerCase().includes(searchTerm.toLowerCase())
+                        ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (ticket.assigned_to && ticket.assigned_to.toLowerCase().includes(searchTerm.toLowerCase()))
                     );
                 }
                 if (statusFilter) {
@@ -563,6 +685,7 @@ function displayTickets(searchTerm = '', statusFilter = '', priorityFilter = '',
                 }
 
                 noTickets.style.display = 'none';
+                // CLEAN VERTICAL LIST DISPLAY
                 container.innerHTML = filteredTickets
                     .sort((a, b) => {
                         // Sort by priority (P1 first) then by timestamp (newest first)
@@ -577,7 +700,8 @@ function displayTickets(searchTerm = '', statusFilter = '', priorityFilter = '',
                         const priorityClass = `priority-${ticket.priority}`;
                         const slaClass = sla.status === 'breach' ? 'sla-breach' : sla.status === 'warning' ? 'sla-warning' : 'sla-good';
                         const statusColor = ticket.status === 'Open' ? (isDark ? 'text-blue-400' : 'text-blue-600') : ticket.status === 'In Progress' ? (isDark ? 'text-yellow-400' : 'text-yellow-600') : (isDark ? 'text-green-400' : 'text-green-600');
-
+                        const statusIcon = ticket.status === 'Open' ? 'fa-circle-open' : ticket.status === 'In Progress' ? 'fa-hourglass-half' : 'fa-check-circle';
+                        
                         const cardBg = isDark ? 'bg-white/10 backdrop-blur-md border border-white/20' : 'bg-white border border-gray-200 shadow-md';
                         const iconBg = isDark ? 'bg-white/20' : 'bg-gray-100';
                         const iconColor = isDark ? 'text-white' : 'text-gray-600';
@@ -589,45 +713,56 @@ function displayTickets(searchTerm = '', statusFilter = '', priorityFilter = '',
                         const buttonBg = isDark ? 'bg-white/20 hover:bg-white/30 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700';
 
                         return `
-                        <div class="ticket-card ${cardBg} rounded-xl p-6">
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center">
+                        <div class="ticket-card ${cardBg} rounded-xl p-6 mb-3 border-l-4 ${ticket.priority === 'P1' ? 'border-l-red-500' : ticket.priority === 'P2' ? 'border-l-orange-500' : ticket.priority === 'P3' ? 'border-l-blue-500' : 'border-l-gray-500'}">
+                            <!-- Header: ID and Status -->
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-3 flex-1">
+                                    <div class="w-10 h-10 ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0">
                                         <i class="fas fa-ticket-alt ${iconColor}"></i>
                                     </div>
-                                    <div>
-                                        <h3 class="${titleColor} font-bold text-lg">${ticket.id}</h3>
-                                        <p class="${subtitleColor} text-sm">${ticket.category || 'Request'}</p>
+                                    <div class="min-w-0">
+                                        <h3 class="${titleColor} font-bold text-lg break-words">${ticket.id}</h3>
+                                        <p class="${subtitleColor} text-xs">${ticket.category || 'Request'} • Created ${new Date(ticket.timestamp).toLocaleDateString()}</p>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 ml-2">
                                     <span class="priority-badge ${priorityClass}">${ticket.priority}</span>
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium ${statusColor} ${isDark ? 'bg-white/20' : 'bg-gray-100'}">${ticket.status}</span>
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor} ${isDark ? 'bg-white/20' : 'bg-gray-100'} whitespace-nowrap"><i class="fas ${statusIcon} mr-1"></i>${ticket.status}</span>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <!-- Requester and Details -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3 text-sm">
                                 <div>
-                                    <p class="${labelColor} text-sm">From</p>
-                                    <p class="${valueColor}">${ticket.name} (${ticket.fromDept || 'Customer'})</p>
+                                    <p class="${labelColor}">Requester</p>
+                                    <p class="${valueColor} font-medium">${ticket.name}</p>
+                                    <p class="${subtitleColor} text-xs">${ticket.fromDept || 'Customer'}</p>
                                 </div>
                                 <div>
-                                    <p class="${labelColor} text-sm">Assigned To</p>
-                                    <p class="${valueColor}">${ticket.toDept}</p>
+                                    <p class="${labelColor}">Assigned To</p>
+                                    <p class="${valueColor} font-medium">${ticket.toDept}</p>
+                                    <p class="${subtitleColor} text-xs"><i class="fas fa-user-tie mr-1"></i>${ticket.assigned_to || 'Unassigned'}</p>
+                                </div>
+                                <div>
+                                    <p class="${labelColor}">Issue Type</p>
+                                    <p class="${valueColor} font-medium">${ticket.issueType}</p>
+                                    <p class="${subtitleColor} text-xs"><i class="fas fa-envelope mr-1"></i>${ticket.email}</p>
                                 </div>
                             </div>
 
-                            <p class="${bodyColor} mb-4 line-clamp-2">${ticket.description}</p>
+                            <!-- Description -->
+                            <p class="${bodyColor} mb-3 text-sm leading-relaxed">${ticket.description}</p>
 
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-4">
+                            <!-- SLA and Additional Info -->
+                            <div class="flex flex-wrap items-center justify-between text-sm gap-3 pt-3 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}">
+                                <div class="flex items-center gap-3">
                                     <div class="sla-timer ${slaClass}">
                                         <i class="fas fa-clock mr-1"></i>
-                                        ${sla.status === 'breach' ? 'SLA Breached' : sla.status === 'warning' ? `Due in ${formatTimeRemaining(sla.timeLeft)}` : `Due in ${formatTimeRemaining(sla.timeLeft)}`}
+                                        ${sla.status === 'breach' ? '<span class="font-bold">SLA Breached</span>' : sla.status === 'warning' ? `Due in ${formatTimeRemaining(sla.timeLeft)}` : `Due in ${formatTimeRemaining(sla.timeLeft)}`}
                                     </div>
-                                    ${ticket.escalated === 'Yes' ? `<span class="${isDark ? 'text-red-400' : 'text-red-600'}"><i class="fas fa-exclamation-triangle mr-1"></i>Escalated</span>` : ''}
+                                    ${ticket.escalated === 'Yes' ? `<span class="${isDark ? 'text-red-400' : 'text-red-600'} font-medium"><i class="fas fa-exclamation-triangle mr-1"></i>Escalated</span>` : ''}
                                 </div>
-                                ${isDark ? `<button onclick="showQuickActions('${ticket.id}')" class="${buttonBg} px-3 py-1 rounded-lg transition">
+                                ${isDark ? `<button onclick="showQuickActions('${ticket.id}')" class="${buttonBg} px-3 py-1 rounded-lg transition text-xs" title="Quick Actions">
                                     <i class="fas fa-ellipsis-h"></i>
                                 </button>` : ''}
                             </div>
@@ -704,7 +839,6 @@ function showQuickActions(ticketId) {
 function updateTicketStatus(ticketId, status) {
     updateTicket(ticketId, { status: status });
     document.getElementById('quickActionsModal').classList.add('hidden');
-}
 }
 
 // Escalate ticket

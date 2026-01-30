@@ -120,12 +120,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="priority" class="block text-sm font-medium text-gray-700">Priority <span class="text-red-500">*</span></label>
-                            <select id="priority" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                <option value="P4">P4 - Low</option>
-                                <option value="P3">P3 - Medium</option>
-                                <option value="P2">P2 - High</option>
-                                <option value="P1">P1 - Critical</option>
-                            </select>
+                            <div class="mt-1 p-3 bg-blue-50 border border-blue-200 rounded-md text-gray-900">
+                                <div id="priorityDisplay" class="font-medium">Will be auto-assigned based on issue type</div>
+                                <input type="hidden" id="priority" value="P4">
+                                <p class="text-xs text-gray-500 mt-1"><i class="fas fa-robot mr-1"></i>Automated Priority Assignment</p>
+                            </div>
                         </div>
                         <div>
                             <label for="category" class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
@@ -142,18 +141,23 @@
                     
                     <div id="toDeptContainer">
                         <label for="toDept" class="block text-sm font-medium text-gray-700">Assign To Department <span class="text-red-500">*</span></label>
-                        <select id="toDept" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                            <option value="">Select department</option>
-                            <option value="Customer Service">Customer Service</option>
-                            <option value="IT">IT</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Security">Security</option>
-                            <option value="Operations">Operations</option>
-                            <option value="Risk & Compliance">Risk & Compliance</option>
-                            <option value="Internal Audit">Internal Audit</option>
-                            <option value="Management">Management</option>
-                            <option value="Data Analysis">Data Analysis</option>
-                        </select>
+                        <div class="mt-1 flex gap-2 items-start">
+                            <div class="flex-1">
+                                <select id="toDept" required class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="">Select department</option>
+                                    <option value="Customer Service">Customer Service</option>
+                                    <option value="IT">IT</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Security">Security</option>
+                                    <option value="Operations">Operations</option>
+                                    <option value="Risk & Compliance">Risk & Compliance</option>
+                                    <option value="Internal Audit">Internal Audit</option>
+                                    <option value="Management">Management</option>
+                                    <option value="Data Analysis">Data Analysis</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-lightbulb mr-1"></i>Suggested: <span id="toDeptSuggestion">Select issue type to see suggestion</span></p>
                     </div>
 
                     <div>
@@ -166,6 +170,24 @@
                     <div>
                         <label for="description" class="block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
                         <textarea id="description" rows="5" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ticket Details</label>
+                        <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                            <div>
+                                <p class="text-xs text-gray-500">Ticket ID</p>
+                                <p class="font-mono font-bold text-gray-900" id="ticketIdPreview">Auto-Generated</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Timestamp</p>
+                                <p class="text-xs text-gray-700" id="timestampPreview">Current Time</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Assigned Agent</p>
+                                <p class="text-xs text-gray-700" id="agentPreview">Auto-Assigned</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -211,9 +233,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.js"></script>
     <script src="script.js"></script>
     <script>
-        alert('Script loaded'); // Debug
+        console.log('✅ Submit form script loaded');
+        
         // Check login
         if (!localStorage.getItem('userDept')) {
+            console.log('🚫 No user department found, redirecting to login');
             window.location.href = 'index.html';
         }
 
@@ -222,156 +246,222 @@
         document.getElementById('userName').textContent = 'User (' + dept + ')';
         document.getElementById('userRole').textContent = dept + ' Department';
 
-        // Auto-assignment rules
-        const autoAssignRules = {
-            'Account Opening': 'Customer Service',
-            'Loan Inquiry': 'Customer Service',
-            'Transaction Issue': 'Customer Service',
-            'General Inquiry': 'Customer Service',
-            'Software Issue': 'IT',
-            'Hardware Problem': 'IT',
-            'Network Issue': 'IT',
-            'Access Request': 'IT',
-            'Payment Issue': 'Finance',
-            'Statement Request': 'Finance',
-            'Fee Inquiry': 'Finance',
-            'Account Balance': 'Finance',
-            'Suspicious Activity': 'Security',
-            'Password Reset': 'Security',
-            'Access Control': 'Security',
-            'Security Incident': 'Security',
-            'Process Issue': 'Operations',
-            'Documentation': 'Operations',
-            'Schedule Change': 'Operations',
-            'Resource Request': 'Operations',
-            'Compliance Check': 'Risk & Compliance',
-            'Risk Assessment': 'Risk & Compliance',
-            'Audit Request': 'Risk & Compliance',
-            'Policy Question': 'Risk & Compliance',
-            'Audit Finding': 'Internal Audit',
-            'Process Review': 'Internal Audit',
-            'Compliance Issue': 'Internal Audit',
-            'Report Request': 'Internal Audit',
-            'Strategic Issue': 'Management',
-            'Performance Review': 'Management',
-            'Budget Question': 'Management',
-            'Executive Request': 'Management',
-            'Report Generation': 'Data Analysis',
-            'Data Query': 'Data Analysis',
-            'Analytics Request': 'Data Analysis',
-            'Dashboard Issue': 'Data Analysis'
+        // ===== DEFINE ALL MISSING FUNCTIONS =====
+        
+        // Function to generate ticket ID - AUTOMATIC
+        function generateTicketId() {
+            const counter = String(parseInt(localStorage.getItem('ticketCounter') || '10000') + 1).padStart(6, '0');
+            localStorage.setItem('ticketCounter', counter);
+            const ticketId = 'TICK-' + counter;
+            console.log('🎫 Generated Ticket ID:', ticketId);
+            return ticketId;
+        }
+
+        // Function to get current timestamp - AUTOMATIC
+        function getCurrentTimestamp() {
+            const timestamp = new Date().toISOString();
+            console.log('⏰ Generated Timestamp:', timestamp);
+            return timestamp;
+        }
+
+        // Function to auto-assign priority based on issue type and category
+        function autoAssignPriority(issueType, category) {
+            const criticalIssues = ['Security Incident', 'Password Reset', 'Suspicious Activity', 'System Down', 'Data Breach', 'Access Control'];
+            const highIssues = ['Access Request', 'Hardware Problem', 'Network Issue', 'Payment Issue', 'Compliance Check'];
+            const mediumIssues = ['Software Issue', 'Account Opening', 'Loan Inquiry', 'Process Issue', 'Report Request'];
+            
+            let priority = 'P4';
+            if (criticalIssues.includes(issueType)) priority = 'P1';
+            else if (highIssues.includes(issueType)) priority = 'P2';
+            else if (mediumIssues.includes(issueType)) priority = 'P3';
+            else if (category === 'Incident') priority = 'P2';
+            else if (category === 'Problem') priority = 'P3';
+            else if (category === 'Change') priority = 'P4';
+            
+            console.log('⚡ Auto-assigned Priority:', priority, 'for issue:', issueType);
+            return priority;
+        }
+
+        // Function to route ticket to correct department
+        function routeTicketToDepartment(issueType, fromDept) {
+            const routing = {
+                'Account Opening': 'Customer Service',
+                'Loan Inquiry': 'Customer Service',
+                'Transaction Issue': 'Customer Service',
+                'General Inquiry': 'Customer Service',
+                'Software Issue': 'IT',
+                'Hardware Problem': 'IT',
+                'Network Issue': 'IT',
+                'Access Request': 'IT',
+                'System Down': 'IT',
+                'Payment Issue': 'Finance',
+                'Statement Request': 'Finance',
+                'Fee Inquiry': 'Finance',
+                'Account Balance': 'Finance',
+                'Budget Question': 'Finance',
+                'Suspicious Activity': 'Security',
+                'Password Reset': 'Security',
+                'Access Control': 'Security',
+                'Security Incident': 'Security',
+                'Data Breach': 'Security',
+                'Process Issue': 'Operations',
+                'Documentation': 'Operations',
+                'Schedule Change': 'Operations',
+                'Resource Request': 'Operations',
+                'Facilities': 'Operations',
+                'Compliance Check': 'Risk & Compliance',
+                'Risk Assessment': 'Risk & Compliance',
+                'Audit Request': 'Risk & Compliance',
+                'Policy Question': 'Risk & Compliance',
+                'Audit Finding': 'Internal Audit',
+                'Process Review': 'Internal Audit',
+                'Compliance Issue': 'Internal Audit',
+                'Report Request': 'Internal Audit',
+                'Strategic Issue': 'Management',
+                'Performance Review': 'Management',
+                'Executive Request': 'Management',
+                'Report Generation': 'Data Analysis',
+                'Data Query': 'Data Analysis',
+                'Analytics Request': 'Data Analysis',
+                'Dashboard Issue': 'Data Analysis'
+            };
+            
+            const dept = routing[issueType] || fromDept || 'Customer Service';
+            console.log('🚀 Routing ticket to department:', dept);
+            return dept;
+        }
+
+        // Agent assignments
+        const AGENT_ASSIGNMENTS = {
+            'Customer Service': ['Agent-CS-001', 'Agent-CS-002', 'Agent-CS-003'],
+            'IT': ['Agent-IT-001', 'Agent-IT-002', 'Agent-IT-003'],
+            'Finance': ['Agent-FIN-001', 'Agent-FIN-002', 'Agent-FIN-003'],
+            'Security': ['Agent-SEC-001', 'Agent-SEC-002', 'Agent-SEC-003'],
+            'Operations': ['Agent-OPS-001', 'Agent-OPS-002', 'Agent-OPS-003'],
+            'Risk & Compliance': ['Agent-RC-001', 'Agent-RC-002', 'Agent-RC-003'],
+            'Internal Audit': ['Agent-IA-001', 'Agent-IA-002', 'Agent-IA-003'],
+            'Management': ['Agent-MGT-001', 'Agent-MGT-002', 'Agent-MGT-003'],
+            'Data Analysis': ['Agent-DA-001', 'Agent-DA-002', 'Agent-DA-003']
         };
 
-        // Auto-assign department when issue type changes
-        document.getElementById('issueType').addEventListener('change', function() {
-            const issueType = this.value;
-            const assignedDept = autoAssignRules[issueType];
-            if (assignedDept) {
-                document.getElementById('toDept').value = assignedDept;
-                populateIssueTypes(); // Refresh issue types for the new department
-            }
-        });
+        const agentLoadMap = {};
 
-        // Logout
-        document.getElementById('logout').addEventListener('click', function() {
-            localStorage.removeItem('userDept');
-            window.location.href = 'index.html';
-        });
-
-        // User type selection flow
-        document.getElementById('customerBtn').addEventListener('click', function() {
-            document.getElementById('userTypeSelection').style.display = 'none';
-            document.getElementById('ticketFormContainer').style.display = 'block';
-            // For customers, set defaults
-            document.getElementById('fromDept').value = 'Customer';
-            document.getElementById('name').value = 'Customer User';
-            document.getElementById('email').value = 'customer@onitbank.com';
-            // Set toDept to Customer Service by default
-            document.getElementById('toDept').value = 'Customer Service';
-            populateIssueTypes();
-        });
-
-        document.getElementById('internalBtn').addEventListener('click', function() {
-            document.getElementById('userTypeSelection').style.display = 'none';
-            document.getElementById('deptSelection').style.display = 'block';
-        });
-
-        document.getElementById('proceedBtn').addEventListener('click', function() {
-            const selectedDept = document.getElementById('fromDeptSelect').value;
-            if (!selectedDept) {
-                alert('Please select your department');
-                return;
-            }
-            document.getElementById('deptSelection').style.display = 'none';
-            document.getElementById('ticketFormContainer').style.display = 'block';
-            document.getElementById('fromDept').value = selectedDept;
-            // Auto-fill name and email for internal users
-            document.getElementById('name').value = 'Internal User';
-            document.getElementById('email').value = 'internal@onitbank.com';
-            // Populate issue types for the selected department
-            document.getElementById('toDept').value = selectedDept; // Default to same department
-            populateIssueTypes();
-        });
-
-        document.getElementById('backBtn').addEventListener('click', function() {
-            document.getElementById('ticketFormContainer').style.display = 'none';
-            document.getElementById('userTypeSelection').style.display = 'block';
-        });
-
-        // Form submission
-        document.getElementById('ticketForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Function to auto-assign agent to ticket (load-balanced)
+        function autoAssignAgent(department) {
+            const agents = AGENT_ASSIGNMENTS[department] || AGENT_ASSIGNMENTS['Customer Service'];
             
-            // Validate form
-            if (!validateForm()) {
+            // Get agent with lowest load
+            let selectedAgent = agents[0];
+            let minLoad = agentLoadMap[selectedAgent] || 0;
+            
+            for (let agent of agents) {
+                const load = agentLoadMap[agent] || 0;
+                if (load < minLoad) {
+                    minLoad = load;
+                    selectedAgent = agent;
+                }
+            }
+            
+            // Increment agent load
+            agentLoadMap[selectedAgent] = (agentLoadMap[selectedAgent] || 0) + 1;
+            
+            console.log('👤 Auto-assigned Agent:', selectedAgent, 'with load:', agentLoadMap[selectedAgent]);
+            return selectedAgent;
+        }
+
+        // SLA Configuration
+        const SLA_CONFIG = {
+            'P1': 1 * 60 * 60 * 1000, // 1 hour
+            'P2': 4 * 60 * 60 * 1000, // 4 hours
+            'P3': 24 * 60 * 60 * 1000, // 24 hours
+            'P4': 72 * 60 * 60 * 1000  // 72 hours
+        };
+
+        // Calculate SLA due date
+        function calculateSLADue(priority, timestamp) {
+            const slaMs = SLA_CONFIG[priority] || SLA_CONFIG['P4'];
+            const slaDate = new Date(new Date(timestamp).getTime() + slaMs).toISOString();
+            console.log('📅 SLA Due calculated:', slaDate, 'for priority:', priority);
+            return slaDate;
+        }
+
+        // Populate issue types based on department
+        function populateIssueTypes(dept) {
+            console.log('📋 populateIssueTypes called with dept:', dept);
+            
+            const issueTypeSelect = document.getElementById('issueType');
+            if (!issueTypeSelect) {
+                console.warn('⚠️ Issue type select not found');
                 return;
             }
             
-            const ticketData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                fromDept: document.getElementById('fromDept').value,
-                ticketType: document.getElementById('ticketType').value,
-                toDept: document.getElementById('toDept').value,
-                issueType: document.getElementById('issueType').value,
-                description: document.getElementById('description').value,
-                status: 'Open',
-                priority: document.getElementById('priority').value,
-                escalated: 'No',
-                attachment: document.getElementById('attachment').files.length > 0 ? Array.from(document.getElementById('attachment').files).map(f => f.name).join(', ') : '',
-                timestamp: new Date().toISOString(),
-                category: document.getElementById('category').value
+            console.log('✓ Found issue type select element');
+            issueTypeSelect.innerHTML = '<option value="">Select an issue type</option>';
+
+            const issueTypes = {
+                'Customer Service': ['Account Opening', 'Loan Inquiry', 'Transaction Issue', 'General Inquiry', 'Other'],
+                'IT': ['Software Issue', 'Hardware Problem', 'Network Issue', 'Access Request', 'System Down', 'Other'],
+                'Finance': ['Payment Issue', 'Statement Request', 'Fee Inquiry', 'Account Balance', 'Budget Question', 'Other'],
+                'Security': ['Suspicious Activity', 'Password Reset', 'Access Control', 'Security Incident', 'Data Breach', 'Other'],
+                'Operations': ['Process Issue', 'Documentation', 'Schedule Change', 'Resource Request', 'Facilities', 'Other'],
+                'Risk & Compliance': ['Compliance Check', 'Risk Assessment', 'Audit Request', 'Policy Question', 'Other'],
+                'Internal Audit': ['Audit Finding', 'Process Review', 'Compliance Issue', 'Report Request', 'Other'],
+                'Management': ['Strategic Issue', 'Performance Review', 'Budget Question', 'Executive Request', 'Other'],
+                'Data Analysis': ['Report Generation', 'Data Query', 'Analytics Request', 'Dashboard Issue', 'Other']
             };
 
-            // Send to API
-            fetch('/api/tickets', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(ticketData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success notification
-                    const notification = document.getElementById('successNotification');
-                    notification.classList.remove('hidden');
-                    setTimeout(() => notification.classList.add('hidden'), 5000); // Hide after 5 seconds
-                    
-                    // Clear the form
-                    this.reset();
-                    
-                    // Show tickets section and refresh the list
-                    document.getElementById('ticketsSection').classList.remove('hidden');
-                    displayTickets();
-                } else {
-                    alert('Failed to create ticket: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error creating ticket. Please try again.');
+            const types = issueTypes[dept] || issueTypes['Customer Service'];
+            console.log('✓ Found issue types:', types);
+            
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                option.className = 'text-gray-900';
+                issueTypeSelect.appendChild(option);
             });
-        });
+            
+            console.log('✓ Issue types populated:', types.length, 'items');
+        }
+        
+        // Function to update ticket preview
+        function updateTicketPreview() {
+            console.log('🔄 Updating ticket preview...');
+            
+            const ticketId = generateTicketId();
+            document.getElementById('ticketIdPreview').textContent = ticketId;
+            
+            const now = new Date();
+            document.getElementById('timestampPreview').textContent = now.toLocaleString();
+            
+            const toDept = document.getElementById('toDept').value;
+            if (toDept) {
+                const agent = autoAssignAgent(toDept);
+                document.getElementById('agentPreview').innerHTML = `<strong>${agent}</strong> <i class="fas fa-user-tie ml-1"></i>`;
+            } else {
+                document.getElementById('agentPreview').innerHTML = 'Select department';
+            }
+            
+            console.log('✅ Preview updated');
+        }
+
+        // Fallback: save locally if API not available (for development)
+        function saveTicketLocally(ticket) {
+            console.log('💾 Saving ticket locally to localStorage...');
+            if (db) {
+                db.run("INSERT INTO tickets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+                    ticket.id, ticket.name, ticket.email, ticket.fromDept, 'Request', ticket.toDept, 
+                    ticket.issueType, ticket.description, ticket.status, ticket.priority, ticket.escalated, 
+                    ticket.attachment, ticket.timestamp, ticket.category, ticket.sla_due, ticket.assigned_to
+                ]);
+                saveDbToStorage();
+            } else {
+                const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+                tickets.push(ticket);
+                localStorage.setItem('tickets', JSON.stringify(tickets));
+            }
+            console.log('✅ Ticket saved to localStorage');
+        }
 
         // Form validation
         function validateForm() {
@@ -409,35 +499,250 @@
             element.parentNode.appendChild(errorDiv);
         }
 
-        // Populate issue types based on department
-        function populateIssueTypes() {
-            const dept = document.getElementById('toDept').value;
+        
+
+        // SINGLE consolidated DOMContentLoaded for ALL initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 === FORM INITIALIZATION STARTING ===');
+            
+            // 1. Set up toDept change listener
+            const toDeptSelect = document.getElementById('toDept');
+            if (toDeptSelect) {
+                toDeptSelect.addEventListener('change', function() {
+                    console.log('🔄 Department changed to:', this.value);
+                    populateIssueTypes(this.value);
+                });
+                console.log('✓ toDept change listener attached');
+            }
+            
+            // 2. Set up issueType change listener
             const issueTypeSelect = document.getElementById('issueType');
-            issueTypeSelect.innerHTML = '';
+            if (issueTypeSelect) {
+                issueTypeSelect.addEventListener('change', function() {
+                    const issueType = this.value;
+                    const category = document.getElementById('category').value || 'Request';
+                    
+                    console.log('🎯 Issue type changed to:', issueType, 'Category:', category);
+                    
+                    // Show suggestion
+                    const suggestedDept = routeTicketToDepartment(issueType, document.getElementById('fromDept').value);
+                    document.getElementById('toDeptSuggestion').textContent = suggestedDept;
+                    console.log('💡 Department suggestion updated to:', suggestedDept);
+                    
+                    // Auto-assign priority
+                    const priority = autoAssignPriority(issueType, category);
+                    document.getElementById('priority').value = priority;
+                    const priorityText = priority === 'P1' ? 'Critical' : priority === 'P2' ? 'High' : priority === 'P3' ? 'Medium' : 'Low';
+                    document.getElementById('priorityDisplay').innerHTML = `<strong>${priority}</strong> - ${priorityText} <i class="fas fa-check-circle text-green-600 ml-2"></i>`;
+                    console.log('⚡ Priority updated to:', priority);
+                    
+                    // Show preview of automated assignments
+                    updateTicketPreview();
+                });
+                console.log('✓ issueType change listener attached');
+            }
+            
+            // 3. Set up category change listener
+            const categorySelect = document.getElementById('category');
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function() {
+                    const issueType = document.getElementById('issueType').value;
+                    console.log('📌 Category changed to:', this.value);
+                    
+                    if (issueType) {
+                        // Re-calculate priority based on new category
+                        const priority = autoAssignPriority(issueType, this.value);
+                        document.getElementById('priority').value = priority;
+                        const priorityText = priority === 'P1' ? 'Critical' : priority === 'P2' ? 'High' : priority === 'P3' ? 'Medium' : 'Low';
+                        document.getElementById('priorityDisplay').innerHTML = `<strong>${priority}</strong> - ${priorityText} <i class="fas fa-check-circle text-green-600 ml-2"></i>`;
+                        console.log('⚡ Priority recalculated to:', priority);
+                    }
+                });
+                console.log('✓ category change listener attached');
+            }
+            
+            // 4. Initial population of issue types
+            populateIssueTypes('Customer Service');
+            console.log('✓ Initial issue types populated');
+            
+            // 5. Set up logout button
+            const logoutBtn = document.getElementById('logout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    localStorage.removeItem('userDept');
+                    window.location.href = 'index.html';
+                });
+                console.log('✓ Logout button listener attached');
+            }
 
-            const issueTypes = {
-                'Customer Service': ['Account Opening', 'Loan Inquiry', 'Transaction Issue', 'General Inquiry'],
-                'IT': ['Software Issue', 'Hardware Problem', 'Network Issue', 'Access Request'],
-                'Finance': ['Payment Issue', 'Statement Request', 'Fee Inquiry', 'Account Balance'],
-                'Security': ['Suspicious Activity', 'Password Reset', 'Access Control', 'Security Incident'],
-                'Operations': ['Process Issue', 'Documentation', 'Schedule Change', 'Resource Request'],
-                'Risk & Compliance': ['Compliance Check', 'Risk Assessment', 'Audit Request', 'Policy Question'],
-                'Internal Audit': ['Audit Finding', 'Process Review', 'Compliance Issue', 'Report Request'],
-                'Management': ['Strategic Issue', 'Performance Review', 'Budget Question', 'Executive Request'],
-                'Data Analysis': ['Report Generation', 'Data Query', 'Analytics Request', 'Dashboard Issue']
-            };
+            // 6. Set up customer button
+            const customerBtn = document.getElementById('customerBtn');
+            if (customerBtn) {
+                customerBtn.addEventListener('click', function() {
+                    console.log('🔘 Customer button clicked');
+                    document.getElementById('userTypeSelection').style.display = 'none';
+                    document.getElementById('ticketFormContainer').style.display = 'block';
+                    document.getElementById('fromDept').value = 'Customer';
+                    document.getElementById('name').value = 'Customer User';
+                    document.getElementById('email').value = 'customer@onitbank.com';
+                    document.getElementById('toDept').value = 'Customer Service';
+                    document.getElementById('toDeptSuggestion').textContent = 'Customer Service (default for customers)';
+                    populateIssueTypes('Customer Service');
+                    console.log('✅ Customer form initialized');
+                });
+                console.log('✓ Customer button listener attached');
+            }
 
-            const types = issueTypes[dept] || ['General Issue'];
-            types.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                issueTypeSelect.appendChild(option);
-            });
-        }
+            // 7. Set up internal button
+            const internalBtn = document.getElementById('internalBtn');
+            if (internalBtn) {
+                internalBtn.addEventListener('click', function() {
+                    console.log('🔘 Internal button clicked');
+                    document.getElementById('userTypeSelection').style.display = 'none';
+                    document.getElementById('deptSelection').style.display = 'block';
+                    console.log('✅ Department selection shown');
+                });
+                console.log('✓ Internal button listener attached');
+            }
 
-        document.getElementById('toDept').addEventListener('change', populateIssueTypes);
-        populateIssueTypes(); // Initial population
+            // 8. Set up proceed button
+            const proceedBtn = document.getElementById('proceedBtn');
+            if (proceedBtn) {
+                proceedBtn.addEventListener('click', function() {
+                    const selectedDept = document.getElementById('fromDeptSelect').value;
+                    console.log('✓ Proceeding with department:', selectedDept);
+                    if (!selectedDept) {
+                        console.warn('⚠️ No department selected');
+                        alert('Please select your department');
+                        return;
+                    }
+                    document.getElementById('deptSelection').style.display = 'none';
+                    document.getElementById('ticketFormContainer').style.display = 'block';
+                    document.getElementById('fromDept').value = selectedDept;
+                    document.getElementById('name').value = 'Internal User - ' + selectedDept;
+                    document.getElementById('email').value = 'internal@onitbank.com';
+                    document.getElementById('toDept').value = selectedDept;
+                    document.getElementById('toDeptSuggestion').textContent = selectedDept + ' (your department - can be changed)';
+                    populateIssueTypes(selectedDept);
+                    console.log('✅ Internal form initialized for:', selectedDept);
+                });
+                console.log('✓ Proceed button listener attached');
+            }
+
+            // 9. Set up back button
+            const backBtn = document.getElementById('backBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', function() {
+                    console.log('🔙 Back button clicked');
+                    document.getElementById('ticketFormContainer').style.display = 'none';
+                    document.getElementById('userTypeSelection').style.display = 'block';
+                    document.getElementById('deptSelection').style.display = 'none';
+                    console.log('✅ Back to user type selection');
+                });
+                console.log('✓ Back button listener attached');
+            }
+
+            // 10. Set up form submission
+            const ticketForm = document.getElementById('ticketForm');
+            if (ticketForm) {
+                ticketForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('📝 Form submission started...');
+                    
+                    if (!validateForm()) {
+                        console.warn('❌ Form validation failed');
+                        return;
+                    }
+                    
+                    console.log('✔️ Form validation passed');
+                    
+                    const issueType = document.getElementById('issueType').value;
+                    const category = document.getElementById('category').value;
+                    const fromDept = document.getElementById('fromDept').value;
+                    const toDept = document.getElementById('toDept').value;
+                    
+                    console.log('📋 Form values extracted:', { issueType, category, fromDept, toDept });
+                    
+                    const priority = autoAssignPriority(issueType, category);
+                    const ticketId = generateTicketId();
+                    const timestamp = getCurrentTimestamp();
+                    const assignedAgent = autoAssignAgent(toDept);
+                    const slaDate = calculateSLADue(priority, timestamp);
+                    
+                    const ticketData = {
+                        id: ticketId,
+                        timestamp: timestamp,
+                        priority: priority,
+                        toDept: toDept,
+                        assigned_to: assignedAgent,
+                        sla_due: slaDate,
+                        status: 'Open',
+                        escalated: 'No',
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        fromDept: fromDept,
+                        ticketType: 'Request',
+                        issueType: issueType,
+                        description: document.getElementById('description').value,
+                        attachment: document.getElementById('attachment').files.length > 0 ? Array.from(document.getElementById('attachment').files).map(f => f.name).join(', ') : '',
+                        category: category
+                    };
+
+                    console.log('📤 Sending ticket to /api/tickets...');
+                    console.log('Full Payload:', JSON.stringify(ticketData, null, 2));
+                    
+                    fetch('/api/tickets', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(ticketData)
+                    })
+                    .then(response => {
+                        console.log('📨 Response received - Status:', response.status, response.statusText);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('✅ Response data from server:', data);
+                        if (data.success) {
+                            console.log('🎉 Ticket created successfully!');
+                            const notification = document.getElementById('successNotification');
+                            notification.innerHTML = `
+                                <div class="flex gap-3 items-start">
+                                    <i class="fas fa-check-circle text-lg mt-1"></i>
+                                    <div class="text-left flex-1">
+                                        <h4 class="font-bold mb-2">✅ Ticket Created Successfully!</h4>
+                                        <div class="text-sm space-y-1">
+                                            <p><strong>Ticket ID:</strong> ${ticketData.id}</p>
+                                            <p><strong>Priority:</strong> ${ticketData.priority}</p>
+                                            <p><strong>Routed To:</strong> ${ticketData.toDept}</p>
+                                            <p><strong>Assigned Agent:</strong> ${ticketData.assigned_to}</p>
+                                            <p><strong>SLA Due:</strong> ${new Date(ticketData.sla_due).toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            notification.classList.remove('hidden');
+                            setTimeout(() => notification.classList.add('hidden'), 7000);
+                            ticketForm.reset();
+                            document.getElementById('priority').value = 'P4';
+                            document.getElementById('priorityDisplay').textContent = 'Will be auto-assigned based on issue type';
+                            document.getElementById('toDeptSuggestion').textContent = 'Select issue type to see suggestion';
+                            console.log('📋 Form cleared and reset');
+                        } else {
+                            console.error('❌ API Error:', data.message);
+                            alert('Failed to create ticket: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Network Error:', error);
+                        console.error('Error stack:', error.stack);
+                        alert('Error creating ticket: ' + error.message + '\n\nCheck browser console (F12) for details.');
+                    });
+                });
+                console.log('✓ Form submission listener attached');
+            }
+            
+            console.log('✅ === FORM INITIALIZATION COMPLETE ===');
+        });
 
         // Send notification function
         function sendNotification(ticketData) {
