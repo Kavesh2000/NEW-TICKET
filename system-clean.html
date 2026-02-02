@@ -37,6 +37,7 @@
                 <button onclick="switchSection('tickets')" class="sidebar-link w-full text-left px-4 py-3 rounded">🎫 Tickets</button>
                 <button onclick="switchSection('leave')" class="sidebar-link w-full text-left px-4 py-3 rounded">🏖️ Leave Management</button>
                 <button onclick="switchSection('finance')" class="sidebar-link w-full text-left px-4 py-3 rounded">💼 Finance</button>
+                <button onclick="switchSection('notifications')" class="sidebar-link w-full text-left px-4 py-3 rounded">🔔 Notifications <span id="notificationBadge" class="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full hidden">0</span></button>
             </nav>
             <div class="mt-8 pt-8 border-t border-teal-600">
                 <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded">🚪 Logout</button>
@@ -44,25 +45,110 @@
         </aside>
 
         <main class="flex-1 overflow-auto">
-            <div id="dashboard" class="content-section active p-8">
-                <h2 class="text-3xl font-bold mb-4">Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="card">
-                                <h3 class="text-lg font-semibold">Tickets</h3>
-                                <p class="text-sm text-gray-600 mt-2">Total: <span id="totalTickets">0</span> • Open: <span id="openTickets">0</span></p>
+            <div id="dashboard" class="content-section active p-8 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+                    <p class="text-gray-600">Here's your dashboard overview</p>
+                </div>
+
+                <!-- User Profile Card -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border-l-4 border-blue-600">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold">FULL NAME</p>
+                            <p class="text-2xl font-bold text-gray-800 mt-1" id="infoName">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold">EMAIL</p>
+                            <p class="text-lg text-gray-800 mt-1" id="infoEmail">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm font-semibold">STATUS</p>
+                            <p class="text-lg font-semibold mt-1"><span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm" id="infoType">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- Tickets Card -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-blue-500 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Tickets</p>
+                                <p class="text-3xl font-bold text-blue-600 mt-2" id="totalTickets">0</p>
                             </div>
-                            <div class="card">
-                                <h3 class="text-lg font-semibold">Profile</h3>
-                                <p class="text-sm text-gray-700 mt-2">Name: <span id="infoName">-</span></p>
-                                <p class="text-sm text-gray-700">Email: <span id="infoEmail">-</span></p>
-                                <p class="text-sm text-gray-700">Type: <span id="infoType">-</span></p>
-                                <div class="mt-3 border-t pt-3">
-                                    <h4 class="font-semibold">Leave Balances</h4>
-                                    <p class="text-sm text-gray-600">Annual: <span id="balAnnual">0</span></p>
-                                    <p class="text-sm text-gray-600">Sick: <span id="balSick">0</span></p>
-                                    <p class="text-sm text-gray-600">Personal: <span id="balPersonal">0</span></p>
-                                </div>
+                            <div class="text-5xl text-blue-200">🎫</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-3">Open: <span class="font-semibold text-blue-600" id="openTickets">0</span></p>
+                    </div>
+
+                    <!-- Claims Card -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-green-500 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Total Claims</p>
+                                <p class="text-3xl font-bold text-green-600 mt-2" id="totalClaims">0</p>
                             </div>
+                            <div class="text-5xl text-green-200">💼</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-3">Pending: <span class="font-semibold text-green-600" id="pendingClaims">0</span></p>
+                    </div>
+
+                    <!-- Leave Requests Card -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-purple-500 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Leave Requests</p>
+                                <p class="text-3xl font-bold text-purple-600 mt-2" id="totalLeave">0</p>
+                            </div>
+                            <div class="text-5xl text-purple-200">🏖️</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-3">Pending: <span class="font-semibold text-purple-600" id="pendingLeave">0</span></p>
+                    </div>
+
+                    <!-- Notifications Card -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-orange-500 hover:shadow-lg transition">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">Notifications</p>
+                                <p class="text-3xl font-bold text-orange-600 mt-2" id="totalNotifications">0</p>
+                            </div>
+                            <div class="text-5xl text-orange-200">🔔</div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-3">Unread: <span class="font-semibold text-orange-600" id="unreadNotifications">0</span></p>
+                    </div>
+                </div>
+
+                <!-- Leave Balances -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Balance</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p class="text-gray-600 text-sm font-semibold">Annual Leave</p>
+                            <p class="text-3xl font-bold text-blue-600 mt-2" id="balAnnual">0</p>
+                            <p class="text-xs text-gray-500 mt-1">days remaining</p>
+                        </div>
+                        <div class="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                            <p class="text-gray-600 text-sm font-semibold">Sick Leave</p>
+                            <p class="text-3xl font-bold text-red-600 mt-2" id="balSick">0</p>
+                            <p class="text-xs text-gray-500 mt-1">days remaining</p>
+                        </div>
+                        <div class="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <p class="text-gray-600 text-sm font-semibold">Personal Leave</p>
+                            <p class="text-3xl font-bold text-yellow-600 mt-2" id="balPersonal">0</p>
+                            <p class="text-xs text-gray-500 mt-1">days remaining</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Activity</h3>
+                    <div id="recentActivityContainer" class="space-y-3">
+                        <p class="text-gray-500 text-center py-8">No recent activity</p>
+                    </div>
                 </div>
             </div>
 
@@ -96,6 +182,8 @@
                                     <option value="HR">HR</option>
                                     <option value="Support">Support</option>
                                     <option value="Operations">Operations</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Branch">Branch</option>
                                 </select>
                             </div>
                         </div>
@@ -261,9 +349,21 @@
                     </table>
                 </div>
             </div>
+
+            <div id="notifications" class="content-section p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Notifications</h2>
+                    <button onclick="markAllNotificationsRead()" class="btn btn-secondary text-sm">Mark All as Read</button>
+                </div>
+
+                <div id="notificationsContainer" class="space-y-3">
+                    <div class="p-4 text-center text-gray-500">No notifications</div>
+                </div>
+            </div>
         </main>
     </div>
 
+    <script src="approval-workflow.js"></script>
     <script>
         // Numeric auto-increment ID helper
         function getNextId(key){
@@ -273,7 +373,13 @@
             localStorage.setItem('nextIds', JSON.stringify(next));
             return String(id);
         }
-        function switchSection(id){ document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        function switchSection(id){ 
+            document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active')); 
+            document.getElementById(id).classList.add('active');
+            if (id === 'notifications') {
+                loadNotifications();
+            }
+        }
         function showNewTicketForm(){ 
             document.getElementById('newTicketForm').classList.remove('hidden');
             const today = formatDateISO(new Date());
@@ -324,7 +430,18 @@
             document.getElementById('infoName').textContent = localStorage.getItem('userName')||'-';
             document.getElementById('infoEmail').textContent = localStorage.getItem('userEmail')||'-';
             document.getElementById('infoType').textContent = (localStorage.getItem('isAdmin')==='true') ? 'Admin' : 'User';
-                loadTickets(); loadLeaveRequests(); loadClaims(); updateStats(); loadUserBalances();
+            
+            // Initialize workflow for expense claims
+            const claimWorkflowConfig = {
+                moduleName: 'expense',
+                steps: [
+                    { stepId: 'finance-officer-review', role: 'Finance Officer', department: 'Finance', approver: 'Finance Officer' },
+                    { stepId: 'head-of-finance-review', role: 'Head of Finance', department: 'Finance', approver: 'Head of Finance' }
+                ]
+            };
+            workflow = new ApprovalWorkflow(claimWorkflowConfig);
+            
+            loadTickets(); loadLeaveRequests(); loadClaims(); updateStats(); loadUserBalances(); updateNotificationBadge();
             // Prefill department select with user's department if available
             try {
                 const employees = JSON.parse(localStorage.getItem('employees')||'[]');
@@ -340,7 +457,21 @@
         // Department-based assignment helper
         function getAssigneeByDepartment(dept, excludeId) {
             const employees = JSON.parse(localStorage.getItem('employees')||'[]');
-            const candidates = employees.filter(e => (e.department||'').toLowerCase() === (dept||'').toLowerCase() && (e.type||'user').toLowerCase() !== 'admin' && e.id !== excludeId);
+            let candidates = [];
+            
+            // Handle special portal departments
+            if ((dept||'').toLowerCase() === 'finance') {
+                const financeUsers = JSON.parse(localStorage.getItem('financeUsers')||'[]');
+                candidates = financeUsers.filter(u => u.id !== excludeId);
+            } else if ((dept||'').toLowerCase() === 'admin') {
+                candidates = employees.filter(e => (e.type||'').toLowerCase() === 'admin' && e.id !== excludeId);
+            } else if ((dept||'').toLowerCase() === 'branch') {
+                const branchUsers = JSON.parse(localStorage.getItem('branchUsers')||'[]');
+                candidates = branchUsers.filter(u => u.id !== excludeId);
+            } else {
+                candidates = employees.filter(e => (e.department||'').toLowerCase() === (dept||'').toLowerCase() && (e.type||'user').toLowerCase() !== 'admin' && e.id !== excludeId);
+            }
+            
             const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
             if (!candidates || candidates.length === 0) return null;
             function openCount(id){ return tickets.filter(t => t.assignedTo === id && t.status !== 'Closed').length; }
@@ -366,7 +497,131 @@
                 }
             }
 
-        function updateStats(){ const tickets=JSON.parse(localStorage.getItem('tickets')||'[]'); document.getElementById('totalTickets').textContent=tickets.length; document.getElementById('openTickets').textContent=tickets.filter(t=>t.status==='Open').length; }
+        function updateStats(){ 
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]'); 
+            const userEmail = localStorage.getItem('userEmail');
+            const userId = localStorage.getItem('userId');
+            const employees = JSON.parse(localStorage.getItem('employees')||'[]');
+            const userDept = (employees.find(e=>e.id===userId) || {}).department || '';
+            const isAdmin = localStorage.getItem('isAdmin')==='true';
+            
+            // User tickets
+            const userTickets = isAdmin ? tickets : tickets.filter(t=> t.email === userEmail || t.assignedTo === userId || (t.department && t.department.toLowerCase() === (userDept||'').toLowerCase()));
+            document.getElementById('totalTickets').textContent = userTickets.length; 
+            document.getElementById('openTickets').textContent = userTickets.filter(t=>t.status==='Open').length;
+            
+            // User claims
+            const claims = JSON.parse(localStorage.getItem('claims')||'[]');
+            const userClaims = isAdmin ? claims : claims.filter(c => c.email === userEmail);
+            document.getElementById('totalClaims').textContent = userClaims.length;
+            document.getElementById('pendingClaims').textContent = userClaims.filter(c => c.status === 'Pending').length;
+            
+            // User leave
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')||'[]');
+            const userLeave = isAdmin ? leaveRequests : leaveRequests.filter(r => r.email === userEmail);
+            document.getElementById('totalLeave').textContent = userLeave.length;
+            document.getElementById('pendingLeave').textContent = userLeave.filter(r => r.status === 'Pending').length;
+            
+            // User notifications
+            const notifications = JSON.parse(localStorage.getItem('userNotifications')||'[]');
+            const userNotifications = notifications.filter(n => n.userEmail === userEmail);
+            document.getElementById('totalNotifications').textContent = userNotifications.length;
+            document.getElementById('unreadNotifications').textContent = userNotifications.filter(n => !n.read).length;
+            
+            loadDashboardActivity();
+        }
+
+        function loadDashboardActivity() {
+            const userEmail = localStorage.getItem('userEmail');
+            const userId = localStorage.getItem('userId');
+            const employees = JSON.parse(localStorage.getItem('employees')||'[]');
+            const userDept = (employees.find(e=>e.id===userId) || {}).department || '';
+            const isAdmin = localStorage.getItem('isAdmin')==='true';
+            
+            let activities = [];
+            
+            // Get recent tickets
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+            const userTickets = isAdmin ? tickets : tickets.filter(t=> t.email === userEmail || t.assignedTo === userId || (t.department && t.department.toLowerCase() === (userDept||'').toLowerCase()));
+            userTickets.slice(-5).reverse().forEach(t => {
+                activities.push({
+                    type: 'ticket',
+                    icon: '🎫',
+                    title: `Ticket #${t.id}: ${t.subject}`,
+                    status: t.status,
+                    color: t.status === 'Open' ? 'yellow' : t.status === 'Closed' ? 'green' : 'blue',
+                    date: t.createdDate || t.timestamp
+                });
+            });
+            
+            // Get recent claims
+            const claims = JSON.parse(localStorage.getItem('claims')||'[]');
+            const userClaims = isAdmin ? claims : claims.filter(c => c.email === userEmail);
+            userClaims.slice(-5).reverse().forEach(c => {
+                activities.push({
+                    type: 'claim',
+                    icon: '💼',
+                    title: `Claim #${c.id}: ${c.type} - ₦${parseFloat(c.amount).toFixed(2)}`,
+                    status: c.status,
+                    color: c.status === 'Pending' ? 'yellow' : c.status === 'Approved' ? 'green' : 'red',
+                    date: c.timestamp
+                });
+            });
+            
+            // Get recent leave
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')||'[]');
+            const userLeave = isAdmin ? leaveRequests : leaveRequests.filter(r => r.email === userEmail);
+            userLeave.slice(-5).reverse().forEach(r => {
+                activities.push({
+                    type: 'leave',
+                    icon: '🏖️',
+                    title: `${r.type} Leave: ${r.startDate} to ${r.endDate} (${r.days} days)`,
+                    status: r.status,
+                    color: r.status === 'Pending' ? 'yellow' : r.status === 'Approved' ? 'green' : 'red',
+                    date: r.timestamp
+                });
+            });
+            
+            // Get recent notifications
+            const notifications = JSON.parse(localStorage.getItem('userNotifications')||'[]');
+            const userNotifications = notifications.filter(n => n.userEmail === userEmail);
+            userNotifications.slice(-5).reverse().forEach(n => {
+                activities.push({
+                    type: 'notification',
+                    icon: '✅',
+                    title: `Claim #${n.claimId} disbursed: ₦${parseFloat(n.amount).toFixed(2)}`,
+                    status: n.read ? 'Read' : 'New',
+                    color: n.read ? 'gray' : 'orange',
+                    date: n.createdAt
+                });
+            });
+            
+            // Sort by date and take last 10
+            activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+            activities = activities.slice(0, 10);
+            
+            const container = document.getElementById('recentActivityContainer');
+            if (activities.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No recent activity</p>';
+                return;
+            }
+            
+            const colorMap = { yellow: 'border-yellow-300 bg-yellow-50', green: 'border-green-300 bg-green-50', blue: 'border-blue-300 bg-blue-50', red: 'border-red-300 bg-red-50', orange: 'border-orange-300 bg-orange-50', gray: 'border-gray-300 bg-gray-50' };
+            const statusColorMap = { 'Open': 'text-yellow-700', 'Closed': 'text-green-700', 'Blue': 'text-blue-700', 'Pending': 'text-yellow-700', 'Approved': 'text-green-700', 'Rejected': 'text-red-700', 'New': 'text-orange-700', 'Read': 'text-gray-700' };
+            
+            container.innerHTML = activities.map(a => `
+                <div class="border-l-4 ${colorMap[a.color]} p-4 rounded flex items-start justify-between hover:shadow-sm transition">
+                    <div class="flex items-start gap-3 flex-1">
+                        <span class="text-2xl">${a.icon}</span>
+                        <div>
+                            <p class="font-semibold text-gray-800">${a.title}</p>
+                            <p class="text-xs text-gray-500 mt-1">${new Date(a.date).toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColorMap[a.status]} ${a.color === 'yellow' ? 'bg-yellow-100' : a.color === 'green' ? 'bg-green-100' : a.color === 'blue' ? 'bg-blue-100' : a.color === 'red' ? 'bg-red-100' : a.color === 'orange' ? 'bg-orange-100' : 'bg-gray-100'}">${a.status}</span>
+                </div>
+            `).join('');
+        }
 
         function loadTickets(){
             const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
@@ -381,14 +636,21 @@
             tbody.innerHTML = filtered.map(t => {
                 const assignee = employees.find(e => e.id === t.assignedTo);
                 const assigneeName = assignee ? assignee.name : (t.assignedToName || 'Unassigned');
-                const canAct = (localStorage.getItem('isAdmin')==='true') || (localStorage.getItem('userId') === t.assignedTo) || ((employees.find(e=>e.id===localStorage.getItem('userId'))||{}).department && ((employees.find(e=>e.id===localStorage.getItem('userId'))||{}).department||'').toLowerCase() === (t.department||'').toLowerCase());
+                const currentUserId = localStorage.getItem('userId');
+                const currentEmail = localStorage.getItem('userEmail');
+                const isAdmin = localStorage.getItem('isAdmin')==='true';
+                const isCreator = t.email === currentEmail;
+                const isAssigned = currentUserId === t.assignedTo;
+                const isInDept = (employees.find(e=>e.id===currentUserId)||{}).department && ((employees.find(e=>e.id===currentUserId)||{}).department||'').toLowerCase() === (t.department||'').toLowerCase();
+                const canAct = isAdmin || isAssigned || isInDept || isCreator;
+                
                 const actions = [];
-                if (t.status !== 'Closed' && canAct) {
+                if (t.status !== 'Closed') {
                     actions.push(`<button onclick="resolveTicket('${t.id}')" class="text-sm text-yellow-600 hover:underline mr-2">Resolve</button>`);
                     actions.push(`<button onclick="closeTicket('${t.id}')" class="text-sm text-green-600 hover:underline mr-2">Close</button>`);
                     actions.push(`<button onclick="commentTicket('${t.id}')" class="text-sm text-gray-600 hover:underline">Comment</button>`);
                 }
-                if (localStorage.getItem('isAdmin')==='true') actions.push(`<button onclick="reassignTicket && reassignTicket('${t.id}')" class="text-sm text-indigo-600 hover:underline ml-2">Reassign</button>`);
+                if (isAdmin) actions.push(`<button onclick="reassignTicket && reassignTicket('${t.id}')" class="text-sm text-indigo-600 hover:underline ml-2">Reassign</button>`);
                 return `
                     <tr class="hover:bg-gray-50">
                         <td class="p-2">${t.id}</td>
@@ -662,9 +924,108 @@
 
         function loadClaims(){ const claims = JSON.parse(localStorage.getItem('claims')||'[]'); const isAdmin = localStorage.getItem('isAdmin')==='true'; const userEmail = localStorage.getItem('userEmail'); const filtered = isAdmin?claims:claims.filter(c=>c.email===userEmail); const tbody = document.getElementById('claimsList'); if(filtered.length===0){ tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center">No claims</td></tr>'; return; } tbody.innerHTML = filtered.map(c=>`<tr><td class="p-2">${c.id}</td><td class="p-2">${c.name||''}</td><td class="p-2">${c.email||''}</td><td class="p-2">${c.type}</td><td class="p-2">${c.amount}</td><td class="p-2">${c.date||''}</td><td class="p-2">${c.status}</td></tr>`).join(''); }
 
+        function loadNotifications(){
+            const userEmail = localStorage.getItem('userEmail');
+            const allNotifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+            const userNotifications = allNotifications.filter(n => n.userEmail === userEmail);
+            const container = document.getElementById('notificationsContainer');
+            const badge = document.getElementById('notificationBadge');
+            
+            // Count unread notifications
+            const unreadCount = userNotifications.filter(n => !n.read).length;
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+            
+            if (userNotifications.length === 0) {
+                container.innerHTML = '<div class="p-4 text-center text-gray-500">No notifications</div>';
+                return;
+            }
+            
+            container.innerHTML = userNotifications.map(n => `
+                <div class="card ${!n.read ? 'border-l-4 border-l-yellow-400 bg-yellow-50' : 'bg-gray-50'} p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="font-semibold text-lg">
+                                ${n.type === 'disbursement_complete' ? '✅ Disbursement Complete' : 'Notification'}
+                            </p>
+                            <p class="text-gray-700 mt-1">${n.message || ''}</p>
+                            <div class="grid grid-cols-2 gap-4 mt-2 text-sm">
+                                <div>
+                                    <span class="text-gray-500">Claim #:</span>
+                                    <span class="font-semibold">${n.claimId || 'N/A'}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Amount:</span>
+                                    <span class="font-semibold">₦${parseFloat(n.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">
+                                ${new Date(n.createdAt).toLocaleString()}
+                            </p>
+                        </div>
+                        <div class="flex gap-2 ml-4">
+                            ${!n.read ? `<button onclick="markNotificationRead('${n.id}')" class="btn btn-sm btn-primary">Mark Read</button>` : ''}
+                            <button onclick="deleteNotification('${n.id}')" class="btn btn-sm btn-secondary">Dismiss</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function markNotificationRead(notificationId){
+            const allNotifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+            const notification = allNotifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+                localStorage.setItem('userNotifications', JSON.stringify(allNotifications));
+                loadNotifications();
+                updateNotificationBadge();
+            }
+        }
+
+        function deleteNotification(notificationId){
+            if (!confirm('Delete this notification?')) return;
+            const allNotifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+            const filtered = allNotifications.filter(n => n.id !== notificationId);
+            localStorage.setItem('userNotifications', JSON.stringify(filtered));
+            loadNotifications();
+            updateNotificationBadge();
+        }
+
+        function markAllNotificationsRead(){
+            const userEmail = localStorage.getItem('userEmail');
+            const allNotifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+            allNotifications.forEach(n => {
+                if (n.userEmail === userEmail) n.read = true;
+            });
+            localStorage.setItem('userNotifications', JSON.stringify(allNotifications));
+            loadNotifications();
+            updateNotificationBadge();
+        }
+
+        function updateNotificationBadge(){
+            const userEmail = localStorage.getItem('userEmail');
+            const allNotifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+            const unreadCount = allNotifications.filter(n => n.userEmail === userEmail && !n.read).length;
+            const badge = document.getElementById('notificationBadge');
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
         document.getElementById('claimFormEl').addEventListener('submit', function(e){
             e.preventDefault();
-            const id = getNextId('claims');
+            const nextIds = JSON.parse(localStorage.getItem('claimNextId') || '{"id": 1}');
+            const id = String(nextIds.id);
+            nextIds.id++;
+            localStorage.setItem('claimNextId', JSON.stringify(nextIds));
             const type = document.getElementById('claimType').value;
             const amount = parseFloat(document.getElementById('claimAmount').value)||0;
             const date = document.getElementById('claimDate').value;
@@ -672,8 +1033,42 @@
             const receiptName = receiptInput && receiptInput.files && receiptInput.files[0] ? receiptInput.files[0].name : null;
             const desc = document.getElementById('claimDescription').value||'';
             if(amount <= 0){ alert('Enter a valid amount'); return; }
-            const claim = { id, name: localStorage.getItem('userName')||'', email: localStorage.getItem('userEmail')||'', type, amount, date, receipt: receiptName, description: desc, status: 'Pending', timestamp: new Date().toISOString() };
-            const claims = JSON.parse(localStorage.getItem('claims')||'[]'); claims.push(claim); localStorage.setItem('claims', JSON.stringify(claims)); hideNewClaimForm(); this.reset(); loadClaims(); alert('Claim submitted: '+id);
+            
+            const claimName = localStorage.getItem('userName')||'';
+            const claimEmail = localStorage.getItem('userEmail')||'';
+            
+            // Create claim object for old system.html compatibility
+            const oldClaim = { id, name: claimName, email: claimEmail, type, amount, date, receipt: receiptName, description: desc, status: 'Pending', timestamp: new Date().toISOString() };
+            const claims = JSON.parse(localStorage.getItem('claims')||'[]'); 
+            claims.push(oldClaim); 
+            localStorage.setItem('claims', JSON.stringify(claims));
+            
+            // Create claim object for new workflow system
+            const workflowClaim = {
+                id,
+                claimant: claimName,
+                email: claimEmail,
+                type,
+                amount,
+                description: desc,
+                status: 'SUBMITTED',
+                timestamp: new Date().toISOString()
+            };
+            const expenseClaims = JSON.parse(localStorage.getItem('expenseClaims')||'[]');
+            expenseClaims.push(workflowClaim);
+            localStorage.setItem('expenseClaims', JSON.stringify(expenseClaims));
+            
+            // Create approval workflow
+            try {
+                workflow.createWorkflow(id, 'expense', workflowClaim, claimEmail);
+                alert('Claim submitted: ' + id + '\n\nStatus: Awaiting Finance Officer Review');
+            } catch(e) {
+                alert('Error creating workflow: ' + e.message);
+            }
+            
+            hideNewClaimForm(); 
+            this.reset(); 
+            loadClaims();
         });
 
         function loadLeaveRequests(){

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Claims - Onit MFB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gradient-to-b from-teal-700 to-teal-900 text-white p-6">
+            <h1 class="text-2xl font-bold mb-6">Onit Portal</h1>
+            <div class="mb-4 pb-4 border-b border-teal-600">
+                <p class="text-sm text-teal-100">Logged in as:</p>
+                <p id="userNameDisplay" class="font-semibold">-</p>
+                <p id="userRoleDisplay" class="text-xs text-teal-200">-</p>
+            </div>
+            <nav class="space-y-2">
+                <a href="system.html" class="sidebar-link w-full text-left px-4 py-3 rounded block hover:bg-teal-800">📊 Dashboard</a>
+                <button onclick="switchTab('submit')" class="sidebar-link active w-full text-left px-4 py-3 rounded">💰 Submit Expense</button>
+                <button onclick="switchTab('myexpenses')" class="sidebar-link w-full text-left px-4 py-3 rounded">📋 My Expenses</button>
+                <button onclick="switchTab('approvals')" class="sidebar-link w-full text-left px-4 py-3 rounded" id="approvalsNav" style="display:none;">✅ Pending Approvals</button>
+            </nav>
+            <div class="mt-8 pt-8 border-t border-teal-600">
+                <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <!-- Submit Expense Tab -->
+            <div id="submitTab" class="tab-content p-8">
+                <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow">
+                    <h2 class="text-3xl font-bold mb-6">Submit Expense Claim</h2>
+                    
+                    <form id="expenseForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Claimant Name</label>
+                                <input id="claimantName" type="text" class="w-full px-3 py-2 border rounded" readonly />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Email</label>
+                                <input id="claimantEmail" type="email" class="w-full px-3 py-2 border rounded" readonly />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Expense Type *</label>
+                                <select id="expenseType" required class="w-full px-3 py-2 border rounded">
+                                    <option value="">Select Type</option>
+                                    <option value="Travel">Travel</option>
+                                    <option value="Meals">Meals</option>
+                                    <option value="Accommodation">Accommodation</option>
+                                    <option value="Office Supplies">Office Supplies</option>
+                                    <option value="Equipment">Equipment</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Amount (₦) *</label>
+                                <input id="expenseAmount" type="number" min="0" step="0.01" required class="w-full px-3 py-2 border rounded" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Date of Expense *</label>
+                                <input id="expenseDate" type="date" required class="w-full px-3 py-2 border rounded" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Department</label>
+                                <select id="department" class="w-full px-3 py-2 border rounded">
+                                    <option value="IT">IT</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Operations">Operations</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Marketing">Marketing</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Description *</label>
+                            <textarea id="expenseDescription" rows="4" required class="w-full px-3 py-2 border rounded" placeholder="Details about the expense"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Receipt/Invoice (optional)</label>
+                            <input id="receipt" type="file" accept=".pdf,.jpg,.png,.doc,.docx" class="w-full px-3 py-2 border rounded" />
+                        </div>
+
+                        <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded font-semibold">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit Expense
+                        </button>
+                    </form>
+
+                    <div id="submitMessage" class="mt-4 p-3 rounded text-sm hidden"></div>
+                </div>
+            </div>
+
+            <!-- My Expenses Tab -->
+            <div id="myExpensesTab" class="tab-content hidden p-8">
+                <div class="max-w-6xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-6">My Expense Claims</h2>
+                    
+                    <div class="mb-4 flex gap-2 flex-wrap">
+                        <button onclick="filterExpenses('all')" class="filter-btn active bg-teal-600 text-white px-4 py-2 rounded">All</button>
+                        <button onclick="filterExpenses('submitted')" class="filter-btn bg-gray-300 text-gray-800 px-4 py-2 rounded">Submitted</button>
+                        <button onclick="filterExpenses('approved')" class="filter-btn bg-gray-300 text-gray-800 px-4 py-2 rounded">Approved</button>
+                        <button onclick="filterExpenses('rejected')" class="filter-btn bg-gray-300 text-gray-800 px-4 py-2 rounded">Rejected</button>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left font-semibold">Claim ID</th>
+                                    <th class="px-6 py-3 text-left font-semibold">Type</th>
+                                    <th class="px-6 py-3 text-left font-semibold">Amount</th>
+                                    <th class="px-6 py-3 text-left font-semibold">Date</th>
+                                    <th class="px-6 py-3 text-left font-semibold">Status</th>
+                                    <th class="px-6 py-3 text-left font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expensesList" class="divide-y">
+                                <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No expenses</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Approvals Tab -->
+            <div id="approvalsTab" class="tab-content hidden p-8">
+                <div class="max-w-6xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-6">Pending Approvals</h2>
+                    <div id="pendingApprovalsList" class="space-y-4">
+                        <p class="text-gray-500">No pending approvals</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Approval Modal -->
+    <div id="approvalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-2xl font-bold mb-4">Expense Claim Details</h3>
+            
+            <div id="claimDetails" class="mb-6 p-4 bg-gray-50 rounded space-y-2"></div>
+
+            <div class="mb-6">
+                <h4 class="font-semibold mb-3">Approval Workflow Progress</h4>
+                <div id="approvalProgress" class="space-y-3"></div>
+            </div>
+
+            <div id="approvalControls" class="mb-6 hidden">
+                <h4 class="font-semibold mb-3">Your Action</h4>
+                <div class="space-y-3">
+                    <textarea id="approvalComments" placeholder="Comments (optional)" rows="3" class="w-full px-3 py-2 border rounded"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="approveExpense()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-check mr-2"></i>Approve
+                        </button>
+                        <button onclick="rejectExpense()" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-times mr-2"></i>Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rejectionReasonDiv" class="mb-6 hidden">
+                <textarea id="rejectionReason" placeholder="Reason for rejection *" rows="3" class="w-full px-3 py-2 border rounded" required></textarea>
+            </div>
+
+            <div id="auditTrail" class="mb-6">
+                <h4 class="font-semibold mb-3">Audit Trail</h4>
+                <div id="auditList" class="space-y-2 text-sm max-h-48 overflow-y-auto"></div>
+            </div>
+
+            <button onclick="closeApprovalModal()" class="w-full bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Close</button>
+        </div>
+    </div>
+
+    <script src="approval-workflow.js"></script>
+    <script>
+        let workflow;
+        let currentExpenseId = null;
+        let currentWorkflowId = null;
+        let currentUserRole = 'User';
+
+        // Initialize
+        window.addEventListener('load', () => {
+            if (!localStorage.getItem('userEmail')) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const userName = localStorage.getItem('userName') || 'User';
+            const userEmail = localStorage.getItem('userEmail') || '';
+            currentUserRole = localStorage.getItem('userRole') || 'User';
+
+            document.getElementById('userNameDisplay').textContent = userName;
+            document.getElementById('userRoleDisplay').textContent = currentUserRole;
+            document.getElementById('claimantName').value = userName;
+            document.getElementById('claimantEmail').value = userEmail;
+
+            // Initialize approval workflow
+            const expenseWorkflowConfig = {
+                moduleName: 'expense',
+                steps: [
+                    { stepId: 'submitter-review', role: 'User', approver: 'Employee' },
+                    { stepId: 'finance-review', role: 'Finance', approver: 'Finance Manager' },
+                    { stepId: 'teller-verification', role: 'Teller', approver: 'Teller' }
+                ]
+            };
+
+            workflow = new ApprovalWorkflow(expenseWorkflowConfig);
+
+            // Show approvals tab if user is Finance or Teller
+            if (currentUserRole === 'Finance' || currentUserRole === 'Teller') {
+                document.getElementById('approvalsNav').style.display = 'block';
+            }
+
+            loadMyExpenses();
+            loadPendingApprovals();
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+            if (tab === 'submit') {
+                document.getElementById('submitTab').classList.remove('hidden');
+            } else if (tab === 'myexpenses') {
+                document.getElementById('myExpensesTab').classList.remove('hidden');
+                loadMyExpenses();
+            } else if (tab === 'approvals') {
+                document.getElementById('approvalsTab').classList.remove('hidden');
+                loadPendingApprovals();
+            }
+
+            event.target.classList.add('active');
+        }
+
+        // Submit expense
+        document.getElementById('expenseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const claimId = `EXP-${Date.now()}`;
+            const expense = {
+                id: claimId,
+                claimant: document.getElementById('claimantName').value,
+                email: document.getElementById('claimantEmail').value,
+                type: document.getElementById('expenseType').value,
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                date: document.getElementById('expenseDate').value,
+                department: document.getElementById('department').value,
+                description: document.getElementById('expenseDescription').value,
+                createdAt: new Date().toISOString(),
+                status: 'submitted'
+            };
+
+            // Save expense
+            let expenses = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+            expenses.push(expense);
+            localStorage.setItem('expenseClaims', JSON.stringify(expenses));
+
+            // Create approval workflow
+            try {
+                const wf = workflow.createWorkflow(
+                    claimId,
+                    'expense',
+                    expense,
+                    document.getElementById('claimantEmail').value
+                );
+
+                document.getElementById('submitMessage').innerHTML = `
+                    <div class="bg-green-100 text-green-800 p-3 rounded">
+                        ✅ Expense claim submitted! ID: <strong>${claimId}</strong><br>
+                        Workflow Status: Awaiting Finance Department Approval
+                    </div>
+                `;
+
+                document.getElementById('expenseForm').reset();
+                document.getElementById('claimantName').value = document.getElementById('claimantName').placeholder || localStorage.getItem('userName');
+                document.getElementById('claimantEmail').value = localStorage.getItem('userEmail');
+
+                setTimeout(() => {
+                    document.getElementById('submitMessage').classList.add('hidden');
+                }, 5000);
+            } catch (err) {
+                document.getElementById('submitMessage').innerHTML = `<div class="bg-red-100 text-red-800 p-3 rounded">❌ Error: ${err.message}</div>`;
+            }
+        });
+
+        let currentFilter = 'all';
+
+        function filterExpenses(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active', 'bg-teal-600', 'text-white'));
+            event.target.classList.add('active', 'bg-teal-600', 'text-white');
+            loadMyExpenses();
+        }
+
+        function loadMyExpenses() {
+            const expenses = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+            const userEmail = localStorage.getItem('userEmail');
+            let filtered = expenses.filter(e => e.email === userEmail);
+
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(e => e.status === currentFilter);
+            }
+
+            const tbody = document.getElementById('expensesList');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No expenses</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(exp => {
+                const wfs = workflow.getWorkflowsByRequestId(exp.id);
+                const wf = wfs[0];
+                const status = wf ? wf.status : exp.status;
+                const statusClass = status === 'approved' ? 'bg-green-100 text-green-800' : 
+                                  status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
+
+                return `<tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-semibold">${exp.id}</td>
+                    <td class="px-6 py-4">${exp.type}</td>
+                    <td class="px-6 py-4">₦${parseFloat(exp.amount).toLocaleString('en-NG', {minimumFractionDigits: 2})}</td>
+                    <td class="px-6 py-4">${new Date(exp.date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-semibold ${statusClass}">${status.toUpperCase()}</span></td>
+                    <td class="px-6 py-4">
+                        <button onclick="viewExpenseDetails('${exp.id}', '${wf ? wf.id : ''}')" class="text-blue-600 hover:underline">View</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function loadPendingApprovals() {
+            const pendingApprovals = workflow.getPendingApprovalsForRole(currentUserRole);
+            const container = document.getElementById('pendingApprovalsList');
+
+            if (pendingApprovals.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No pending approvals</p>';
+                return;
+            }
+
+            container.innerHTML = pendingApprovals.map(wf => {
+                const expense = wf.data;
+                const currentStep = wf.steps[wf.currentStep];
+                return `<div class="bg-white p-6 rounded-lg shadow border-l-4 border-orange-500">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg">${expense.type} - ₦${parseFloat(expense.amount).toLocaleString('en-NG', {minimumFractionDigits: 2})}</h3>
+                            <p class="text-sm text-gray-600">Claimant: ${expense.claimant}</p>
+                            <p class="text-sm text-gray-600">Claim ID: ${expense.id}</p>
+                            <p class="text-sm text-gray-600">Step: ${currentStep.stepId}</p>
+                        </div>
+                        <button onclick="viewExpenseDetails('${expense.id}', '${wf.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                            Review
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function viewExpenseDetails(expenseId, workflowId) {
+            const expenses = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+            const expense = expenses.find(e => e.id === expenseId);
+
+            if (!expense) return;
+
+            currentExpenseId = expenseId;
+            currentWorkflowId = workflowId;
+
+            // Show expense details
+            const wf = workflowId ? workflow.getWorkflow(workflowId) : null;
+            const detailsHtml = `
+                <p><strong>Claim ID:</strong> ${expense.id}</p>
+                <p><strong>Claimant:</strong> ${expense.claimant}</p>
+                <p><strong>Type:</strong> ${expense.type}</p>
+                <p><strong>Amount:</strong> ₦${parseFloat(expense.amount).toLocaleString('en-NG', {minimumFractionDigits: 2})}</p>
+                <p><strong>Date:</strong> ${new Date(expense.date).toLocaleDateString()}</p>
+                <p><strong>Department:</strong> ${expense.department}</p>
+                <p><strong>Description:</strong> ${expense.description}</p>
+                <p><strong>Status:</strong> ${wf ? wf.status.toUpperCase() : expense.status.toUpperCase()}</p>
+            `;
+            document.getElementById('claimDetails').innerHTML = detailsHtml;
+
+            // Show approval progress
+            if (wf) {
+                const progress = workflow.getApprovalProgress(workflowId);
+                const progressHtml = progress.steps.map(s => {
+                    const statusIcon = s.status === 'approved' ? '✅' : s.status === 'rejected' ? '❌' : 
+                                     s.status === 'pending' ? '⏳' : '⏸️';
+                    return `<div class="flex items-center gap-3 p-3 bg-gray-100 rounded">
+                        <span>${statusIcon}</span>
+                        <div class="flex-1">
+                            <p class="font-semibold">${s.stepId}</p>
+                            <p class="text-sm text-gray-600">${s.role}</p>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700">${s.status.toUpperCase()}</span>
+                    </div>`;
+                }).join('');
+                document.getElementById('approvalProgress').innerHTML = progressHtml;
+
+                // Show approval controls if current user is the approver
+                const currentStep = wf.steps[wf.currentStep];
+                if (currentStep && currentStep.status === 'pending' && currentStep.role === currentUserRole) {
+                    document.getElementById('approvalControls').classList.remove('hidden');
+                } else {
+                    document.getElementById('approvalControls').classList.add('hidden');
+                }
+
+                // Show audit trail
+                const auditTrail = workflow.getAuditTrail(expenseId);
+                const auditHtml = auditTrail.map(a => 
+                    `<p class="text-xs"><strong>${new Date(a.timestamp).toLocaleString()}:</strong> ${a.action} by ${a.actor} - ${a.details}</p>`
+                ).join('');
+                document.getElementById('auditList').innerHTML = auditHtml || '<p class="text-gray-500">No audit records</p>';
+            }
+
+            document.getElementById('approvalModal').classList.remove('hidden');
+        }
+
+        function closeApprovalModal() {
+            document.getElementById('approvalModal').classList.add('hidden');
+            document.getElementById('rejectionReasonDiv').classList.add('hidden');
+        }
+
+        function approveExpense() {
+            try {
+                const comments = document.getElementById('approvalComments').value;
+                workflow.approveStep(currentWorkflowId, localStorage.getItem('userEmail'), currentUserRole, comments);
+                
+                // Update expense status
+                const expenses = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+                const wf = workflow.getWorkflow(currentWorkflowId);
+                const expense = expenses.find(e => e.id === wf.requestId);
+                if (expense) {
+                    expense.status = wf.status;
+                    localStorage.setItem('expenseClaims', JSON.stringify(expenses));
+                }
+
+                alert('✅ Expense approved successfully!');
+                closeApprovalModal();
+                loadMyExpenses();
+                loadPendingApprovals();
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            }
+        }
+
+        function rejectExpense() {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            if (!reason) {
+                alert('Please provide a rejection reason');
+                return;
+            }
+
+            try {
+                workflow.rejectStep(currentWorkflowId, localStorage.getItem('userEmail'), currentUserRole, reason);
+                
+                // Update expense status
+                const expenses = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+                const wf = workflow.getWorkflow(currentWorkflowId);
+                const expense = expenses.find(e => e.id === wf.requestId);
+                if (expense) {
+                    expense.status = wf.status;
+                    localStorage.setItem('expenseClaims', JSON.stringify(expenses));
+                }
+
+                alert('❌ Expense rejected. Reason: ' + reason);
+                closeApprovalModal();
+                loadMyExpenses();
+                loadPendingApprovals();
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

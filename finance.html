@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Portal - Claim Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar-link { transition: all 0.3s ease; }
+        .sidebar-link:hover { background-color: rgba(255,255,255,0.06); transform: translateX(4px); }
+        .sidebar-link.active { background-color: rgba(255,255,255,0.08); border-left: 4px solid rgba(255,255,255,0.12); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 to-blue-900">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h1 class="text-3xl font-bold text-center mb-2">Finance Portal</h1>
+            <p class="text-center text-gray-600 mb-6">Claim Management System</p>
+            <p class="text-center text-sm text-gray-500 mb-6">Login credentials created by Admin</p>
+            
+            <form id="financeLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Email</label>
+                    <input type="email" id="financeUserEmail" placeholder="your@email.com" required class="w-full p-3 border rounded focus:outline-none focus:border-blue-500" />
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Password</label>
+                    <input type="password" id="financeUserPassword" placeholder="Password" required class="w-full p-3 border rounded focus:outline-none focus:border-blue-500" />
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Role</label>
+                    <select id="financeUserRole" required class="w-full p-3 border rounded focus:outline-none focus:border-blue-500">
+                        <option value="">Select Role</option>
+                        <option value="Finance Officer">Finance Officer</option>
+                        <option value="Head of Finance">Head of Finance</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Finance Portal Dashboard -->
+    <div id="financePortal" class="hidden flex h-screen">
+        <aside class="w-64 bg-gradient-to-b from-blue-700 to-blue-900 text-white p-6">
+            <h1 class="text-2xl font-bold mb-6">Finance Portal</h1>
+            <div class="mb-4 pb-4 border-b border-blue-600">
+                <p class="text-sm text-blue-100">Logged in as:</p>
+                <p id="financeUserDisplay" class="font-semibold">-</p>
+                <p id="financeRoleDisplay" class="text-xs text-blue-200">-</p>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="switchFinanceSection('claims')" class="sidebar-link active w-full text-left px-4 py-3 rounded">📋 Manage Claims</button>
+                <button onclick="switchFinanceSection('history')" class="sidebar-link w-full text-left px-4 py-3 rounded">📜 Approval History</button>
+                <button onclick="switchFinanceSection('tickets')" class="sidebar-link w-full text-left px-4 py-3 rounded">🎫 Tickets</button>
+            </nav>
+            <div class="mt-8 pt-8 border-t border-blue-600">
+                <button onclick="financeLogout()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-auto">
+            <!-- Manage Claims Section -->
+            <div id="claims" class="content-section active p-8">
+                <h2 class="text-3xl font-bold mb-6">Manage Claims</h2>
+                <div class="bg-white rounded shadow p-4 mb-4">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Claimant</th>
+                                <th class="p-3 text-left">Type</th>
+                                <th class="p-3 text-left">Amount</th>
+                                <th class="p-3 text-left">Current Step</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financeClaimsList">
+                            <tr><td class="p-4 text-center" colspan="7">No claims to review</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Approval History Section -->
+            <div id="history" class="content-section p-8">
+                <h2 class="text-3xl font-bold mb-6">Approval History</h2>
+                <div class="bg-white rounded shadow p-4">
+                    <div id="approvalHistoryList" class="space-y-4">
+                        <p class="text-gray-500">No approval history</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Section -->
+            <div id="tickets" class="content-section p-8">
+                <h2 class="text-3xl font-bold mb-6">Support Tickets</h2>
+                <div class="bg-white rounded shadow p-4">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Subject</th>
+                                <th class="p-3 text-left">Type</th>
+                                <th class="p-3 text-left">Priority</th>
+                                <th class="p-3 text-left">Created</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financeTicketsList">
+                            <tr><td class="p-4 text-center" colspan="7">No tickets assigned</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Claim Review Modal -->
+    <div id="financeApprovalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-2xl font-bold mb-4">Review Claim</h3>
+            <div id="financeClaimDetails" class="mb-6 p-4 bg-gray-50 rounded space-y-2"></div>
+            
+            <div id="financeWorkflowProgress" class="mb-6 hidden">
+                <h4 class="font-semibold mb-3">Approval Progress</h4>
+                <div id="financeProgressSteps" class="space-y-2"></div>
+            </div>
+            
+            <div id="financeApprovalControls" class="mb-6 hidden">
+                <textarea id="financeApprovalComment" placeholder="Comments (optional)" rows="3" class="w-full p-2 border rounded mb-2"></textarea>
+                <div class="flex gap-2">
+                    <button onclick="financeApproveClaim()" class="flex-1 bg-green-600 text-white px-4 py-2 rounded">Approve</button>
+                    <button onclick="showFinanceRejectForm()" class="flex-1 bg-red-600 text-white px-4 py-2 rounded">Reject</button>
+                </div>
+            </div>
+            
+            <div id="financeRejectForm" class="mb-6 hidden">
+                <textarea id="financeRejectionReason" placeholder="Reason for rejection *" rows="3" class="w-full p-2 border rounded mb-2" required></textarea>
+                <button onclick="submitFinanceRejection()" class="w-full bg-red-600 text-white px-4 py-2 rounded">Submit Rejection</button>
+            </div>
+            
+            <button onclick="closeFinanceModal()" class="w-full bg-gray-300 px-4 py-2 rounded">Close</button>
+        </div>
+    </div>
+
+    <script src="approval-workflow.js"></script>
+    <script>
+        let financeWorkflow;
+        let currentFinanceApprovalWF = null;
+
+        // Auto-create demo users if none exist
+        if(!localStorage.getItem('financeUsers')) {
+            const demoUsers = [
+                {
+                    name: 'John Finance Officer',
+                    email: 'john.finance@onit.local',
+                    role: 'Finance Officer',
+                    department: 'Finance',
+                    password: '1234',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    name: 'Sarah Head of Finance',
+                    email: 'sarah.hof@onit.local',
+                    role: 'Head of Finance',
+                    department: 'Finance',
+                    password: '1234',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            localStorage.setItem('financeUsers', JSON.stringify(demoUsers));
+        }
+
+        // Finance Portal Login
+        document.getElementById('financeLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('financeUserEmail').value.trim();
+            const password = document.getElementById('financeUserPassword').value;
+            const selectedRole = document.getElementById('financeUserRole').value;
+
+            if(!email || !password || !selectedRole) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            // Check if user exists in financeUsers
+            const financeUsers = JSON.parse(localStorage.getItem('financeUsers')||'[]');
+            const user = financeUsers.find(u => u.email === email && u.password === password && u.role === selectedRole);
+
+            if(!user) {
+                alert('Invalid email, password, or role. Please check your credentials.\n\nDemo Users:\nFinance Officer: john.finance@onit.local / 1234\nHead of Finance: sarah.hof@onit.local / 1234');
+                return;
+            }
+
+            // Save finance login
+            localStorage.setItem('financeUserName', user.name);
+            localStorage.setItem('financeUserEmail', user.email);
+            localStorage.setItem('financeUserRole', user.role);
+            localStorage.setItem('financeUserDept', user.department);
+
+            // Show portal, hide login
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('financePortal').classList.remove('hidden');
+
+            // Initialize workflow
+            const claimWorkflowConfig = {
+                moduleName: 'expense',
+                steps: [
+                    { stepId: 'finance-officer-review', role: 'Finance Officer', department: 'Finance', approver: 'Finance Officer' },
+                    { stepId: 'head-of-finance-review', role: 'Head of Finance', department: 'Finance', approver: 'Head of Finance' }
+                ]
+            };
+            financeWorkflow = new ApprovalWorkflow(claimWorkflowConfig);
+
+            // Display user info
+            document.getElementById('financeUserDisplay').textContent = user.name;
+            document.getElementById('financeRoleDisplay').textContent = user.role;
+
+            // Load claims
+            loadFinanceClaims();
+        });
+
+        function switchFinanceSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'claims') loadFinanceClaims();
+            if(id === 'history') loadApprovalHistory();
+            if(id === 'tickets') loadFinanceTickets();
+        }
+
+        function loadFinanceClaims() {
+            const userRole = localStorage.getItem('financeUserRole') || '';
+            
+            // Get all workflows
+            const allWorkflows = JSON.parse(localStorage.getItem('approvalWorkflows')||'[]');
+            console.log('DEBUG: Finance Portal loadFinanceClaims');
+            console.log('DEBUG: User Role:', userRole);
+            console.log('DEBUG: All Workflows:', allWorkflows);
+            
+            // Filter for workflows that need action by current user
+            let claimsToReview = allWorkflows.filter(wf => {
+                if(wf.status !== 'in-progress' && wf.status !== 'pending') {
+                    console.log('DEBUG: Filtering out workflow (wrong status):', wf.status);
+                    return false;
+                }
+                
+                const currentStep = wf.steps[wf.currentStep];
+                if(!currentStep) {
+                    console.log('DEBUG: Filtering out workflow (no current step)');
+                    return false;
+                }
+                
+                console.log('DEBUG: Current step role:', currentStep.role, 'vs user role:', userRole, 'step status:', currentStep.status);
+                // Show if user's role matches the current step role
+                return currentStep.role === userRole && currentStep.status === 'pending';
+            });
+            
+            console.log('DEBUG: Claims to review:', claimsToReview);
+            
+            const tbody = document.getElementById('financeClaimsList');
+            
+            if(claimsToReview.length === 0) {
+                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="7">No claims to review</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = claimsToReview.map(wf => {
+                const currentStep = wf.steps[wf.currentStep];
+                const stepDisplay = currentStep.stepId === 'finance-officer-review' ? 'Finance Officer Review' : 'Head of Finance Review';
+                return `<tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">${wf.data.id}</td>
+                    <td class="p-3">${wf.data.claimant}</td>
+                    <td class="p-3">${wf.data.type}</td>
+                    <td class="p-3">₦${parseFloat(wf.data.amount).toFixed(2)}</td>
+                    <td class="p-3"><span class="px-2 py-1 bg-yellow-100 rounded text-xs font-semibold">${stepDisplay}</span></td>
+                    <td class="p-3"><span class="px-2 py-1 bg-blue-100 rounded text-xs">${wf.status}</span></td>
+                    <td class="p-3"><button onclick="viewFinanceClaimDetails('${wf.data.id}', '${wf.id}')" class="text-blue-600 hover:underline font-semibold">Review</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function viewFinanceClaimDetails(claimId, workflowId) {
+            const claims = JSON.parse(localStorage.getItem('expenseClaims')||'[]');
+            const claim = claims.find(c => c.id === claimId);
+            if(!claim) return;
+
+            currentFinanceApprovalWF = workflowId ? financeWorkflow.getWorkflow(workflowId) : null;
+
+            document.getElementById('financeClaimDetails').innerHTML = `
+                <p><strong>ID:</strong> ${claim.id}</p>
+                <p><strong>Claimant:</strong> ${claim.claimant}</p>
+                <p><strong>Email:</strong> ${claim.email}</p>
+                <p><strong>Amount:</strong> ₦${parseFloat(claim.amount).toFixed(2)}</p>
+                <p><strong>Type:</strong> ${claim.type}</p>
+                <p><strong>Description:</strong> ${claim.description}</p>
+                <p><strong>Status:</strong> ${claim.status}</p>
+            `;
+
+            if(currentFinanceApprovalWF) {
+                document.getElementById('financeWorkflowProgress').classList.remove('hidden');
+                const progress = financeWorkflow.getApprovalProgress(workflowId);
+                const stepHtml = progress.steps.map(s => {
+                    const icon = s.status === 'approved' ? '✅' : s.status === 'rejected' ? '❌' : s.status === 'pending' ? '⏳' : '⏸️';
+                    return `<div class="p-3 bg-gray-100 rounded"><strong>${icon} ${s.stepId}</strong> (${s.role}) - ${s.status}</div>`;
+                }).join('');
+                document.getElementById('financeProgressSteps').innerHTML = stepHtml;
+
+                const currentStep = currentFinanceApprovalWF.steps[currentFinanceApprovalWF.currentStep];
+                const userRole = localStorage.getItem('financeUserRole') || '';
+                const userDept = localStorage.getItem('financeUserDept') || 'Finance';
+                const isCurrentRoleAndDept = currentStep && currentStep.status === 'pending' && 
+                                            currentStep.role === userRole && 
+                                            (!currentStep.department || currentStep.department === userDept);
+                
+                if(isCurrentRoleAndDept) {
+                    document.getElementById('financeApprovalControls').classList.remove('hidden');
+                } else {
+                    document.getElementById('financeApprovalControls').classList.add('hidden');
+                }
+            } else {
+                document.getElementById('financeWorkflowProgress').classList.add('hidden');
+                document.getElementById('financeApprovalControls').classList.add('hidden');
+            }
+
+            document.getElementById('financeRejectForm').classList.add('hidden');
+            document.getElementById('financeApprovalModal').classList.remove('hidden');
+        }
+
+        function financeApproveClaim() {
+            try {
+                const comment = document.getElementById('financeApprovalComment').value;
+                const userRole = localStorage.getItem('financeUserRole') || '';
+                const userDept = localStorage.getItem('financeUserDept') || 'Finance';
+                const userEmail = localStorage.getItem('financeUserEmail');
+                const currentStep = currentFinanceApprovalWF.steps[currentFinanceApprovalWF.currentStep];
+                
+                financeWorkflow.approveStep(currentFinanceApprovalWF.id, userEmail, userRole, userDept, comment);
+                
+                const claims = JSON.parse(localStorage.getItem('expenseClaims')||'[]');
+                const claim = claims.find(c => c.id === currentFinanceApprovalWF.requestId);
+                if(claim) {
+                    if(currentFinanceApprovalWF.currentStep === 0) {
+                        claim.status = 'FINANCE_OFFICER_APPROVED';
+                    } else if(currentFinanceApprovalWF.currentStep === 1) {
+                        claim.status = 'APPROVED';
+                        
+                        // Create disbursement notification for Teller
+                        const disbursements = JSON.parse(localStorage.getItem('claimDisbursements') || '[]');
+                        const disbursement = {
+                            id: 'DISB-' + Date.now(),
+                            claimId: claim.id,
+                            claimant: claim.claimant,
+                            email: claim.email,
+                            amount: claim.amount,
+                            claimType: claim.type,
+                            approvedDate: new Date().toISOString(),
+                            approvedBy: userEmail,
+                            status: 'pending'
+                        };
+                        disbursements.push(disbursement);
+                        localStorage.setItem('claimDisbursements', JSON.stringify(disbursements));
+                    }
+                    localStorage.setItem('expenseClaims', JSON.stringify(claims));
+                }
+                
+                const stepName = currentStep.stepId === 'finance-officer-review' ? 'Finance Officer' : 'Head of Finance';
+                const nextAction = currentStep.stepId === 'finance-officer-review' ? 'sent to Head of Finance for final approval' : 'fully approved';
+                alert(`Claim approved by ${stepName}! Claim has been ${nextAction}.`);
+                closeFinanceModal();
+                loadFinanceClaims();
+            } catch(e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function showFinanceRejectForm() {
+            document.getElementById('financeRejectForm').classList.remove('hidden');
+        }
+
+        function submitFinanceRejection() {
+            const reason = document.getElementById('financeRejectionReason').value.trim();
+            if(!reason) {
+                alert('Please provide a rejection reason');
+                return;
+            }
+            try {
+                const userRole = localStorage.getItem('financeUserRole') || '';
+                const userDept = localStorage.getItem('financeUserDept') || 'Finance';
+                const userEmail = localStorage.getItem('financeUserEmail');
+                financeWorkflow.rejectStep(currentFinanceApprovalWF.id, userEmail, userRole, userDept, reason);
+                
+                const claims = JSON.parse(localStorage.getItem('expenseClaims')||'[]');
+                const claim = claims.find(c => c.id === currentFinanceApprovalWF.requestId);
+                if(claim) {
+                    claim.status = 'REJECTED';
+                    localStorage.setItem('expenseClaims', JSON.stringify(claims));
+                }
+                
+                alert('Claim rejected: ' + reason + '\n\nUser will be notified.');
+                closeFinanceModal();
+                loadFinanceClaims();
+            } catch(e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        function loadApprovalHistory() {
+            const userRole = localStorage.getItem('financeUserRole') || '';
+            const allWorkflows = JSON.parse(localStorage.getItem('approvalWorkflows')||'[]');
+            
+            // Get workflows where user has approved a step
+            const auditLogs = JSON.parse(localStorage.getItem('approvalAuditLogs')||'[]');
+            const userApprovals = auditLogs.filter(log => 
+                log.actor === localStorage.getItem('financeUserEmail') && 
+                log.action === 'STEP_APPROVED'
+            );
+            
+            const container = document.getElementById('approvalHistoryList');
+            
+            if(userApprovals.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">No approval history</p>';
+                return;
+            }
+            
+            container.innerHTML = userApprovals.map(log => {
+                const wf = allWorkflows.find(w => w.requestId === log.requestId);
+                const claimAmount = wf ? wf.data.amount : 'N/A';
+                return `<div class="bg-white p-4 rounded shadow border-l-4 border-green-500">
+                    <p><strong>Claim ID:</strong> ${log.requestId}</p>
+                    <p><strong>Amount:</strong> ₦${parseFloat(claimAmount).toFixed(2)}</p>
+                    <p><strong>Step:</strong> ${log.details}</p>
+                    <p><strong>Date:</strong> ${new Date(log.timestamp).toLocaleString()}</p>
+                </div>`;
+            }).join('');
+        }
+
+        function closeFinanceModal() {
+            document.getElementById('financeApprovalModal').classList.add('hidden');
+        }
+
+        function financeLogout() {
+            localStorage.removeItem('financeUserName');
+            localStorage.removeItem('financeUserEmail');
+            localStorage.removeItem('financeUserRole');
+            localStorage.removeItem('financeUserDept');
+            
+            document.getElementById('financePortal').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('financeLoginForm').reset();
+        }
+
+        function loadFinanceTickets() {
+            const userEmail = localStorage.getItem('financeUserEmail');
+            const allTickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const financeTickets = allTickets.filter(t => (t.department || '').toLowerCase() === 'finance');
+            const tbody = document.getElementById('financeTicketsList');
+            
+            if (financeTickets.length === 0) {
+                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="7">No tickets</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = financeTickets.map(t => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3">${t.id}</td>
+                    <td class="p-3">${t.subject || ''}</td>
+                    <td class="p-3">${t.type || ''}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold ${t.priority === 'High' ? 'bg-red-100 text-red-800' : t.priority === 'Critical' ? 'bg-red-200 text-red-900' : 'bg-gray-100 text-gray-800'}">${t.priority || 'Low'}</span></td>
+                    <td class="p-3">${t.createdDate || (t.timestamp ? t.timestamp.split('T')[0] : '')}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold ${t.status === 'Open' ? 'bg-yellow-100 text-yellow-800' : t.status === 'Closed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">${t.status}</span></td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-2">
+                            <button onclick="viewTicketDetails('${t.id}')" class="text-blue-600 hover:underline text-sm">View</button>
+                            <button onclick="financeTicketAction('${t.id}','resolve')" class="text-yellow-600 hover:underline text-sm">Resolve</button>
+                            <button onclick="financeTicketAction('${t.id}','close')" class="text-green-600 hover:underline text-sm">Close</button>
+                            <button onclick="financeCommentTicket('${t.id}')" class="text-gray-600 hover:underline text-sm">Comment</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function pushSentEmail(to, subject, body){ const sent = JSON.parse(localStorage.getItem('sentEmails')||'[]'); sent.push({to,subject,body,sentAt:new Date().toISOString()}); localStorage.setItem('sentEmails', JSON.stringify(sent)); }
+
+        function financeTicketAction(ticketId, action){
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+            const employees = JSON.parse(localStorage.getItem('employees')||'[]');
+            const t = tickets.find(x=>x.id===ticketId);
+            if(!t){ alert('Ticket not found'); return; }
+            const actorId = localStorage.getItem('financeUserEmail') || localStorage.getItem('financeUserName') || 'Finance-User';
+            const actorName = localStorage.getItem('financeUserName') || actorId;
+            if(action==='resolve'){
+                t.status = 'Resolved'; t.resolvedAt = new Date().toISOString(); t.resolvedBy = actorId; t.resolvedByName = actorName;
+            } else if(action==='close'){
+                t.status = 'Closed'; t.closedAt = new Date().toISOString(); t.closedBy = actorId; t.closedByName = actorName;
+            } else if(action==='progress'){
+                t.status = 'In Progress';
+            }
+            t.history = t.history||[]; t.history.push({ action: action, by: actorId, byName: actorName, at: new Date().toISOString(), notes: '' });
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            try{ pushSentEmail(t.email, `Your ticket ${t.id} ${t.status}`, 'Ticket updated by finance'); }catch(e){}
+            loadFinanceTickets();
+        }
+
+        function financeCommentTicket(ticketId){
+            const note = prompt('Add comment:'); if(!note) return;
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+            const t = tickets.find(x=>x.id===ticketId); if(!t){ alert('Ticket not found'); return; }
+            const actorId = localStorage.getItem('financeUserEmail') || localStorage.getItem('financeUserName') || 'Finance-User';
+            const actorName = localStorage.getItem('financeUserName') || actorId;
+            t.history = t.history||[]; t.history.push({ action: 'comment', by: actorId, byName: actorName, at: new Date().toISOString(), notes: note });
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            try{ pushSentEmail(t.email, `New comment on ticket ${t.id}`, note); }catch(e){}
+            loadFinanceTickets();
+        }
+
+        // Detailed ticket view for Finance portal
+        function viewTicketDetails(ticketId){
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+            const employees = JSON.parse(localStorage.getItem('employees')||'[]');
+            const t = tickets.find(x=>x.id===ticketId);
+            if(!t){ alert('Ticket not found'); return; }
+
+            let modal = document.getElementById('financeTicketModal');
+            if(!modal){
+                modal = document.createElement('div');
+                modal.id = 'financeTicketModal';
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div class="sticky top-0 bg-gray-800 text-white p-6 flex justify-between items-center">
+                            <h2 class="text-2xl font-bold">Ticket Details</h2>
+                            <button onclick="document.getElementById('financeTicketModal').style.display='none'" class="text-2xl hover:text-gray-300">×</button>
+                        </div>
+                        <div id="financeTicketContent" class="p-6"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            const creator = employees.find(e => (e.email||'').toLowerCase() === (t.email||'').toLowerCase());
+            const assignee = employees.find(e => e.id === t.assignedTo);
+
+            document.getElementById('financeTicketContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Ticket ID</p>
+                            <p class="text-xl font-bold text-gray-800">${t.id}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Status</p>
+                            <p class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${t.status === 'Open' ? 'bg-yellow-100 text-yellow-800' : t.status === 'Closed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">${t.status}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Subject</p>
+                        <p class="text-lg font-semibold text-gray-800">${t.subject||'N/A'}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Priority</p>
+                            <p class="inline-block px-3 py-1 rounded text-sm font-semibold ${t.priority === 'High' ? 'bg-red-100 text-red-800' : t.priority === 'Critical' ? 'bg-red-200 text-red-900' : 'bg-gray-100 text-gray-800'}">${t.priority||'Low'}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Created Date</p>
+                            <p class="text-gray-800">${t.createdDate || (t.timestamp ? new Date(t.timestamp).toLocaleDateString() : '')}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded border border-blue-200">
+                            <p class="text-gray-500 text-sm font-semibold">Created By</p>
+                            <p class="font-semibold text-gray-800">${creator ? creator.name : (t.name||t.email||'Unknown')}</p>
+                            <p class="text-sm text-gray-600">${t.email}</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded border border-green-200">
+                            <p class="text-gray-500 text-sm font-semibold">Assigned To</p>
+                            <p class="font-semibold text-gray-800">${assignee ? assignee.name : 'Unassigned'}</p>
+                            ${assignee ? `<p class="text-sm text-gray-600">${assignee.email}</p>` : ''}
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-2">Description</p>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200"><p class="text-gray-800 whitespace-pre-wrap">${t.description||'No description provided'}</p></div>
+                    </div>
+                    ${t.resolutionNotes ? `<div><p class="text-gray-500 text-sm mb-2">Resolution Notes</p><div class="bg-yellow-50 p-4 rounded border border-yellow-200"><p class="text-gray-800 whitespace-pre-wrap">${t.resolutionNotes}</p></div></div>` : ''}
+                    <div class="mt-4">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Activity History</h3>
+                        ${(t.history||[]).map(h=>`<div class="bg-gray-50 p-3 rounded border-l-4 border-blue-500 mb-2"><p class="font-semibold">${h.action}</p><p class="text-sm text-gray-600">By: ${h.byName || ''}</p>${h.notes?`<p class="text-sm text-gray-700 mt-1"><strong>Notes:</strong> ${h.notes}</p>`:''}<p class="text-xs text-gray-500 mt-1">${h.at?new Date(h.at).toLocaleString():''}</p></div>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        // Check if already logged in
+        window.addEventListener('load', () => {
+            if(localStorage.getItem('financeUserRole')) {
+                const name = localStorage.getItem('financeUserName');
+                const role = localStorage.getItem('financeUserRole');
+                
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('financePortal').classList.remove('hidden');
+                document.getElementById('financeUserDisplay').textContent = name;
+                document.getElementById('financeRoleDisplay').textContent = role;
+                
+                const claimWorkflowConfig = {
+                    moduleName: 'expense',
+                    steps: [
+                        { stepId: 'finance-officer-review', role: 'Finance Officer', department: 'Finance', approver: 'Finance Officer' },
+                        { stepId: 'head-of-finance-review', role: 'Head of Finance', department: 'Finance', approver: 'Head of Finance' }
+                    ]
+                };
+                financeWorkflow = new ApprovalWorkflow(claimWorkflowConfig);
+                loadFinanceClaims();
+            }
+        });
+    </script>
+</body>
+</html>

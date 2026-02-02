@@ -57,6 +57,7 @@
                 </button>
                 <button onclick="switchSection('claims')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">💼 Manage Claims</button>
                 <button onclick="switchSection('users')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">👥 Manage Users</button>
+                <button onclick="switchSection('rights')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">🔐 Change of Rights</button>
             </nav>
 
             <div class="mt-8 pt-8 border-t border-red-600">
@@ -195,8 +196,8 @@
                                         <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
                                         <th class="px-6 py-3 text-left text-sm font-semibold">Amount</th>
                                         <th class="px-6 py-3 text-left text-sm font-semibold">Date</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Approval Status</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="claimsListAdmin" class="divide-y">
@@ -206,6 +207,72 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Claim Details Modal -->
+            <div id="claimModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold">Claim Details</h3>
+                        <button onclick="closeClaimModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    
+                    <div id="claimDetailsContent" class="space-y-6">
+                        <!-- Claim Information -->
+                        <div class="border-b pb-4">
+                            <h4 class="font-semibold mb-3 text-lg">Claim Information</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-600">Claim ID</p>
+                                    <p id="modalClaimId" class="font-semibold text-lg">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Date Submitted</p>
+                                    <p id="modalClaimDate" class="font-semibold">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Claimant</p>
+                                    <p id="modalClaimant" class="font-semibold">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Email</p>
+                                    <p id="modalClaimEmail" class="font-semibold">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Type</p>
+                                    <p id="modalClaimType" class="font-semibold">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Amount</p>
+                                    <p id="modalClaimAmount" class="font-semibold">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="border-b pb-4">
+                            <h4 class="font-semibold mb-2">Description</h4>
+                            <p id="modalClaimDescription" class="text-gray-700 p-3 bg-gray-50 rounded">-</p>
+                        </div>
+                        
+                        <!-- Approval Status -->
+                        <div class="border-b pb-4">
+                            <h4 class="font-semibold mb-3 text-lg">Approval Status</h4>
+                            <div class="mb-3">
+                                <p class="text-sm text-gray-600">Current Status</p>
+                                <p id="modalApprovalStatus" class="px-3 py-2 rounded font-semibold inline-block bg-yellow-100 text-yellow-800">-</p>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">Approval Progress</p>
+                            <div id="modalApprovalProgress" class="space-y-2">
+                                <!-- Approval steps will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex gap-2 justify-end">
+                        <button onclick="closeClaimModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Close</button>
                     </div>
                 </div>
             </div>
@@ -290,6 +357,78 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Change of Rights -->
+            <div id="rights" class="content-section">
+                <div class="p-8">
+                    <h2 class="text-3xl font-bold mb-6">Change of Rights</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Delegate Rights -->
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-4">Delegate Approval Rights</h3>
+                            <form id="delegateRightsForm" class="space-y-4">
+                                <div>
+                                    <label class="text-sm font-medium">From User (Current Approver)</label>
+                                    <select id="delegateFromUser" class="w-full p-2 border rounded mt-1" required>
+                                        <option value="">Select user...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium">To User (Temporary Approver)</label>
+                                    <select id="delegateToUser" class="w-full p-2 border rounded mt-1" required>
+                                        <option value="">Select user...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium">Role Being Delegated</label>
+                                    <select id="delegateRole" class="w-full p-2 border rounded mt-1" required>
+                                        <option value="">Select role...</option>
+                                        <option value="Finance Officer">Finance Officer</option>
+                                        <option value="Head of Finance">Head of Finance</option>
+                                        <option value="Teller">Teller</option>
+                                        <option value="Operations">Operations</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium">Duration (Days)</label>
+                                    <input id="delegateDays" type="number" min="1" max="30" value="7" class="w-full p-2 border rounded mt-1" required />
+                                </div>
+                                <button type="submit" class="w-full btn btn-primary">Delegate Rights</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Active Delegations -->
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-4">Active Delegations</h3>
+                            <div id="activeDelegationsList" class="space-y-3">
+                                <p class="text-gray-500">No active delegations</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delegation History -->
+                    <div class="card mt-6">
+                        <h3 class="font-semibold text-lg mb-4">Delegation History</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">From</th>
+                                        <th class="px-4 py-2 text-left">To</th>
+                                        <th class="px-4 py-2 text-left">Role</th>
+                                        <th class="px-4 py-2 text-left">Duration</th>
+                                        <th class="px-4 py-2 text-left">Status</th>
+                                        <th class="px-4 py-2 text-left">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="delegationHistoryTable" class="divide-y">
+                                    <tr><td colspan="6" class="px-4 py-2 text-center text-gray-500">No delegations yet</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -303,6 +442,12 @@
             });
             document.getElementById(sectionId).classList.add('active');
             event.target.classList.add('active');
+            
+            // Load data for specific sections
+            if (sectionId === 'rights') {
+                loadApprovalUsers();
+                loadDelegations();
+            }
         }
 
         function logout() {
@@ -491,6 +636,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 space-x-2">
+                            <button onclick="viewTicketDetails('${ticket.id}')" class="text-blue-600 hover:underline text-sm font-semibold">View</button>
                             <button onclick="openAdminModal('progress','${ticket.id}')" class="text-blue-600 hover:underline text-sm">Progress</button>
                             <button onclick="openAdminModal('resolve','${ticket.id}')" class="text-green-600 hover:underline text-sm">Resolve</button>
                             <button onclick="openAdminModal('close','${ticket.id}')" class="text-gray-600 hover:underline text-sm">Close</button>
@@ -546,38 +692,138 @@
         }
 
         function loadClaims() {
-            const requests = JSON.parse(localStorage.getItem('claims') || '[]');
+            const expenseClaims = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+            const workflows = JSON.parse(localStorage.getItem('approvalWorkflows') || '[]');
             const employees = JSON.parse(localStorage.getItem('employees') || '[]');
             const tbody = document.getElementById('claimsListAdmin');
-            if (requests.length === 0) {
+            
+            if (expenseClaims.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">No claims</td></tr>';
                 return;
             }
+            
             function fmt(d){ try{ return d ? new Date(d).toLocaleDateString() : ''; } catch(e){ return d||''; } }
-            tbody.innerHTML = requests.map(req => {
-                const user = employees.find(e => e.email === req.email);
-                const displayName = user ? user.name : (req.name || req.email || 'Unknown');
-                const displayEmail = user ? user.email : (req.email || '');
+            
+            tbody.innerHTML = expenseClaims.map(claim => {
+                const user = employees.find(e => e.email === claim.email);
+                const displayName = user ? user.name : (claim.claimant || claim.email || 'Unknown');
+                const displayEmail = claim.email || '';
+                
+                // Find workflow for this claim
+                const workflow = workflows.find(wf => wf.requestId === claim.id);
+                let approvalStatus = 'SUBMITTED';
+                let approvalProgress = '';
+                
+                if (workflow) {
+                    approvalStatus = workflow.status;
+                    const currentStep = workflow.steps[workflow.currentStep];
+                    if (currentStep) {
+                        approvalProgress = `Awaiting: ${currentStep.role}`;
+                    }
+                }
+                
                 return `
                     <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 font-semibold">${req.id}</td>
+                        <td class="px-6 py-4 font-semibold">${claim.id}</td>
                         <td class="px-6 py-4">${displayName}</td>
                         <td class="px-6 py-4">${displayEmail}</td>
-                        <td class="px-6 py-4">${req.type}</td>
-                        <td class="px-6 py-4">${req.amount}</td>
-                        <td class="px-6 py-4">${fmt(req.date)}</td>
+                        <td class="px-6 py-4">${claim.type}</td>
+                        <td class="px-6 py-4">₦${parseFloat(claim.amount).toFixed(2)}</td>
+                        <td class="px-6 py-4">${fmt(claim.timestamp)}</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded text-sm font-semibold ${getRequestStatusClass(req.status)}">${req.status}</span>
+                            <div class="text-sm">
+                                <span class="px-2 py-1 rounded font-semibold ${approvalStatus === 'approved' ? 'bg-green-100 text-green-800' : approvalStatus === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${approvalStatus.toUpperCase()}</span>
+                                <div class="text-xs text-gray-600 mt-1">${approvalProgress}</div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 space-x-2">
-                            ${req.status === 'Pending' ? `
-                                <button onclick="approveClaim('${req.id}', true)" class="text-green-600 hover:underline text-sm">Approve</button>
-                                <button onclick="approveClaim('${req.id}', false)" class="text-red-600 hover:underline text-sm">Reject</button>
-                            ` : ''}
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            <button onclick="viewClaim('${claim.id}')" class="text-blue-600 hover:underline font-semibold">View</button>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function viewClaim(claimId) {
+            const expenseClaims = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+            const workflows = JSON.parse(localStorage.getItem('approvalWorkflows') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            
+            const claim = expenseClaims.find(c => c.id === claimId);
+            if (!claim) {
+                alert('Claim not found');
+                return;
+            }
+            
+            // Find workflow for this claim
+            const workflow = workflows.find(wf => wf.requestId === claim.id);
+            
+            // Format date
+            function fmt(d) { 
+                try { 
+                    return d ? new Date(d).toLocaleString() : '-'; 
+                } catch(e) { 
+                    return d || '-'; 
+                } 
+            }
+            
+            // Populate modal
+            document.getElementById('modalClaimId').textContent = claim.id;
+            document.getElementById('modalClaimDate').textContent = fmt(claim.timestamp);
+            document.getElementById('modalClaimant').textContent = claim.claimant || '-';
+            document.getElementById('modalClaimEmail').textContent = claim.email || '-';
+            document.getElementById('modalClaimType').textContent = claim.type || '-';
+            document.getElementById('modalClaimAmount').textContent = '₦' + parseFloat(claim.amount).toFixed(2);
+            document.getElementById('modalClaimDescription').textContent = claim.description || 'No description';
+            
+            // Show approval status
+            let approvalStatus = 'SUBMITTED';
+            if (workflow) {
+                approvalStatus = workflow.status;
+            }
+            
+            const statusClass = approvalStatus === 'approved' ? 'bg-green-100 text-green-800' : 
+                               approvalStatus === 'rejected' ? 'bg-red-100 text-red-800' : 
+                               'bg-yellow-100 text-yellow-800';
+            document.getElementById('modalApprovalStatus').className = 'px-3 py-2 rounded font-semibold inline-block ' + statusClass;
+            document.getElementById('modalApprovalStatus').textContent = approvalStatus.toUpperCase();
+            
+            // Show approval progress
+            if (workflow) {
+                const progressHtml = workflow.steps.map((step, idx) => {
+                    const isCurrentStep = workflow.currentStep === idx;
+                    const icon = step.status === 'approved' ? '✅' : 
+                                step.status === 'rejected' ? '❌' : 
+                                step.status === 'pending' ? '⏳' : '⏸️';
+                    const bgColor = step.status === 'approved' ? 'bg-green-50' : 
+                                   step.status === 'rejected' ? 'bg-red-50' : 
+                                   isCurrentStep ? 'bg-yellow-50' : 'bg-gray-50';
+                    
+                    return `
+                        <div class="p-3 rounded border ${bgColor}">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-lg">${icon}</span>
+                                <span class="font-semibold">${step.stepId}</span>
+                                <span class="text-sm text-gray-600">(${step.role})</span>
+                            </div>
+                            <div class="text-sm text-gray-700">Status: <span class="font-semibold">${step.status}</span></div>
+                            ${step.approvedBy ? `<div class="text-sm text-gray-600">Approved by: ${step.approvedBy}</div>` : ''}
+                            ${step.approvedAt ? `<div class="text-xs text-gray-500">${fmt(step.approvedAt)}</div>` : ''}
+                            ${step.rejectionReason ? `<div class="text-sm text-red-700 mt-1">Rejection: ${step.rejectionReason}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('modalApprovalProgress').innerHTML = progressHtml;
+            } else {
+                document.getElementById('modalApprovalProgress').innerHTML = '<p class="text-gray-500">No workflow found</p>';
+            }
+            
+            // Show modal
+            document.getElementById('claimModal').classList.remove('hidden');
+        }
+        
+        function closeClaimModal() {
+            document.getElementById('claimModal').classList.add('hidden');
         }
 
         function adminCommentTicket(ticketId){
@@ -805,6 +1051,285 @@
             };
             return classes[status] || 'bg-gray-200 text-gray-800';
         }
+        
+        // ===== CHANGE OF RIGHTS FUNCTIONS =====
+        function loadApprovalUsers() {
+            const financeUsers = JSON.parse(localStorage.getItem('financeUsers') || '[]');
+            const branchUsers = JSON.parse(localStorage.getItem('branchUsers') || '[]');
+            const allUsers = [...financeUsers, ...branchUsers];
+            
+            const fromSelect = document.getElementById('delegateFromUser');
+            const toSelect = document.getElementById('delegateToUser');
+            
+            const html = allUsers.map(u => `<option value="${u.email}">${u.name} (${u.role})</option>`).join('');
+            fromSelect.innerHTML = '<option value="">Select user...</option>' + html;
+            toSelect.innerHTML = '<option value="">Select user...</option>' + html;
+        }
+        
+        function loadDelegations() {
+            const delegations = JSON.parse(localStorage.getItem('approvalDelegations') || '[]');
+            const financeUsers = JSON.parse(localStorage.getItem('financeUsers') || '[]');
+            const branchUsers = JSON.parse(localStorage.getItem('branchUsers') || '[]');
+            const allUsers = [...financeUsers, ...branchUsers];
+            
+            // Load active delegations
+            const now = new Date().getTime();
+            const active = delegations.filter(d => new Date(d.expiresAt).getTime() > now);
+            
+            if (active.length === 0) {
+                document.getElementById('activeDelegationsList').innerHTML = '<p class="text-gray-500">No active delegations</p>';
+            } else {
+                document.getElementById('activeDelegationsList').innerHTML = active.map(d => {
+                    const fromUser = allUsers.find(u => u.email === d.fromEmail);
+                    const toUser = allUsers.find(u => u.email === d.toEmail);
+                    const expiresIn = Math.ceil((new Date(d.expiresAt).getTime() - now) / (1000 * 60 * 60 * 24));
+                    
+                    return `
+                        <div class="p-3 bg-blue-50 rounded border border-blue-200">
+                            <div class="flex justify-between items-start">
+                                <div class="text-sm">
+                                    <p><strong>${fromUser ? fromUser.name : d.fromEmail}</strong> → <strong>${toUser ? toUser.name : d.toEmail}</strong></p>
+                                    <p class="text-gray-600">Role: ${d.role}</p>
+                                    <p class="text-gray-600">Expires in: <strong>${expiresIn} days</strong></p>
+                                </div>
+                                <button onclick="revokeDelegation('${d.id}')" class="text-red-600 hover:text-red-800 text-sm font-semibold">Revoke</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // Load delegation history
+            const history = delegations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            if (history.length === 0) {
+                document.getElementById('delegationHistoryTable').innerHTML = '<tr><td colspan="6" class="px-4 py-2 text-center text-gray-500">No delegations yet</td></tr>';
+            } else {
+                document.getElementById('delegationHistoryTable').innerHTML = history.map(d => {
+                    const fromUser = allUsers.find(u => u.email === d.fromEmail);
+                    const toUser = allUsers.find(u => u.email === d.toEmail);
+                    const isActive = new Date(d.expiresAt).getTime() > now;
+                    const status = isActive ? 'Active' : 'Expired';
+                    const statusClass = isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                    
+                    return `
+                        <tr>
+                            <td class="px-4 py-2">${fromUser ? fromUser.name : d.fromEmail}</td>
+                            <td class="px-4 py-2">${toUser ? toUser.name : d.toEmail}</td>
+                            <td class="px-4 py-2">${d.role}</td>
+                            <td class="px-4 py-2">${d.days} days</td>
+                            <td class="px-4 py-2"><span class="px-2 py-1 rounded text-xs font-semibold ${statusClass}">${status}</span></td>
+                            <td class="px-4 py-2">
+                                ${isActive ? `<button onclick="revokeDelegation('${d.id}')" class="text-red-600 hover:underline text-xs">Revoke</button>` : '-'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+        
+        document.getElementById('delegateRightsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fromEmail = document.getElementById('delegateFromUser').value;
+            const toEmail = document.getElementById('delegateToUser').value;
+            const role = document.getElementById('delegateRole').value;
+            const days = parseInt(document.getElementById('delegateDays').value);
+            
+            if (!fromEmail || !toEmail || !role) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            if (fromEmail === toEmail) {
+                alert('Cannot delegate to the same person');
+                return;
+            }
+            
+            const delegation = {
+                id: 'DEL-' + Date.now(),
+                fromEmail,
+                toEmail,
+                role,
+                days,
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+            };
+            
+            const delegations = JSON.parse(localStorage.getItem('approvalDelegations') || '[]');
+            delegations.push(delegation);
+            localStorage.setItem('approvalDelegations', JSON.stringify(delegations));
+            
+            alert(`Rights delegated successfully! Expires in ${days} days.`);
+            this.reset();
+            loadDelegations();
+        });
+        
+        function revokeDelegation(delegationId) {
+            if (!confirm('Revoke this delegation?')) return;
+            
+            const delegations = JSON.parse(localStorage.getItem('approvalDelegations') || '[]');
+            const filtered = delegations.filter(d => d.id !== delegationId);
+            localStorage.setItem('approvalDelegations', JSON.stringify(filtered));
+            
+            alert('Delegation revoked');
+            loadDelegations();
+        }
+
+        // Ticket Details Modal
+        function viewTicketDetails(ticketId) {
+            const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const ticket = tickets.find(t => t.id === ticketId);
+            
+            if (!ticket) {
+                alert('Ticket not found');
+                return;
+            }
+
+            const creator = employees.find(e => e.email === ticket.email);
+            const assignee = employees.find(e => e.id === ticket.assignedTo);
+            
+            let modal = document.getElementById('ticketDetailsModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'ticketDetailsModal';
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div class="sticky top-0 bg-gray-800 text-white p-6 flex justify-between items-center">
+                            <h2 class="text-2xl font-bold">Ticket Details</h2>
+                            <button onclick="document.getElementById('ticketDetailsModal').style.display='none'" class="text-2xl hover:text-gray-300">×</button>
+                        </div>
+                        <div id="ticketDetailsContent" class="p-6"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            let historyHtml = '';
+            if (ticket.history && ticket.history.length > 0) {
+                historyHtml = `
+                    <div class="mt-6 pt-6 border-t">
+                        <h3 class="text-lg font-bold mb-4 text-gray-800">Activity History</h3>
+                        <div class="space-y-3">
+                            ${ticket.history.map(h => `
+                                <div class="bg-gray-50 p-3 rounded border-l-4 border-blue-500">
+                                    <p class="font-semibold text-gray-800">${h.action.charAt(0).toUpperCase() + h.action.slice(1)}</p>
+                                    <p class="text-sm text-gray-600">By: ${h.byName}</p>
+                                    ${h.notes ? `<p class="text-sm text-gray-700 mt-1"><strong>Notes:</strong> ${h.notes}</p>` : ''}
+                                    <p class="text-xs text-gray-500 mt-1">${new Date(h.at).toLocaleString()}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('ticketDetailsContent').innerHTML = `
+                <div class="space-y-6">
+                    <!-- Header Info -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Ticket ID</p>
+                            <p class="text-xl font-bold text-gray-800">${ticket.id}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Status</p>
+                            <p class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusClass(ticket.status)}">${ticket.status}</p>
+                        </div>
+                    </div>
+
+                    <!-- Subject & Type -->
+                    <div>
+                        <p class="text-gray-500 text-sm">Subject</p>
+                        <p class="text-lg font-semibold text-gray-800">${ticket.subject || 'N/A'}</p>
+                    </div>
+
+                    <!-- Priority & Created Date -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Priority</p>
+                            <p class="inline-block px-3 py-1 rounded text-sm font-semibold ${getPriorityClass(ticket.priority)}">${ticket.priority || 'Low'}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Created Date</p>
+                            <p class="text-gray-800">${ticket.createdDate || new Date(ticket.timestamp).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+
+                    <!-- Creator & Assignee -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded border border-blue-200">
+                            <p class="text-gray-500 text-sm font-semibold">Created By</p>
+                            <p class="font-semibold text-gray-800">${creator ? creator.name : ticket.name}</p>
+                            <p class="text-sm text-gray-600">${ticket.email}</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded border border-green-200">
+                            <p class="text-gray-500 text-sm font-semibold">Assigned To</p>
+                            <p class="font-semibold text-gray-800">${assignee ? assignee.name : 'Unassigned'}</p>
+                            ${assignee ? `<p class="text-sm text-gray-600">${assignee.email}</p>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Department -->
+                    <div>
+                        <p class="text-gray-500 text-sm">Department</p>
+                        <p class="text-gray-800 font-semibold">${ticket.department || 'General'}</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <p class="text-gray-500 text-sm mb-2">Description</p>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                            <p class="text-gray-800 whitespace-pre-wrap">${ticket.description || 'No description provided'}</p>
+                        </div>
+                    </div>
+
+                    <!-- Resolution Notes -->
+                    ${ticket.resolutionNotes ? `
+                        <div>
+                            <p class="text-gray-500 text-sm mb-2">Resolution Notes</p>
+                            <div class="bg-yellow-50 p-4 rounded border border-yellow-200">
+                                <p class="text-gray-800 whitespace-pre-wrap">${ticket.resolutionNotes}</p>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- Status Timeline -->
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        ${ticket.createdAt ? `
+                            <div class="bg-blue-50 p-3 rounded">
+                                <p class="text-xs text-gray-600">Submitted</p>
+                                <p class="text-sm font-semibold text-blue-600">${new Date(ticket.createdAt).toLocaleDateString()}</p>
+                            </div>
+                        ` : ''}
+                        ${ticket.resolvedAt ? `
+                            <div class="bg-yellow-50 p-3 rounded">
+                                <p class="text-xs text-gray-600">Resolved</p>
+                                <p class="text-sm font-semibold text-yellow-600">${new Date(ticket.resolvedAt).toLocaleDateString()}</p>
+                            </div>
+                        ` : ''}
+                        ${ticket.closedAt ? `
+                            <div class="bg-green-50 p-3 rounded">
+                                <p class="text-xs text-gray-600">Closed</p>
+                                <p class="text-sm font-semibold text-green-600">${new Date(ticket.closedAt).toLocaleDateString()}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${historyHtml}
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('ticketDetailsModal');
+            if (modal && event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

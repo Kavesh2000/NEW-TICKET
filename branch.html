@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Portal - Operations Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar-link { transition: all 0.3s ease; }
+        .sidebar-link:hover { background-color: rgba(255,255,255,0.06); transform: translateX(4px); }
+        .sidebar-link.active { background-color: rgba(255,255,255,0.08); border-left: 4px solid rgba(255,255,255,0.12); }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-600 to-purple-900">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h1 class="text-3xl font-bold text-center mb-2">Branch Portal</h1>
+            <p class="text-center text-gray-600 mb-6">Operations Management System</p>
+            <p class="text-center text-sm text-gray-500 mb-6">Login credentials created by Admin</p>
+            
+            <form id="branchLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Email</label>
+                    <input type="email" id="branchUserEmail" placeholder="your@email.com" required class="w-full p-3 border rounded focus:outline-none focus:border-purple-500" />
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Password</label>
+                    <input type="password" id="branchUserPassword" placeholder="Password" required class="w-full p-3 border rounded focus:outline-none focus:border-purple-500" />
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Role</label>
+                    <select id="branchUserRole" required class="w-full p-3 border rounded focus:outline-none focus:border-purple-500">
+                        <option value="">Select Role</option>
+                        <option value="Teller">Teller</option>
+                        <option value="Operations">Operations</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded">Login</button>
+            </form>
+            
+            <p id="branchLoginError" class="text-center text-red-500 mt-4 hidden"></p>
+        </div>
+    </div>
+
+    <!-- Branch Portal Dashboard -->
+    <div id="branchPortal" class="hidden flex h-screen">
+        <aside class="w-64 bg-gradient-to-b from-purple-700 to-purple-900 text-white p-6">
+            <h1 class="text-2xl font-bold mb-6">Branch Portal</h1>
+            <div class="mb-4 pb-4 border-b border-purple-600">
+                <p class="text-sm text-purple-100">Logged in as:</p>
+                <p id="branchUserDisplay" class="font-semibold">-</p>
+                <p id="branchRoleDisplay" class="text-xs text-purple-200">-</p>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="switchBranchSection('dashboard')" class="sidebar-link active w-full text-left px-4 py-3 rounded">📊 Dashboard</button>
+                <button onclick="switchBranchSection('disbursements')" class="sidebar-link w-full text-left px-4 py-3 rounded">💵 Disbursements</button>
+                <button onclick="switchBranchSection('transactions')" class="sidebar-link w-full text-left px-4 py-3 rounded">💱 Transactions</button>
+                <button onclick="switchBranchSection('operations')" class="sidebar-link w-full text-left px-4 py-3 rounded">⚙️ Operations</button>
+                <button onclick="switchBranchSection('reports')" class="sidebar-link w-full text-left px-4 py-3 rounded">📈 Reports</button>
+                <button onclick="switchBranchSection('tickets')" class="sidebar-link w-full text-left px-4 py-3 rounded">🎫 Tickets</button>
+            </nav>
+            <div class="mt-8 pt-8 border-t border-purple-600">
+                <button onclick="branchLogout()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-auto">
+            <!-- Dashboard -->
+            <div id="dashboard" class="content-section active p-8">
+                <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded shadow">
+                        <p class="text-gray-600">Today's Transactions</p>
+                        <p class="text-3xl font-bold" id="todayTransactions">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded shadow">
+                        <p class="text-gray-600">Total Amount</p>
+                        <p class="text-3xl font-bold" id="totalAmount">₦0.00</p>
+                    </div>
+                    <div class="bg-white p-6 rounded shadow">
+                        <p class="text-gray-600">Pending Operations</p>
+                        <p class="text-3xl font-bold" id="pendingOperations">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disbursements (For Tellers) -->
+            <div id="disbursements" class="content-section p-8">
+                <h2 class="text-2xl font-bold mb-6">Approved Claims - Ready for Disbursement</h2>
+                <div class="bg-white rounded shadow">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">Claim ID</th>
+                                <th class="p-3 text-left">User Name</th>
+                                <th class="p-3 text-left">Email</th>
+                                <th class="p-3 text-left">Amount</th>
+                                <th class="p-3 text-left">Type</th>
+                                <th class="p-3 text-left">Approved Date</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disbursementsList">
+                            <tr><td class="p-4 text-center" colspan="7" class="text-gray-500">No pending disbursements</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Transactions -->
+            <div id="transactions" class="content-section p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Transactions</h2>
+                    <button id="newTransactionBtn" onclick="showNewTransactionForm()" class="bg-blue-600 text-white px-4 py-2 rounded hidden">+ New Transaction</button>
+                </div>
+                
+                <div id="newTransactionForm" class="hidden bg-white p-6 rounded shadow mb-4">
+                    <h3 class="font-semibold mb-4">Record Transaction</h3>
+                    <form id="transactionFormEl" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <input id="transactionType" placeholder="Transaction Type" required class="p-2 border rounded" />
+                            <input id="transactionAmount" type="number" placeholder="Amount" step="0.01" required class="p-2 border rounded" />
+                        </div>
+                        <input id="transactionRef" placeholder="Reference/Account Number" required class="w-full p-2 border rounded" />
+                        <textarea id="transactionDesc" placeholder="Description" class="w-full p-2 border rounded"></textarea>
+                        <div class="flex gap-2">
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded" type="submit">Submit</button>
+                            <button type="button" class="px-4 py-2 rounded bg-gray-200" onclick="hideNewTransactionForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded shadow">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Type</th>
+                                <th class="p-3 text-left">Amount</th>
+                                <th class="p-3 text-left">Reference</th>
+                                <th class="p-3 text-left">Date</th>
+                                <th class="p-3 text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsList">
+                            <tr><td class="p-4 text-center" colspan="6">No transactions</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Operations -->
+            <div id="operations" class="content-section p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Operations</h2>
+                    <button id="newOperationBtn" onclick="showNewOperationForm()" class="bg-green-600 text-white px-4 py-2 rounded hidden">+ New Operation</button>
+                </div>
+                
+                <div id="newOperationForm" class="hidden bg-white p-6 rounded shadow mb-4">
+                    <h3 class="font-semibold mb-4">Log Operation</h3>
+                    <form id="operationFormEl" class="space-y-3">
+                        <input id="operationName" placeholder="Operation Name" required class="w-full p-2 border rounded" />
+                        <select id="operationType" required class="w-full p-2 border rounded">
+                            <option value="">Select Type</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Setup">Setup</option>
+                            <option value="Closure">Closure</option>
+                            <option value="Audit">Audit</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <textarea id="operationDesc" placeholder="Details" class="w-full p-2 border rounded"></textarea>
+                        <div class="flex gap-2">
+                            <button class="bg-green-600 text-white px-4 py-2 rounded" type="submit">Submit</button>
+                            <button type="button" class="px-4 py-2 rounded bg-gray-200" onclick="hideNewOperationForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded shadow">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Operation</th>
+                                <th class="p-3 text-left">Type</th>
+                                <th class="p-3 text-left">Date</th>
+                                <th class="p-3 text-left">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operationsList">
+                            <tr><td class="p-4 text-center" colspan="5">No operations</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reports -->
+            <div id="reports" class="content-section p-8">
+                <h2 class="text-2xl font-bold mb-6">Reports</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded shadow">
+                        <h3 class="font-semibold mb-4">Daily Summary</h3>
+                        <p class="text-sm text-gray-600 mb-2">Total Transactions: <span id="reportTotalTx" class="font-semibold">0</span></p>
+                        <p class="text-sm text-gray-600 mb-2">Total Amount: <span id="reportTotalAmount" class="font-semibold">₦0.00</span></p>
+                        <p class="text-sm text-gray-600">Generated: <span id="reportTime" class="font-semibold">-</span></p>
+                    </div>
+                    <div class="bg-white p-6 rounded shadow">
+                        <h3 class="font-semibold mb-4">Operations Summary</h3>
+                        <p class="text-sm text-gray-600 mb-2">Total Operations: <span id="reportTotalOps" class="font-semibold">0</span></p>
+                        <button onclick="generateReport()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Generate Full Report</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets -->
+            <div id="tickets" class="content-section p-8">
+                <h2 class="text-2xl font-bold mb-6">Support Tickets</h2>
+                <div class="bg-white rounded shadow p-4">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-3 text-left">ID</th>
+                                <th class="p-3 text-left">Subject</th>
+                                <th class="p-3 text-left">Type</th>
+                                <th class="p-3 text-left">Priority</th>
+                                <th class="p-3 text-left">Created</th>
+                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="branchTicketsList">
+                            <tr><td class="p-4 text-center" colspan="7">No tickets assigned</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let branchWorkflow;
+
+        function switchBranchSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            if (id === 'dashboard') loadBranchDashboard();
+            else if (id === 'disbursements') loadDisbursements();
+            else if (id === 'transactions') loadTransactions();
+            else if (id === 'operations') loadOperations();
+            else if (id === 'reports') loadReports();
+            else if (id === 'tickets') loadBranchTickets();
+        }
+
+        function showNewTransactionForm() {
+            document.getElementById('newTransactionForm').classList.remove('hidden');
+        }
+        function hideNewTransactionForm() {
+            document.getElementById('newTransactionForm').classList.add('hidden');
+        }
+        function showNewOperationForm() {
+            document.getElementById('newOperationForm').classList.remove('hidden');
+        }
+        function hideNewOperationForm() {
+            document.getElementById('newOperationForm').classList.add('hidden');
+        }
+
+        function branchLogout() {
+            localStorage.removeItem('branchUserName');
+            localStorage.removeItem('branchUserEmail');
+            localStorage.removeItem('branchUserRole');
+            window.location.href = 'index.html';
+        }
+
+        // Login Handler
+        document.getElementById('branchLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('branchUserEmail').value;
+            const password = document.getElementById('branchUserPassword').value;
+            const selectedRole = document.getElementById('branchUserRole').value;
+
+            const branchUsers = JSON.parse(localStorage.getItem('branchUsers') || '[]');
+            const user = branchUsers.find(u => u.email === email && u.password === password && u.role === selectedRole);
+
+            if (!user) {
+                document.getElementById('branchLoginError').textContent = 'Invalid credentials. Demo: teller.branch@onit.local / 1234 or ops.branch@onit.local / 1234';
+                document.getElementById('branchLoginError').classList.remove('hidden');
+                return;
+            }
+
+            localStorage.setItem('branchUserName', user.name);
+            localStorage.setItem('branchUserEmail', user.email);
+            localStorage.setItem('branchUserRole', user.role);
+
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('branchPortal').classList.remove('hidden');
+
+            document.getElementById('branchUserDisplay').textContent = user.name;
+            document.getElementById('branchRoleDisplay').textContent = user.role;
+
+            // Show form buttons based on role
+            const tellerOnly = document.getElementById('newTransactionBtn');
+            const opsOnly = document.getElementById('newOperationBtn');
+            if (user.role === 'Teller') {
+                tellerOnly.classList.remove('hidden');
+            } else if (user.role === 'Operations') {
+                opsOnly.classList.remove('hidden');
+            }
+
+            loadBranchDashboard();
+        });
+
+        function loadBranchDashboard() {
+            const txList = JSON.parse(localStorage.getItem('branchTransactions') || '[]');
+            const opsList = JSON.parse(localStorage.getItem('branchOperations') || '[]');
+            
+            const today = new Date().toDateString();
+            const todayTx = txList.filter(t => new Date(t.date).toDateString() === today);
+            const totalAmount = todayTx.reduce((sum, t) => sum + (t.amount || 0), 0);
+            
+            document.getElementById('todayTransactions').textContent = todayTx.length;
+            document.getElementById('totalAmount').textContent = '₦' + totalAmount.toFixed(2);
+            document.getElementById('pendingOperations').textContent = opsList.filter(o => o.status === 'Pending').length;
+        }
+
+        function loadDisbursements() {
+            const disbursements = JSON.parse(localStorage.getItem('claimDisbursements') || '[]');
+            const tbody = document.getElementById('disbursementsList');
+            
+            // Filter only pending disbursements
+            const pending = disbursements.filter(d => d.status === 'pending');
+            
+            if (pending.length === 0) {
+                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="7" class="text-gray-500">No pending disbursements</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pending.map(d => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 font-semibold">${d.claimId}</td>
+                    <td class="p-3">${d.claimant}</td>
+                    <td class="p-3">${d.email}</td>
+                    <td class="p-3"><strong>₦${parseFloat(d.amount).toFixed(2)}</strong></td>
+                    <td class="p-3">${d.claimType}</td>
+                    <td class="p-3">${new Date(d.approvedDate).toLocaleDateString()}</td>
+                    <td class="p-3">
+                        <button onclick="markDisbursementComplete('${d.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Disbursed</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function markDisbursementComplete(disbursementId) {
+            if (!confirm('Mark this disbursement as complete?')) return;
+            
+            const disbursements = JSON.parse(localStorage.getItem('claimDisbursements') || '[]');
+            const disburse = disbursements.find(d => d.id === disbursementId);
+            
+            if (disburse) {
+                disburse.status = 'completed';
+                disburse.completedDate = new Date().toISOString();
+                disburse.completedBy = localStorage.getItem('branchUserName');
+                disburse.completedByEmail = localStorage.getItem('branchUserEmail');
+                localStorage.setItem('claimDisbursements', JSON.stringify(disbursements));
+                
+                // Create notification for the user
+                const notifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+                const notification = {
+                    id: 'NOTIF-' + Date.now(),
+                    userEmail: disburse.email,
+                    claimId: disburse.claimId,
+                    amount: disburse.amount,
+                    message: `Your claim #${disburse.claimId} for ₦${parseFloat(disburse.amount).toFixed(2)} has been disbursed by ${disburse.completedBy}`,
+                    type: 'disbursement_complete',
+                    createdAt: new Date().toISOString(),
+                    read: false
+                };
+                notifications.push(notification);
+                localStorage.setItem('userNotifications', JSON.stringify(notifications));
+                
+                alert('Disbursement completed! User notified.');
+                loadDisbursements();
+            }
+        }
+
+        function loadTransactions() {
+            const txList = JSON.parse(localStorage.getItem('branchTransactions') || '[]');
+            const tbody = document.getElementById('transactionsList');
+            
+            if (txList.length === 0) {
+                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="6">No transactions</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = txList.map(t => `
+                <tr class="border-b">
+                    <td class="p-3">${t.id}</td>
+                    <td class="p-3">${t.type}</td>
+                    <td class="p-3">₦${parseFloat(t.amount).toFixed(2)}</td>
+                    <td class="p-3">${t.ref}</td>
+                    <td class="p-3">${new Date(t.date).toLocaleDateString()}</td>
+                    <td class="p-3"><span class="px-2 py-1 bg-green-100 rounded text-xs">${t.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function loadOperations() {
+            const opsList = JSON.parse(localStorage.getItem('branchOperations') || '[]');
+            const tbody = document.getElementById('operationsList');
+            
+            if (opsList.length === 0) {
+                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="5">No operations</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = opsList.map(o => `
+                <tr class="border-b">
+                    <td class="p-3">${o.id}</td>
+                    <td class="p-3">${o.name}</td>
+                    <td class="p-3">${o.type}</td>
+                    <td class="p-3">${new Date(o.date).toLocaleDateString()}</td>
+                    <td class="p-3"><span class="px-2 py-1 ${o.status === 'Completed' ? 'bg-green-100' : 'bg-yellow-100'} rounded text-xs">${o.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function loadReports() {
+            const txList = JSON.parse(localStorage.getItem('branchTransactions') || '[]');
+            const opsList = JSON.parse(localStorage.getItem('branchOperations') || '[]');
+            
+            const totalAmount = txList.reduce((sum, t) => sum + (t.amount || 0), 0);
+            
+            document.getElementById('reportTotalTx').textContent = txList.length;
+            document.getElementById('reportTotalAmount').textContent = '₦' + totalAmount.toFixed(2);
+            document.getElementById('reportTotalOps').textContent = opsList.length;
+            document.getElementById('reportTime').textContent = new Date().toLocaleString();
+        }
+
+        function generateReport() {
+            alert('Report generated and sent to admin email');
+        }
+
+        function loadBranchTickets() {
+            const allTickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+            const branchTickets = allTickets.filter(t => (t.department || '').toLowerCase() === 'branch');
+            const tbody = document.getElementById('branchTicketsList');
+            
+            if (branchTickets.length === 0) {
+                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="7">No tickets</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = branchTickets.map(t => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3">${t.id}</td>
+                    <td class="p-3">${t.subject || ''}</td>
+                    <td class="p-3">${t.type || ''}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold ${t.priority === 'High' ? 'bg-red-100 text-red-800' : t.priority === 'Critical' ? 'bg-red-200 text-red-900' : 'bg-gray-100 text-gray-800'}">${t.priority || 'Low'}</span></td>
+                    <td class="p-3">${t.createdDate || (t.timestamp ? t.timestamp.split('T')[0] : '')}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold ${t.status === 'Open' ? 'bg-yellow-100 text-yellow-800' : t.status === 'Closed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">${t.status}</span></td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-2">
+                            <button onclick="viewTicketDetails('${t.id}')" class="text-blue-600 hover:underline text-sm">View</button>
+                            <button onclick="branchTicketAction('${t.id}','resolve')" class="text-yellow-600 hover:underline text-sm">Resolve</button>
+                            <button onclick="branchTicketAction('${t.id}','close')" class="text-green-600 hover:underline text-sm">Close</button>
+                            <button onclick="branchCommentTicket('${t.id}')" class="text-gray-600 hover:underline text-sm">Comment</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function pushSentEmail(to, subject, body){ const sent = JSON.parse(localStorage.getItem('sentEmails')||'[]'); sent.push({to,subject,body,sentAt:new Date().toISOString()}); localStorage.setItem('sentEmails', JSON.stringify(sent)); }
+
+        function branchTicketAction(ticketId, action){
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+            const employees = JSON.parse(localStorage.getItem('employees')||'[]');
+            const t = tickets.find(x=>x.id===ticketId);
+            if(!t){ alert('Ticket not found'); return; }
+            const actorId = localStorage.getItem('branchUserEmail') || localStorage.getItem('branchUserName') || 'Branch-User';
+            const actorName = localStorage.getItem('branchUserName') || actorId;
+            if(action==='resolve'){
+                t.status = 'Resolved'; t.resolvedAt = new Date().toISOString(); t.resolvedBy = actorId; t.resolvedByName = actorName;
+            } else if(action==='close'){
+                t.status = 'Closed'; t.closedAt = new Date().toISOString(); t.closedBy = actorId; t.closedByName = actorName;
+            } else if(action==='progress'){
+                t.status = 'In Progress';
+            }
+            t.history = t.history||[]; t.history.push({ action: action, by: actorId, byName: actorName, at: new Date().toISOString(), notes: '' });
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            try{ pushSentEmail(t.email, `Your ticket ${t.id} ${t.status}`, 'Ticket updated by branch'); }catch(e){}
+            loadBranchTickets();
+        }
+
+        function branchCommentTicket(ticketId){
+            const note = prompt('Add comment:'); if(!note) return;
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+            const t = tickets.find(x=>x.id===ticketId); if(!t){ alert('Ticket not found'); return; }
+            const actorId = localStorage.getItem('branchUserEmail') || localStorage.getItem('branchUserName') || 'Branch-User';
+            const actorName = localStorage.getItem('branchUserName') || actorId;
+            t.history = t.history||[]; t.history.push({ action: 'comment', by: actorId, byName: actorName, at: new Date().toISOString(), notes: note });
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            try{ pushSentEmail(t.email, `New comment on ticket ${t.id}`, note); }catch(e){}
+            loadBranchTickets();
+        }
+
+        // Detailed ticket view for Branch portal
+        function viewTicketDetails(ticketId){
+            const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+            const employees = JSON.parse(localStorage.getItem('employees')||'[]');
+            const t = tickets.find(x=>x.id===ticketId);
+            if(!t){ alert('Ticket not found'); return; }
+
+            let modal = document.getElementById('branchTicketModal');
+            if(!modal){
+                modal = document.createElement('div');
+                modal.id = 'branchTicketModal';
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div class="sticky top-0 bg-gray-800 text-white p-6 flex justify-between items-center">
+                            <h2 class="text-2xl font-bold">Ticket Details</h2>
+                            <button onclick="document.getElementById('branchTicketModal').style.display='none'" class="text-2xl hover:text-gray-300">×</button>
+                        </div>
+                        <div id="branchTicketContent" class="p-6"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            const creator = employees.find(e => (e.email||'').toLowerCase() === (t.email||'').toLowerCase());
+            const assignee = employees.find(e => e.id === t.assignedTo);
+
+            document.getElementById('branchTicketContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Ticket ID</p>
+                            <p class="text-xl font-bold text-gray-800">${t.id}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Status</p>
+                            <p class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${t.status === 'Open' ? 'bg-yellow-100 text-yellow-800' : t.status === 'Closed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">${t.status}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Subject</p>
+                        <p class="text-lg font-semibold text-gray-800">${t.subject||'N/A'}</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">Priority</p>
+                            <p class="inline-block px-3 py-1 rounded text-sm font-semibold ${t.priority === 'High' ? 'bg-red-100 text-red-800' : t.priority === 'Critical' ? 'bg-red-200 text-red-900' : 'bg-gray-100 text-gray-800'}">${t.priority||'Low'}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Created Date</p>
+                            <p class="text-gray-800">${t.createdDate || (t.timestamp ? new Date(t.timestamp).toLocaleDateString() : '')}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded border border-blue-200">
+                            <p class="text-gray-500 text-sm font-semibold">Created By</p>
+                            <p class="font-semibold text-gray-800">${creator ? creator.name : (t.name||t.email||'Unknown')}</p>
+                            <p class="text-sm text-gray-600">${t.email}</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded border border-green-200">
+                            <p class="text-gray-500 text-sm font-semibold">Assigned To</p>
+                            <p class="font-semibold text-gray-800">${assignee ? assignee.name : 'Unassigned'}</p>
+                            ${assignee ? `<p class="text-sm text-gray-600">${assignee.email}</p>` : ''}
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-2">Description</p>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200"><p class="text-gray-800 whitespace-pre-wrap">${t.description||'No description provided'}</p></div>
+                    </div>
+                    ${t.resolutionNotes ? `<div><p class="text-gray-500 text-sm mb-2">Resolution Notes</p><div class="bg-yellow-50 p-4 rounded border border-yellow-200"><p class="text-gray-800 whitespace-pre-wrap">${t.resolutionNotes}</p></div></div>` : ''}
+                    <div class="mt-4">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Activity History</h3>
+                        ${(t.history||[]).map(h=>`<div class="bg-gray-50 p-3 rounded border-l-4 border-blue-500 mb-2"><p class="font-semibold">${h.action}</p><p class="text-sm text-gray-600">By: ${h.byName || ''}</p>${h.notes?`<p class="text-sm text-gray-700 mt-1"><strong>Notes:</strong> ${h.notes}</p>`:''}<p class="text-xs text-gray-500 mt-1">${h.at?new Date(h.at).toLocaleString():''}</p></div>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        // Transaction Form
+        document.getElementById('transactionFormEl').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = 'TXN-' + Date.now().toString().slice(-6);
+            const type = document.getElementById('transactionType').value;
+            const amount = parseFloat(document.getElementById('transactionAmount').value);
+            const ref = document.getElementById('transactionRef').value;
+            const desc = document.getElementById('transactionDesc').value;
+
+            const transaction = {
+                id,
+                type,
+                amount,
+                ref,
+                desc,
+                date: new Date().toISOString(),
+                status: 'Completed',
+                recordedBy: localStorage.getItem('branchUserName')
+            };
+
+            const txList = JSON.parse(localStorage.getItem('branchTransactions') || '[]');
+            txList.push(transaction);
+            localStorage.setItem('branchTransactions', JSON.stringify(txList));
+
+            alert('Transaction recorded: ' + id);
+            hideNewTransactionForm();
+            this.reset();
+            loadTransactions();
+            loadBranchDashboard();
+        });
+
+        // Operation Form
+        document.getElementById('operationFormEl').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = 'OP-' + Date.now().toString().slice(-6);
+            const name = document.getElementById('operationName').value;
+            const type = document.getElementById('operationType').value;
+            const desc = document.getElementById('operationDesc').value;
+
+            const operation = {
+                id,
+                name,
+                type,
+                desc,
+                date: new Date().toISOString(),
+                status: 'Completed',
+                recordedBy: localStorage.getItem('branchUserName')
+            };
+
+            const opsList = JSON.parse(localStorage.getItem('branchOperations') || '[]');
+            opsList.push(operation);
+            localStorage.setItem('branchOperations', JSON.stringify(opsList));
+
+            alert('Operation logged: ' + id);
+            hideNewOperationForm();
+            this.reset();
+            loadOperations();
+            loadBranchDashboard();
+        });
+
+        // Auto-create demo users on first load if needed
+        window.addEventListener('load', function() {
+            const branchUsers = JSON.parse(localStorage.getItem('branchUsers') || '[]');
+            if (branchUsers.length === 0) {
+                const demoUsers = [
+                    { name: 'John Teller', email: 'teller.branch@onit.local', password: '1234', role: 'Teller', department: 'Branch' },
+                    { name: 'Mary Operations', email: 'ops.branch@onit.local', password: '1234', role: 'Operations', department: 'Branch' }
+                ];
+                localStorage.setItem('branchUsers', JSON.stringify(demoUsers));
+            }
+        });
+    </script>
+</body>
+</html>
