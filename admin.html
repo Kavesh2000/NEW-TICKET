@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Onit MFB</title>
+    <link rel="icon" href="assets/onit-logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .sidebar-link {
@@ -24,25 +25,25 @@
             display: block;
         }
         :root{
-            --bg-1:#0f172a; --accent:#ef4444; --card:#ffffff;
+            --bg-1:#0f172a; --accent:#3b82f6; --card:#ffffff;
         }
         body{ background: linear-gradient(180deg,#f8fafc 0%, #f1f5f9 100%); color:var(--bg-1); }
         .card{ background:var(--card); border-radius:12px; box-shadow:0 10px 30px rgba(2,6,23,0.06); padding:1rem; }
         .btn{ display:inline-flex; align-items:center; gap:.5rem; padding:.5rem 1rem; border-radius:10px; font-weight:600; cursor:pointer; }
-        .btn-primary{ background: linear-gradient(90deg,var(--accent),#dc2626); color:white; border:none; }
+        .btn-primary{ background: linear-gradient(90deg,var(--accent),#2563eb); color:white; border:none; }
         .btn-secondary{ background:#f1f5f9; color:var(--bg-1); border:none; }
     </style>
 </head>
 <body class="bg-gray-100">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div class="w-64 bg-gradient-to-b from-red-700 to-red-900 text-white p-6">
+        <div class="w-64 bg-gradient-to-b from-blue-700 to-blue-900 text-white p-6">
             <h1 class="text-2xl font-bold mb-8">Admin Panel</h1>
             
-            <div class="mb-4 pb-4 border-b border-red-600">
-                <p class="text-sm text-red-100">Logged in as:</p>
+            <div class="mb-4 pb-4 border-b border-blue-600">
+                <p class="text-sm text-blue-100">Logged in as:</p>
                 <p id="userNameDisplay" class="font-semibold"></p>
-                <p id="userTypeDisplay" class="text-xs text-red-200">Administrator</p>
+                <p id="userTypeDisplay" class="text-xs text-blue-200">Administrator</p>
             </div>
 
             <nav class="space-y-2">
@@ -60,7 +61,7 @@
                 <button onclick="switchSection('rights')" class="sidebar-link w-full text-left px-4 py-3 rounded transition">🔐 Change of Rights</button>
             </nav>
 
-            <div class="mt-8 pt-8 border-t border-red-600">
+            <div class="mt-8 pt-8 border-t border-blue-600">
                 <button onclick="logout()" class="w-full bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition">
                     🚪 Logout
                 </button>
@@ -153,7 +154,7 @@
                     <h2 class="text-3xl font-bold mb-6">Manage Leave Requests</h2>
                     
                     <!-- Leave Requests List -->
-                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-gray-200">
@@ -174,6 +175,31 @@
                                     <tr>
                                         <td colspan="10" class="px-6 py-4 text-center text-gray-500">No leave requests</td>
                                     </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Leave Balances Management -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-semibold">Leave Balances (All Users)</h3>
+                            <button onclick="openBalanceResetForm()" class="btn btn-primary">⟲ Reset Annual Balances</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gradient-to-r from-cyan-600 to-cyan-800 text-white">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-bold">👤 User</th>
+                                        <th class="px-6 py-3 text-left text-sm font-bold">📧 Email</th>
+                                        <th class="px-6 py-3 text-left text-sm font-bold">🏖️ Annual</th>
+                                        <th class="px-6 py-3 text-left text-sm font-bold">🏥 Sick</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Personal</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaveBalancesTable" class="divide-y">
+                                    <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No data</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -276,6 +302,74 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Edit Leave Balance Modal -->
+            <div id="leaveBalanceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white p-8 rounded-lg shadow-lg max-w-xl w-full mx-4">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold">Edit Leave Balance</h3>
+                        <button onclick="closeLeaveBalanceModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    
+                    <div id="leaveBalanceContent" class="space-y-4">
+                        <div>
+                            <p class="text-sm text-gray-600">User</p>
+                            <p id="balanceModalUserName" class="font-semibold text-lg">-</p>
+                            <p id="balanceModalUserEmail" class="text-gray-600">-</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="text-sm font-medium">Annual Leave Days</label>
+                                <input id="balanceAnnual" type="number" min="0" class="w-full p-2 border rounded mt-1" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Sick Leave Days</label>
+                                <input id="balanceSick" type="number" min="0" class="w-full p-2 border rounded mt-1" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Personal Leave Days</label>
+                                <input id="balancePersonal" type="number" min="0" class="w-full p-2 border rounded mt-1" />
+                            </div>
+                        </div>
+
+                        <div id="deductionHistory" class="bg-gray-50 p-4 rounded">
+                            <p class="font-semibold text-sm mb-2">Recent Leave Deductions</p>
+                            <div id="deductionList" class="space-y-2 text-sm">
+                                <p class="text-gray-500">No deductions recorded</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex gap-2 justify-end">
+                        <button onclick="closeLeaveBalanceModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Cancel</button>
+                        <button onclick="saveLeaveBalance()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reset Annual Balances Modal -->
+            <div id="balanceResetModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+                    <h3 class="text-2xl font-bold mb-4">Reset Annual Leave Balances</h3>
+                    
+                    <div class="space-y-4 mb-6">
+                        <p class="text-gray-700">This will reset the Annual Leave balance for all users to a specified amount.</p>
+                        <div>
+                            <label class="text-sm font-medium">Annual Leave Days (for all users)</label>
+                            <input id="resetAnnualDays" type="number" min="0" value="21" class="w-full p-2 border rounded mt-1" />
+                        </div>
+                        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded">
+                            <p class="text-sm font-semibold text-yellow-800">⚠️ Warning: This action will reset all users' annual leave to this amount.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 justify-end">
+                        <button onclick="closeBalanceResetModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded">Cancel</button>
+                        <button onclick="confirmResetBalances()" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded">Reset All Balances</button>
+                    </div>
+                </div>
+            </div>
             
             <!-- Users Management -->
             <div id="users" class="content-section">
@@ -331,26 +425,6 @@
                                 </thead>
                                 <tbody id="usersList" class="divide-y">
                                     <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No users</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <!-- Leave balances summary for admins -->
-                    <div class="mt-6 bg-white rounded-lg shadow overflow-hidden p-6">
-                        <h3 class="font-semibold mb-3">Leave Balances (All Users)</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-100">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold">User</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold">Email</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold">Annual</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold">Sick</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold">Personal</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="balancesTable" class="divide-y">
-                                    <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No data</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -411,14 +485,14 @@
                         <h3 class="font-semibold text-lg mb-4">Delegation History</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
-                                <thead class="bg-gray-100">
+                                <thead class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white">
                                     <tr>
-                                        <th class="px-4 py-2 text-left">From</th>
-                                        <th class="px-4 py-2 text-left">To</th>
-                                        <th class="px-4 py-2 text-left">Role</th>
-                                        <th class="px-4 py-2 text-left">Duration</th>
-                                        <th class="px-4 py-2 text-left">Status</th>
-                                        <th class="px-4 py-2 text-left">Actions</th>
+                                        <th class="px-4 py-2 text-left font-bold">📧 From</th>
+                                        <th class="px-4 py-2 text-left font-bold">📧 To</th>
+                                        <th class="px-4 py-2 text-left font-bold">👨‍💼 Role</th>
+                                        <th class="px-4 py-2 text-left font-bold">⏱️ Duration</th>
+                                        <th class="px-4 py-2 text-left font-bold">✓ Status</th>
+                                        <th class="px-4 py-2 text-left font-bold">⚙️ Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="delegationHistoryTable" class="divide-y">
@@ -513,6 +587,11 @@
                     request.rejectedAt = new Date().toISOString();
                     request.rejectedBy = localStorage.getItem('userName') || 'Admin';
                 }
+                // Track approval timestamp
+                if (approved && prevStatus === 'Pending') {
+                    request.approvedAt = new Date().toISOString();
+                    request.approvedBy = localStorage.getItem('userName') || 'Admin';
+                }
                 localStorage.setItem('leaveRequests', JSON.stringify(requests));
                 // If approving and it was previously pending, deduct days from employee balance
                 if (approved && prevStatus === 'Pending') {
@@ -553,6 +632,156 @@
             }
         }
 
+        // --- Leave Balance Management Functions ---
+        function loadLeaveBalances() {
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const tbody = document.getElementById('leaveBalancesTable');
+            
+            if (!employees || employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No users</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = employees.map(emp => {
+                const bal = emp.leaveBalances || { annual: 0, sick: 0, personal: 0 };
+                // Count recent approvals for this employee
+                const approvedRequests = leaveRequests.filter(r => r.email === emp.email && r.status === 'Approved');
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-semibold">${emp.name || ''}</td>
+                        <td class="px-6 py-4">${emp.email || ''}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded font-semibold ${bal.annual <= 5 ? 'bg-red-100 text-red-800' : bal.annual <= 10 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${bal.annual || 0}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded font-semibold ${bal.sick <= 2 ? 'bg-red-100 text-red-800' : bal.sick <= 5 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${bal.sick || 0}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded font-semibold ${bal.personal <= 2 ? 'bg-red-100 text-red-800' : bal.personal <= 5 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${bal.personal || 0}</span>
+                        </td>
+                        <td class="px-6 py-4 space-x-2">
+                            <button onclick="openLeaveBalanceModal('${emp.id}')" class="text-blue-600 hover:underline text-sm">Edit</button>
+                            <button onclick="showApprovedRequestsForUser('${emp.email}')" class="text-gray-600 hover:underline text-sm">History (${approvedRequests.length})</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openLeaveBalanceModal(empId) {
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const emp = employees.find(e => e.id === empId);
+            
+            if (!emp) return;
+            
+            const bal = emp.leaveBalances || { annual: 0, sick: 0, personal: 0 };
+            
+            document.getElementById('balanceModalUserName').textContent = emp.name || '';
+            document.getElementById('balanceModalUserEmail').textContent = emp.email || '';
+            document.getElementById('balanceAnnual').value = bal.annual || 0;
+            document.getElementById('balanceSick').value = bal.sick || 0;
+            document.getElementById('balancePersonal').value = bal.personal || 0;
+            
+            // Show deduction history
+            const approvedRequests = leaveRequests.filter(r => r.email === emp.email && r.status === 'Approved');
+            const deductionList = document.getElementById('deductionList');
+            
+            if (approvedRequests.length === 0) {
+                deductionList.innerHTML = '<p class="text-gray-500">No deductions recorded</p>';
+            } else {
+                deductionList.innerHTML = approvedRequests.slice(-5).reverse().map(req => `
+                    <div class="bg-white p-2 rounded border-l-4 border-green-500">
+                        <p class="font-semibold text-sm">${req.type}: -${req.days} days</p>
+                        <p class="text-xs text-gray-600">${new Date(req.approvedAt || req.timestamp).toLocaleDateString()}</p>
+                    </div>
+                `).join('');
+            }
+            
+            // Store the empId for later save
+            document.getElementById('leaveBalanceModal').dataset.empId = empId;
+            document.getElementById('leaveBalanceModal').classList.remove('hidden');
+        }
+
+        function closeLeaveBalanceModal() {
+            document.getElementById('leaveBalanceModal').classList.add('hidden');
+        }
+
+        function saveLeaveBalance() {
+            const empId = document.getElementById('leaveBalanceModal').dataset.empId;
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            const emp = employees.find(e => e.id === empId);
+            
+            if (!emp) return;
+            
+            emp.leaveBalances = {
+                annual: parseInt(document.getElementById('balanceAnnual').value) || 0,
+                sick: parseInt(document.getElementById('balanceSick').value) || 0,
+                personal: parseInt(document.getElementById('balancePersonal').value) || 0
+            };
+            
+            localStorage.setItem('employees', JSON.stringify(employees));
+            closeLeaveBalanceModal();
+            loadLeaveBalances();
+            alert('Leave balance updated successfully!');
+        }
+
+        function showApprovedRequestsForUser(email) {
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const approvedRequests = leaveRequests.filter(r => r.email === email && r.status === 'Approved');
+            
+            if (approvedRequests.length === 0) {
+                alert('No approved leave requests for this user.');
+                return;
+            }
+            
+            let summary = 'Approved Leave Requests:\n\n';
+            const totals = { annual: 0, sick: 0, personal: 0 };
+            
+            approvedRequests.forEach(req => {
+                const type = (req.type || '').toLowerCase();
+                const key = type === 'annual leave' ? 'annual' : (type === 'sick' ? 'sick' : (type === 'personal' ? 'personal' : type));
+                totals[key] = (totals[key] || 0) + parseFloat(req.days || 0);
+                summary += `${req.type}: ${req.days} days (${new Date(req.startDate).toLocaleDateString()} - ${new Date(req.endDate).toLocaleDateString()})\n`;
+            });
+            
+            summary += '\n--- TOTAL DEDUCTED ---\n';
+            summary += `Annual: ${totals.annual} days\n`;
+            summary += `Sick: ${totals.sick} days\n`;
+            summary += `Personal: ${totals.personal} days`;
+            
+            alert(summary);
+        }
+
+        function openBalanceResetForm() {
+            document.getElementById('balanceResetModal').classList.remove('hidden');
+        }
+
+        function closeBalanceResetModal() {
+            document.getElementById('balanceResetModal').classList.add('hidden');
+        }
+
+        function confirmResetBalances() {
+            const days = parseInt(document.getElementById('resetAnnualDays').value) || 21;
+            
+            if (!confirm(`Reset annual leave for ALL users to ${days} days? This cannot be undone.`)) {
+                return;
+            }
+            
+            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+            employees.forEach(emp => {
+                emp.leaveBalances = emp.leaveBalances || { annual: 0, sick: 0, personal: 0 };
+                emp.leaveBalances.annual = days;
+            });
+            
+            localStorage.setItem('employees', JSON.stringify(employees));
+            closeBalanceResetModal();
+            loadLeaveBalances();
+            alert(`Annual leave balances reset to ${days} days for all users!`);
+        }
+
         window.addEventListener('load', function() {
             if (localStorage.getItem('isAdmin') !== 'true') {
                 window.location.href = 'index.html';
@@ -563,6 +792,7 @@
             seedDepartmentsIfMissing();
             loadTickets();
             loadLeaveRequests();
+            loadLeaveBalances();
             loadClaims();
             loadUsers();
         });

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onit Microfinance Bank</title>
+    <link rel="icon" href="assets/onit-logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -38,29 +39,90 @@
                 font-size: 2.5rem;
             }
         }
+        /* Live/bold heading styles */
+        .live-heading {
+            display: inline-block;
+            background: linear-gradient(90deg,#0f1724 0%, #0b1220 40%, #0ea5ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 6px 18px rgba(2,6,23,0.6);
+            position: relative;
+        }
+        .live-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin-left: 10px;
+            background: #0ea5ff;
+            border-radius: 9999px;
+            box-shadow: 0 0 12px rgba(14,165,255,0.85);
+            vertical-align: middle;
+            animation: pulse 1.6s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px rgba(14,165,255,0.9); }
+            50% { transform: scale(1.25); opacity: 0.8; box-shadow: 0 0 20px rgba(14,165,255,0.6); }
+            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px rgba(14,165,255,0.9); }
+        }
+
+        /* 3D embossed heading */
+        .three-d {
+            font-weight: 900;
+            font-size: 3.25rem;
+            line-height: 1;
+            background: linear-gradient(180deg, #0f1724 0%, #0b1220 40%, #0ea5ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            text-transform: none;
+            letter-spacing: 0.4px;
+            text-shadow:
+                0 1px 0 rgba(255,255,255,0.02),
+                0 2px 0 rgba(0,0,0,0.06),
+                0 6px 8px rgba(2,6,23,0.6);
+        }
+
+        .three-d::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0; top: 0;
+            z-index: -1;
+            color: rgba(2,6,23,0.12);
+            transform: translateY(10px) skewY(-3deg);
+            filter: blur(1px);
+            width: 100%;
+        }
     </style>
 </head>
 <body class="text-white">
     <div class="text-center">
-        <h1 id="welcomeText" class="welcome"></h1>
-        <p class="text-xl mt-4 mb-8">Your trusted microfinance partner</p>
+        <!-- Logo Section (favicon only) -->
+        <div class="mb-12 flex flex-col items-center gap-4">
+                <div class="text-center">
+                <h1 class="three-d" data-text="Welcome to Onit MFB">Welcome to Onit MFB</h1>
+            </div>
+        </div>
+
         
-        <!-- Portal Selection -->
+        
+        <!-- Portal Selection (dropdown) -->
         <div id="portalSelect" class="bg-gray-100 bg-opacity-90 p-8 rounded-lg max-w-3xl mx-auto shadow-lg mb-8">
             <h2 class="text-2xl font-bold mb-6 text-gray-800">Select Portal</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <button id="userPortalBtn" class="bg-blue-600 hover:bg-blue-700 px-6 py-4 rounded-lg font-semibold transition text-white text-lg">
-                    👤 User Portal
-                </button>
-                <button id="financePortalBtn" class="bg-green-600 hover:bg-green-700 px-6 py-4 rounded-lg font-semibold transition text-white text-lg">
-                    💰 Finance Portal
-                </button>
-                <button id="branchPortalBtn" class="bg-purple-600 hover:bg-purple-700 px-6 py-4 rounded-lg font-semibold transition text-white text-lg">
-                    🏦 Branch Portal
-                </button>
-                <button id="adminPortalBtn" class="bg-red-600 hover:bg-red-700 px-6 py-4 rounded-lg font-semibold transition text-white text-lg">
-                    🔐 Admin Portal
-                </button>
+            <div class="flex items-center justify-center gap-4">
+                <label for="portalDropdown" class="sr-only">Select Portal</label>
+                <select id="portalDropdown" class="w-72 px-4 py-3 border border-gray-300 rounded bg-white text-gray-800">
+                    <option value="">-- Choose a portal --</option>
+                    <option value="user">👤 User Portal</option>
+                    <option value="finance">💰 Finance Portal</option>
+                    <option value="branch">🏦 Branch Portal</option>
+                    <option value="ict">💻 ICT Portal</option>
+                    <option value="admin">🔐 Admin Portal</option>
+                </select>
+                
             </div>
         </div>
         
@@ -101,17 +163,6 @@
         </div>
     </div>
     <script>
-        const text = "WELCOME TO ONIT MFB";
-        const element = document.getElementById('welcomeText');
-        let index = 0;
-
-        function typeWriter() {
-            if (index < text.length) {
-                element.innerHTML += text.charAt(index);
-                index++;
-                setTimeout(typeWriter, 100);
-            }
-        }
 
         // Initialize employees data (reinitialize if old schema detected)
         function initializeEmployees() {
@@ -166,7 +217,6 @@
         }
 
         window.onload = function() {
-            typeWriter();
             // Clear any existing login session
             localStorage.removeItem('userId');
             localStorage.removeItem('userName');
@@ -182,17 +232,23 @@
         };
 
         function setupPortalSelection() {
-            const userPortalBtn = document.getElementById('userPortalBtn');
-            const financePortalBtn = document.getElementById('financePortalBtn');
-            const branchPortalBtn = document.getElementById('branchPortalBtn');
-            const adminPortalBtn = document.getElementById('adminPortalBtn');
+            const portalDropdown = document.getElementById('portalDropdown');
             const backFromUserBtn = document.getElementById('backFromUserBtn');
             const backFromAdminBtn = document.getElementById('backFromAdminBtn');
 
-            userPortalBtn.addEventListener('click', () => showUserLogin());
-            financePortalBtn.addEventListener('click', () => window.location.href = 'finance.html');
-            branchPortalBtn.addEventListener('click', () => window.location.href = 'branch.html');
-            adminPortalBtn.addEventListener('click', () => showAdminLogin());
+            function openSelectedPortal() {
+                const val = (portalDropdown.value || '').trim();
+                if (!val) return;
+                if (val === 'user') return showUserLogin();
+                if (val === 'admin') return showAdminLogin();
+                // other portals navigate directly
+                window.location.href = `${val}.html`;
+            }
+
+            portalDropdown.addEventListener('change', () => {
+                // auto-open on select for faster flow
+                openSelectedPortal();
+            });
             backFromUserBtn.addEventListener('click', () => showPortalSelect());
             backFromAdminBtn.addEventListener('click', () => showPortalSelect());
 

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onit Portal - Dashboard</title>
+    <link rel="icon" href="assets/onit-logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .sidebar-link { transition: all 0.3s ease; }
@@ -26,7 +27,13 @@
 <body class="bg-gray-100">
     <div class="flex h-screen">
         <aside class="w-64 bg-gradient-to-b from-teal-700 to-teal-900 text-white p-6">
-            <h1 class="text-2xl font-bold mb-6">Onit Portal</h1>
+            <div class="mb-6 pb-6 border-b border-teal-600 flex items-center gap-3">
+                <img src="assets/onit-logo.png" alt="Onit MFB logo" class="w-12 h-12 object-contain">
+                <div>
+                    <h1 class="text-xl font-bold">Onit</h1>
+                    <p class="text-xs text-teal-200">MFB Portal</p>
+                </div>
+            </div>
             <div class="mb-4 pb-4 border-b border-teal-600">
                 <p class="text-sm text-teal-100">Logged in as:</p>
                 <p id="userNameDisplay" class="font-semibold">-</p>
@@ -177,15 +184,20 @@
                             <div>
                                 <label class="text-sm font-medium">Department</label>
                                 <select id="ticketDepartment" class="w-full p-2 border rounded mt-1">
-                                    <option value="IT">IT</option>
-                                    <option value="Finance">Finance</option>
-                                    <option value="HR">HR</option>
-                                    <option value="Support">Support</option>
-                                    <option value="Operations">Operations</option>
-                                    <option value="Admin">Admin</option>
                                     <option value="Branch">Branch</option>
+                                    <option value="ICT">ICT</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Admin">Admin</option>
                                 </select>
                             </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium">Submitting For</label>
+                            <select id="ticketSubmittingFor" class="w-full p-2 border rounded mt-1">
+                                <option value="">Select type</option>
+                                <option value="Customer">Customer</option>
+                                <option value="User">User</option>
+                            </select>
                         </div>
                         <div>
                             <label class="text-sm font-medium">Description</label>
@@ -223,7 +235,7 @@
 
                 <div class="bg-white rounded shadow">
                     <table class="w-full">
-                        <thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Subject</th><th class="p-2">Type</th><th class="p-2">Priority</th><th class="p-2">Created</th><th class="p-2">Creator</th><th class="p-2">Assigned</th><th class="p-2">Status</th><th class="p-2">Actions</th></tr></thead>
+                        <thead class="bg-gradient-to-r from-purple-600 to-purple-800 text-white"><tr><th class="p-3 text-left font-bold">🎫 ID</th><th class="p-3 text-left font-bold">📋 Subject</th><th class="p-3 text-left font-bold">🏷️ Type</th><th class="p-3 text-left font-bold">⚡ Priority</th><th class="p-3 text-left font-bold">📅 Created</th><th class="p-3 text-left font-bold">👤 Creator</th><th class="p-3 text-left font-bold">👨‍💼 Assigned</th><th class="p-3 text-left font-bold">✓ Status</th><th class="p-3 text-left font-bold">⚙️ Actions</th></tr></thead>
                         <tbody id="ticketsList"><tr><td class="p-4 text-center" colspan="7">No tickets</td></tr></tbody>
                     </table>
                 </div>
@@ -286,7 +298,7 @@
 
                 <div class="bg-white rounded shadow p-4">
                     <table class="w-full">
-                        <thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Name</th><th class="p-2">Email</th><th class="p-2">Type</th><th class="p-2">Start Date</th><th class="p-2">End Date</th><th class="p-2">Resume Date</th><th class="p-2">Days</th><th class="p-2">Status</th></tr></thead>
+                        <thead class="bg-gradient-to-r from-orange-600 to-orange-800 text-white"><tr><th class="p-3 text-left font-bold">📋 ID</th><th class="p-3 text-left font-bold">👤 Name</th><th class="p-3 text-left font-bold">📧 Email</th><th class="p-3 text-left font-bold">🏖️ Type</th><th class="p-3 text-left font-bold">📅 Start Date</th><th class="p-3 text-left font-bold">📅 End Date</th><th class="p-3 text-left font-bold">📅 Resume Date</th><th class="p-3 text-left font-bold">⏱️ Days</th><th class="p-3 text-left font-bold">✓ Status</th></tr></thead>
                         <tbody id="leaveList"><tr><td class="p-4 text-center" colspan="9">No leave requests</td></tr></tbody>
                     </table>
                 </div>
@@ -344,7 +356,7 @@
 
                 <div class="bg-white rounded shadow p-4">
                     <table class="w-full">
-                        <thead class="bg-gray-100"><tr><th class="p-2">ID</th><th class="p-2">Name</th><th class="p-2">Email</th><th class="p-2">Type</th><th class="p-2">Amount</th><th class="p-2">Date</th><th class="p-2">Status</th></tr></thead>
+                        <thead class="bg-gradient-to-r from-blue-600 to-blue-800 text-white"><tr><th class="p-3 text-left font-bold">📋 ID</th><th class="p-3 text-left font-bold">👤 Name</th><th class="p-3 text-left font-bold">📧 Email</th><th class="p-3 text-left font-bold">💰 Type</th><th class="p-3 text-left font-bold">💵 Amount</th><th class="p-3 text-left font-bold">📅 Date</th><th class="p-3 text-left font-bold">✓ Status</th></tr></thead>
                         <tbody id="claimsList"><tr><td class="p-4 text-center" colspan="7">No claims</td></tr></tbody>
                     </table>
                 </div>
@@ -1038,7 +1050,7 @@
             const claimEmail = localStorage.getItem('userEmail')||'';
             
             // Create claim object for old system.html compatibility
-            const oldClaim = { id, name: claimName, email: claimEmail, type, amount, date, receipt: receiptName, description: desc, status: 'Pending', timestamp: new Date().toISOString() };
+            const oldClaim = { id, name: claimName, email: claimEmail, type, amount, date, receipt: receiptName, description: desc, status: 'Pending', approverDept: 'Finance', timestamp: new Date().toISOString() };
             const claims = JSON.parse(localStorage.getItem('claims')||'[]'); 
             claims.push(oldClaim); 
             localStorage.setItem('claims', JSON.stringify(claims));
@@ -1057,7 +1069,35 @@
             const expenseClaims = JSON.parse(localStorage.getItem('expenseClaims')||'[]');
             expenseClaims.push(workflowClaim);
             localStorage.setItem('expenseClaims', JSON.stringify(expenseClaims));
-            
+
+            // Create notification for claimant
+            const notifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+            notifications.push({
+                id: 'NOTIF-' + Date.now(),
+                userEmail: claimEmail,
+                claimId: id,
+                message: `Claim submitted: ${id}\nStatus: Awaiting Finance Officer Review`,
+                type: 'claim_submitted',
+                createdAt: new Date().toISOString(),
+                read: false
+            });
+
+            // Notify all finance users so assigned officers get alerted
+            const financeUsers = JSON.parse(localStorage.getItem('financeUsers') || '[]');
+            financeUsers.forEach(fu => {
+                notifications.push({
+                    id: 'NOTIF-' + Date.now() + '-' + (fu.email||'').replace(/[^a-z0-9@.]/gi,''),
+                    userEmail: fu.email,
+                    claimId: id,
+                    message: `New claim ${id} submitted by ${claimName} - awaiting your review`,
+                    type: 'new_claim_assigned',
+                    createdAt: new Date().toISOString(),
+                    read: false
+                });
+            });
+
+            localStorage.setItem('userNotifications', JSON.stringify(notifications));
+
             // Create approval workflow
             try {
                 workflow.createWorkflow(id, 'expense', workflowClaim, claimEmail);

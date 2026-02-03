@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch Portal - Operations Management</title>
+    <link rel="icon" href="assets/onit-logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .sidebar-link { transition: all 0.3s ease; }
@@ -18,6 +19,7 @@
     <div id="loginScreen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-600 to-purple-900">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
             <h1 class="text-3xl font-bold text-center mb-2">Branch Portal</h1>
+            <button type="button" onclick="window.location.href='index.html'" class="text-purple-600 hover:text-purple-700 text-sm mb-4">← Back</button>
             <p class="text-center text-gray-600 mb-6">Operations Management System</p>
             <p class="text-center text-sm text-gray-500 mb-6">Login credentials created by Admin</p>
             
@@ -51,7 +53,13 @@
     <!-- Branch Portal Dashboard -->
     <div id="branchPortal" class="hidden flex h-screen">
         <aside class="w-64 bg-gradient-to-b from-purple-700 to-purple-900 text-white p-6">
-            <h1 class="text-2xl font-bold mb-6">Branch Portal</h1>
+            <div class="mb-6 pb-6 border-b border-purple-600 flex items-center gap-3">
+                <img src="assets/onit-logo.png" alt="Onit MFB logo" class="w-12 h-12 object-contain">
+                <div>
+                    <h1 class="text-xl font-bold">Onit</h1>
+                    <p class="text-xs text-purple-200">MFB - Branch</p>
+                </div>
+            </div>
             <div class="mb-4 pb-4 border-b border-purple-600">
                 <p class="text-sm text-purple-100">Logged in as:</p>
                 <p id="branchUserDisplay" class="font-semibold">-</p>
@@ -63,6 +71,8 @@
                 <button onclick="switchBranchSection('transactions')" class="sidebar-link w-full text-left px-4 py-3 rounded">💱 Transactions</button>
                 <button onclick="switchBranchSection('operations')" class="sidebar-link w-full text-left px-4 py-3 rounded">⚙️ Operations</button>
                 <button onclick="switchBranchSection('reports')" class="sidebar-link w-full text-left px-4 py-3 rounded">📈 Reports</button>
+                <button onclick="switchBranchSection('leave')" class="sidebar-link w-full text-left px-4 py-3 rounded">🏖️ Leave</button>
+                <button onclick="switchBranchSection('finance')" class="sidebar-link w-full text-left px-4 py-3 rounded">💰 Finance</button>
                 <button onclick="switchBranchSection('tickets')" class="sidebar-link w-full text-left px-4 py-3 rounded">🎫 Tickets</button>
             </nav>
             <div class="mt-8 pt-8 border-t border-purple-600">
@@ -73,19 +83,110 @@
         <main class="flex-1 overflow-auto">
             <!-- Dashboard -->
             <div id="dashboard" class="content-section active p-8">
-                <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded shadow">
-                        <p class="text-gray-600">Today's Transactions</p>
-                        <p class="text-3xl font-bold" id="todayTransactions">0</p>
+                <div class="mb-8">
+                    <h2 class="text-4xl font-bold text-gray-800">Welcome to Your Dashboard</h2>
+                    <p class="text-gray-600 mt-2">Here's an overview of your leave, claims, and tickets</p>
+                </div>
+
+                <!-- Top Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-purple-100 text-sm font-medium">Leave Remaining</p>
+                                <p class="text-3xl font-bold mt-2" id="dashboardLeaveBalance">0</p>
+                                <p class="text-purple-100 text-xs mt-2">Days available</p>
+                            </div>
+                            <span class="text-4xl">🏖️</span>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded shadow">
-                        <p class="text-gray-600">Total Amount</p>
-                        <p class="text-3xl font-bold" id="totalAmount">₦0.00</p>
+
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-orange-100 text-sm font-medium">Pending Claims</p>
+                                <p class="text-3xl font-bold mt-2" id="dashboardPendingClaims">0</p>
+                                <p class="text-orange-100 text-xs mt-2">Awaiting approval</p>
+                            </div>
+                            <span class="text-4xl">💰</span>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded shadow">
-                        <p class="text-gray-600">Pending Operations</p>
-                        <p class="text-3xl font-bold" id="pendingOperations">0</p>
+
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-blue-100 text-sm font-medium">Open Tickets</p>
+                                <p class="text-3xl font-bold mt-2" id="dashboardOpenTickets">0</p>
+                                <p class="text-blue-100 text-xs mt-2">Awaiting support</p>
+                            </div>
+                            <span class="text-4xl">🎫</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-green-100 text-sm font-medium">Approved Claims</p>
+                                <p class="text-3xl font-bold mt-2" id="dashboardApprovedClaims">0</p>
+                                <p class="text-green-100 text-xs mt-2">Ready for action</p>
+                            </div>
+                            <span class="text-4xl">✅</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Balance Breakdown -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Balance Breakdown</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-600 font-medium">Annual Leave</span>
+                                    <span class="text-gray-800 font-bold" id="dashboardAnnualDays">0</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-purple-500 h-3 rounded-full" id="dashboardAnnualBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-600 font-medium">Sick Leave</span>
+                                    <span class="text-gray-800 font-bold" id="dashboardSickDays">0</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-blue-500 h-3 rounded-full" id="dashboardSickBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-600 font-medium">Personal Leave</span>
+                                    <span class="text-gray-800 font-bold" id="dashboardPersonalDays">0</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-green-500 h-3 rounded-full" id="dashboardPersonalBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Activity</h3>
+                        <div class="space-y-3" id="dashboardActivity">
+                            <p class="text-gray-500 text-center py-6">No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <button onclick="switchBranchSection('leave')" class="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-lg font-medium transition">🏖️ Request Leave</button>
+                        <button onclick="switchBranchSection('finance')" class="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-lg font-medium transition">💰 Submit Claim</button>
+                        <button onclick="switchBranchSection('tickets')" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg font-medium transition">🎫 Create Ticket</button>
+                        <button onclick="switchBranchSection('reports')" class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg font-medium transition">📊 View Reports</button>
                     </div>
                 </div>
             </div>
@@ -93,17 +194,17 @@
             <!-- Disbursements (For Tellers) -->
             <div id="disbursements" class="content-section p-8">
                 <h2 class="text-2xl font-bold mb-6">Approved Claims - Ready for Disbursement</h2>
-                <div class="bg-white rounded shadow">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     <table class="w-full">
-                        <thead class="bg-gray-100">
+                        <thead class="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
                             <tr>
-                                <th class="p-3 text-left">Claim ID</th>
-                                <th class="p-3 text-left">User Name</th>
-                                <th class="p-3 text-left">Email</th>
-                                <th class="p-3 text-left">Amount</th>
-                                <th class="p-3 text-left">Type</th>
-                                <th class="p-3 text-left">Approved Date</th>
-                                <th class="p-3 text-left">Actions</th>
+                                <th class="p-3 text-left font-bold">📋 Claim ID</th>
+                                <th class="p-3 text-left font-bold">👤 User Name</th>
+                                <th class="p-3 text-left font-bold">📧 Email</th>
+                                <th class="p-3 text-left font-bold">💵 Amount</th>
+                                <th class="p-3 text-left font-bold">💰 Type</th>
+                                <th class="p-3 text-left font-bold">📅 Approved Date</th>
+                                <th class="p-3 text-left font-bold">⚡ Actions</th>
                             </tr>
                         </thead>
                         <tbody id="disbursementsList">
@@ -136,16 +237,16 @@
                     </form>
                 </div>
 
-                <div class="bg-white rounded shadow">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     <table class="w-full">
-                        <thead class="bg-gray-100">
+                        <thead class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white">
                             <tr>
-                                <th class="p-3 text-left">ID</th>
-                                <th class="p-3 text-left">Type</th>
-                                <th class="p-3 text-left">Amount</th>
-                                <th class="p-3 text-left">Reference</th>
-                                <th class="p-3 text-left">Date</th>
-                                <th class="p-3 text-left">Status</th>
+                                <th class="p-3 text-left font-bold">📋 ID</th>
+                                <th class="p-3 text-left font-bold">🔄 Type</th>
+                                <th class="p-3 text-left font-bold">💵 Amount</th>
+                                <th class="p-3 text-left font-bold">🔗 Reference</th>
+                                <th class="p-3 text-left font-bold">📅 Date</th>
+                                <th class="p-3 text-left font-bold">✓ Status</th>
                             </tr>
                         </thead>
                         <tbody id="transactionsList">
@@ -218,9 +319,202 @@
                 </div>
             </div>
 
+            <!-- Leave Management -->
+            <div id="leave" class="content-section p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Leave Management</h2>
+                    <button onclick="showNewLeaveForm()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded">+ Request Leave</button>
+                </div>
+                <div id="newLeaveForm" class="hidden card mb-4">
+                    <form id="leaveFormEl" class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">Name</label>
+                                <input id="leaveName" type="text" readonly class="w-full p-2 border rounded mt-1 bg-gray-100" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Email</label>
+                                <input id="leaveEmail" type="email" readonly class="w-full p-2 border rounded mt-1 bg-gray-100" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">Leave Type</label>
+                                <select id="leaveType" required class="p-2 border rounded w-full mt-1"><option value="Annual">Annual</option><option value="Sick">Sick</option><option value="Personal">Personal</option></select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Start Date</label>
+                                <input id="leaveStartDate" type="date" required class="w-full p-2 border rounded mt-1" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">End Date</label>
+                                <input id="leaveEndDate" type="date" required class="w-full p-2 border rounded mt-1" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Days</label>
+                                <input id="leaveDays" type="number" min="0" required class="w-full input mt-1" placeholder="Calculated automatically" readonly />
+                                <p class="text-xs text-gray-500 mt-1">Excludes weekends and public holidays.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">Resume Work On</label>
+                                <input id="leaveResumeDate" type="date" required class="w-full p-2 border rounded mt-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium">Reason (optional)</label>
+                            <textarea id="leaveReason" rows="3" class="w-full p-2 border rounded mt-1" placeholder="Reason for leave"></textarea>
+                        </div>
+                        <div class="flex gap-2 justify-end">
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" type="submit">Submit Request</button>
+                            <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded" onclick="hideNewLeaveForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gradient-to-r from-orange-600 to-orange-800 text-white"><tr><th class="p-3 text-left font-bold">📋 ID</th><th class="p-3 text-left font-bold">👤 Name</th><th class="p-3 text-left font-bold">📧 Email</th><th class="p-3 text-left font-bold">🏖️ Type</th><th class="p-3 text-left font-bold">📅 Start Date</th><th class="p-3 text-left font-bold">📅 End Date</th><th class="p-3 text-left font-bold">📅 Resume Date</th><th class="p-3 text-left font-bold">⏱️ Days</th><th class="p-3 text-left font-bold">✓ Status</th></tr></thead>
+                        <tbody id="leaveList"><tr><td class="p-4 text-center text-gray-400" colspan="9">No leave requests</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Expense Claims -->
+            <div id="finance" class="content-section p-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">Finance - Expense Claims</h2>
+                    <button onclick="showNewClaimForm()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded">+ New Claim</button>
+                </div>
+                <div id="newClaimForm" class="hidden card mb-4">
+                    <h3 class="font-semibold mb-4">Submit Expense Claim</h3>
+                    <form id="claimFormEl" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">Name</label>
+                                <input id="claimName" type="text" readonly class="w-full p-2 border rounded mt-1 bg-gray-100" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Email</label>
+                                <input id="claimEmail" type="email" readonly class="w-full p-2 border rounded mt-1 bg-gray-100" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">Expense Type</label>
+                                <select id="claimType" required class="p-2 border rounded w-full mt-1"><option value="Travel">Travel</option><option value="Meals">Meals</option><option value="Supplies">Supplies</option><option value="Other">Other</option></select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Amount</label>
+                                <input id="claimAmount" type="number" min="0" step="0.01" required class="w-full p-2 border rounded mt-1" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">Date</label>
+                                <input id="claimDate" type="date" required class="w-full p-2 border rounded mt-1" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Receipt (optional)</label>
+                                <input id="claimReceipt" type="file" class="w-full mt-1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium">Description (optional)</label>
+                            <textarea id="claimDescription" rows="3" class="w-full p-2 border rounded mt-1" placeholder="Details about the expense"></textarea>
+                        </div>
+                        <div class="flex gap-2 justify-end">
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" type="submit">Submit Claim</button>
+                            <button type="button" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded" onclick="hideNewClaimForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gradient-to-r from-blue-600 to-blue-800 text-white"><tr><th class="p-3 text-left font-bold">📋 ID</th><th class="p-3 text-left font-bold">👤 Name</th><th class="p-3 text-left font-bold">📧 Email</th><th class="p-3 text-left font-bold">💰 Type</th><th class="p-3 text-left font-bold">💵 Amount</th><th class="p-3 text-left font-bold">📅 Date</th><th class="p-3 text-left font-bold">✓ Status</th></tr></thead>
+                        <tbody id="claimsList"><tr><td class="p-4 text-center text-gray-400" colspan="7">No claims</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Tickets -->
             <div id="tickets" class="content-section p-8">
-                <h2 class="text-2xl font-bold mb-6">Support Tickets</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Support Tickets</h2>
+                    <button type="button" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" onclick="document.getElementById('newBranchTicketForm').classList.toggle('hidden')">+ New Ticket</button>
+                </div>
+                <div id="newBranchTicketForm" class="card mb-4 hidden">
+                    <h3 class="font-semibold mb-4">Submit New Ticket</h3>
+                    <form id="branchTicketFormEl" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-sm font-medium">Subject</label>
+                                <input id="branchTicketSubject" placeholder="Short title" required class="w-full p-2 border rounded mt-1" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Type</label>
+                                <select id="branchTicketType" class="w-full p-2 border rounded mt-1">
+                                    <option value="Request">Request</option>
+                                    <option value="Issue">Issue</option>
+                                    <option value="Bug">Bug</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Department</label>
+                                <select id="branchTicketDepartment" class="w-full p-2 border rounded mt-1">
+                                    <option value="Branch">Branch</option>
+                                    <option value="ICT">ICT</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Admin">Admin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Submitting For</label>
+                                <select id="branchTicketSubmittingFor" class="w-full p-2 border rounded mt-1">
+                                    <option value="">Select type</option>
+                                    <option value="Customer">Customer</option>
+                                    <option value="User">User</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium">Description</label>
+                            <textarea id="branchTicketDescription" placeholder="What happened? Provide steps or context." required class="w-full p-2 border rounded mt-1" rows="4"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                            <div>
+                                <label class="text-sm font-medium">Priority</label>
+                                <select id="branchTicketPriority" class="w-full input mt-1">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Due Date (optional)</label>
+                                <input id="branchTicketDueDate" type="date" class="w-full p-2 border rounded mt-1" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Attachment (optional)</label>
+                                <input id="branchTicketAttachment" type="file" class="w-full mt-1" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">Created Date</label>
+                                <input id="branchTicketCreatedDate" type="date" readonly class="w-full p-2 border rounded mt-1 bg-gray-100" />
+                            </div>
+                        </div>
+                        <div class="flex gap-2 justify-end">
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" type="submit">Submit Ticket</button>
+                            <button type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded" onclick="document.getElementById('newBranchTicketForm').classList.add('hidden')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
                 <div class="bg-white rounded shadow p-4">
                     <table class="w-full">
                         <thead class="bg-gray-100">
@@ -255,6 +549,8 @@
             else if (id === 'transactions') loadTransactions();
             else if (id === 'operations') loadOperations();
             else if (id === 'reports') loadReports();
+            else if (id === 'leave') loadLeaveRequests();
+            else if (id === 'finance') loadClaims();
             else if (id === 'tickets') loadBranchTickets();
         }
 
@@ -317,40 +613,86 @@
         });
 
         function loadBranchDashboard() {
-            const txList = JSON.parse(localStorage.getItem('branchTransactions') || '[]');
-            const opsList = JSON.parse(localStorage.getItem('branchOperations') || '[]');
+                // Get user data
+                const userName = localStorage.getItem('branchUserName') || 'User';
+                const userEmail = localStorage.getItem('branchUserEmail') || '';
             
-            const today = new Date().toDateString();
-            const todayTx = txList.filter(t => new Date(t.date).toDateString() === today);
-            const totalAmount = todayTx.reduce((sum, t) => sum + (t.amount || 0), 0);
+                // Get employees and find current user's leave balance
+                const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+                const currentUser = employees.find(e => e.email === userEmail);
+                const leaveBalance = currentUser?.leaveBalances || { Annual: 0, Sick: 0, Personal: 0 };
             
-            document.getElementById('todayTransactions').textContent = todayTx.length;
-            document.getElementById('totalAmount').textContent = '₦' + totalAmount.toFixed(2);
-            document.getElementById('pendingOperations').textContent = opsList.filter(o => o.status === 'Pending').length;
+                // Get claims
+                const claims = JSON.parse(localStorage.getItem('claims') || '[]');
+                const userClaims = claims.filter(c => c.email === userEmail);
+                const pendingClaims = userClaims.filter(c => c.status === 'Pending').length;
+                const approvedClaims = userClaims.filter(c => c.status === 'Approved').length;
+            
+                // Get tickets
+                const branchTickets = JSON.parse(localStorage.getItem('branchTickets') || '[]');
+                const userTickets = branchTickets.filter(t => t.email === userEmail);
+                const openTickets = userTickets.filter(t => t.status !== 'Closed').length;
+            
+                // Get leave requests
+                const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+                const userLeave = leaveRequests.filter(l => l.email === userEmail);
+                const totalLeave = leaveBalance.Annual + leaveBalance.Sick + leaveBalance.Personal;
+            
+                // Update top stats
+                document.getElementById('dashboardLeaveBalance').textContent = Math.max(totalLeave, 0);
+                document.getElementById('dashboardPendingClaims').textContent = pendingClaims;
+                document.getElementById('dashboardOpenTickets').textContent = openTickets;
+                document.getElementById('dashboardApprovedClaims').textContent = approvedClaims;
+            
+                // Update leave breakdown
+                document.getElementById('dashboardAnnualDays').textContent = leaveBalance.Annual;
+                document.getElementById('dashboardSickDays').textContent = leaveBalance.Sick;
+                document.getElementById('dashboardPersonalDays').textContent = leaveBalance.Personal;
+            
+                const maxDays = 30;
+                document.getElementById('dashboardAnnualBar').style.width = ((leaveBalance.Annual / maxDays) * 100) + '%';
+                document.getElementById('dashboardSickBar').style.width = ((leaveBalance.Sick / 10) * 100) + '%';
+                document.getElementById('dashboardPersonalBar').style.width = ((leaveBalance.Personal / 10) * 100) + '%';
+            
+                // Recent activity
+                const activities = [];
+                userLeave.slice(-3).reverse().forEach(l => {
+                    activities.push(`📅 Leave: ${l.type} (${l.days} days) - ${l.status}`);
+                });
+                userClaims.slice(-2).reverse().forEach(c => {
+                    activities.push(`💰 Claim: ₦${c.amount} - ${c.status}`);
+                });
+            
+                const activityDiv = document.getElementById('dashboardActivity');
+                if (activities.length > 0) {
+                    activityDiv.innerHTML = activities.map(a => `<p class="text-sm text-gray-700 p-2 bg-gray-50 rounded">${a}</p>`).join('');
+                } else {
+                    activityDiv.innerHTML = '<p class="text-gray-500 text-center py-6">No recent activity</p>';
+                }
         }
 
         function loadDisbursements() {
             const disbursements = JSON.parse(localStorage.getItem('claimDisbursements') || '[]');
             const tbody = document.getElementById('disbursementsList');
             
-            // Filter only pending disbursements
             const pending = disbursements.filter(d => d.status === 'pending');
             
             if (pending.length === 0) {
-                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="7" class="text-gray-500">No pending disbursements</td></tr>';
+                tbody.innerHTML = '<tr><td class="p-4 text-center text-gray-400" colspan="7">No pending disbursements</td></tr>';
                 return;
             }
 
+            const typeEmojis = {'Travel': '✈️', 'Accommodation': '🏨', 'Meals': '🍽️', 'Equipment': '🖥️', 'Other': '📦'};
             tbody.innerHTML = pending.map(d => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-semibold">${d.claimId}</td>
-                    <td class="p-3">${d.claimant}</td>
-                    <td class="p-3">${d.email}</td>
-                    <td class="p-3"><strong>₦${parseFloat(d.amount).toFixed(2)}</strong></td>
-                    <td class="p-3">${d.claimType}</td>
-                    <td class="p-3">${new Date(d.approvedDate).toLocaleDateString()}</td>
+                <tr class="bg-purple-50 border-l-4 border-purple-600 hover:shadow-md transition border-b">
+                    <td class="p-3 font-bold text-gray-900">${d.id}</td>
+                    <td class="p-3 text-gray-800">${d.claimant}</td>
+                    <td class="p-3 text-gray-600 text-sm">${d.email}</td>
+                    <td class="p-3 font-bold text-lg text-green-700">KSH ${parseFloat(d.amount).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+                    <td class="p-3"><span class="text-lg">${typeEmojis[d.claimType] || '💰'}</span> ${d.claimType}</td>
+                    <td class="p-3 text-gray-700">${new Date(d.approvedDate).toLocaleDateString()}</td>
                     <td class="p-3">
-                        <button onclick="markDisbursementComplete('${d.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Disbursed</button>
+                        <button onclick="markDisbursementComplete('${d.id}')" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold px-3 py-1 rounded-lg text-sm transition">✓ Disburse</button>
                     </td>
                 </tr>
             `).join('');
@@ -369,6 +711,29 @@
                 disburse.completedByEmail = localStorage.getItem('branchUserEmail');
                 localStorage.setItem('claimDisbursements', JSON.stringify(disbursements));
                 
+                // Update claim status to 'Completed' in both claim storages
+                const genericClaims = JSON.parse(localStorage.getItem('claims') || '[]');
+                const claimToUpdate = genericClaims.find(c => c.id === disburse.claimId);
+                if (claimToUpdate) {
+                    claimToUpdate.status = 'Completed';
+                    localStorage.setItem('claims', JSON.stringify(genericClaims));
+                }
+                
+                const expenseClaims = JSON.parse(localStorage.getItem('expenseClaims') || '[]');
+                const expenseClaimToUpdate = expenseClaims.find(c => c.id === disburse.claimId);
+                if (expenseClaimToUpdate) {
+                    expenseClaimToUpdate.status = 'COMPLETED';
+                    localStorage.setItem('expenseClaims', JSON.stringify(expenseClaims));
+                }
+                
+                // Update workflow status to completed
+                const workflows = JSON.parse(localStorage.getItem('approvalWorkflows') || '[]');
+                const workflowToUpdate = workflows.find(w => w.requestId === disburse.claimId);
+                if (workflowToUpdate) {
+                    workflowToUpdate.status = 'completed';
+                    localStorage.setItem('approvalWorkflows', JSON.stringify(workflows));
+                }
+                
                 // Create notification for the user
                 const notifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
                 const notification = {
@@ -376,7 +741,7 @@
                     userEmail: disburse.email,
                     claimId: disburse.claimId,
                     amount: disburse.amount,
-                    message: `Your claim #${disburse.claimId} for ₦${parseFloat(disburse.amount).toFixed(2)} has been disbursed by ${disburse.completedBy}`,
+                    message: `Your claim #${disburse.claimId} for ₦${parseFloat(disburse.amount).toFixed(2)} has been successfully disbursed by ${disburse.completedBy}`,
                     type: 'disbursement_complete',
                     createdAt: new Date().toISOString(),
                     read: false
@@ -394,18 +759,20 @@
             const tbody = document.getElementById('transactionsList');
             
             if (txList.length === 0) {
-                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="6">No transactions</td></tr>';
+                tbody.innerHTML = '<tr><td class="p-4 text-center text-gray-400" colspan="6">No transactions</td></tr>';
                 return;
             }
 
+            const typeColors = {'Deposit': 'bg-green-50 border-l-4 border-green-600', 'Withdrawal': 'bg-red-50 border-l-4 border-red-600', 'Transfer': 'bg-blue-50 border-l-4 border-blue-600', 'Fee': 'bg-orange-50 border-l-4 border-orange-600'};
+            const statusBadge = {'Complete': 'bg-green-100 text-green-800', 'Pending': 'bg-yellow-100 text-yellow-800', 'Failed': 'bg-red-100 text-red-800'};
             tbody.innerHTML = txList.map(t => `
-                <tr class="border-b">
-                    <td class="p-3">${t.id}</td>
-                    <td class="p-3">${t.type}</td>
-                    <td class="p-3">₦${parseFloat(t.amount).toFixed(2)}</td>
-                    <td class="p-3">${t.ref}</td>
-                    <td class="p-3">${new Date(t.date).toLocaleDateString()}</td>
-                    <td class="p-3"><span class="px-2 py-1 bg-green-100 rounded text-xs">${t.status}</span></td>
+                <tr class="${typeColors[t.type] || 'bg-white'} hover:shadow-md transition border-b">
+                    <td class="p-3 font-bold text-gray-900">${t.id}</td>
+                    <td class="p-3 font-semibold text-gray-800">${t.type}</td>
+                    <td class="p-3 font-bold text-lg text-indigo-700">KSH ${parseFloat(t.amount).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+                    <td class="p-3 text-gray-700">${t.ref}</td>
+                    <td class="p-3 text-gray-700">${new Date(t.date).toLocaleDateString()}</td>
+                    <td class="p-3"><span class="px-3 py-1 rounded-full text-xs font-bold ${statusBadge[t.status] || 'bg-gray-100 text-gray-800'}">${t.status}</span></td>
                 </tr>
             `).join('');
         }
@@ -651,6 +1018,185 @@
         });
 
         // Auto-create demo users on first load if needed
+        // Leave helpers (shared)
+        const PUBLIC_HOLIDAYS = ['2026-01-01'];
+        function isPublicHoliday(dateStr) { return PUBLIC_HOLIDAYS.includes(dateStr); }
+        function formatDateISO(d) { const yyyy = d.getFullYear(); const mm = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `${yyyy}-${mm}-${dd}`; }
+        function calculateLeaveDays() {
+            const startVal = document.getElementById('leaveStartDate').value;
+            const endVal = document.getElementById('leaveEndDate').value;
+            const daysEl = document.getElementById('leaveDays');
+            if (!startVal || !endVal) { if(daysEl) daysEl.value = 0; return 0; }
+            const start = new Date(startVal + 'T00:00:00');
+            const end = new Date(endVal + 'T00:00:00');
+            if (end < start) { if(daysEl) daysEl.value = 0; return 0; }
+            let count = 0;
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+                const day = d.getDay();
+                if (day === 0 || day === 6) continue;
+                const iso = formatDateISO(d);
+                if (isPublicHoliday(iso)) continue;
+                count++;
+            }
+            if(daysEl) daysEl.value = count;
+            return count;
+        }
+        try { document.getElementById('leaveStartDate').addEventListener('change', calculateLeaveDays); } catch(e){}
+        try { document.getElementById('leaveEndDate').addEventListener('change', calculateLeaveDays); } catch(e){}
+
+        function getNextId(key){ const next = JSON.parse(localStorage.getItem('nextIds') || '{}'); if(!next[key]) next[key]=1; const id = next[key]++; localStorage.setItem('nextIds', JSON.stringify(next)); return String(id); }
+
+        function showNewLeaveForm(){
+            try { document.getElementById('leaveName').value = localStorage.getItem('branchUserName')||''; } catch(e){}
+            try { document.getElementById('leaveEmail').value = localStorage.getItem('branchUserEmail')||''; } catch(e){}
+            document.getElementById('newLeaveForm').classList.remove('hidden');
+            updateLeaveTypeBalanceDisplay();
+        }
+        function hideNewLeaveForm(){ document.getElementById('newLeaveForm').classList.add('hidden'); }
+
+        function loadLeaveRequests(){
+            const reqs = JSON.parse(localStorage.getItem('leaveRequests')||'[]');
+            const isAdmin = localStorage.getItem('isAdmin')==='true';
+            const userEmail = localStorage.getItem('branchUserEmail')||localStorage.getItem('userEmail');
+            const filtered = isAdmin ? reqs : reqs.filter(r => (r.email||'') === (userEmail||''));
+            const tbody = document.getElementById('leaveList');
+            if (!tbody) return;
+            if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-gray-400">No leave requests</td></tr>'; return; }
+            const statusBadge = {'Pending': 'bg-yellow-100 text-yellow-800', 'Approved': 'bg-green-100 text-green-800', 'Rejected': 'bg-red-100 text-red-800'};
+            const leaveEmojis = {'Annual': '🏖️', 'Sick': '🏥', 'Personal': '📅', 'Maternity': '👶'};
+            tbody.innerHTML = filtered.map(r => `<tr class="bg-orange-50 border-l-4 border-orange-600 hover:shadow-md transition border-b"><td class="p-3 font-bold text-gray-900">${r.id}</td><td class="p-3 text-gray-800">${r.name||''}</td><td class="p-3 text-gray-600 text-sm">${r.email||''}</td><td class="p-3"><span class="text-lg">${leaveEmojis[r.type] || '📋'}</span> ${r.type}</td><td class="p-3 text-gray-700">${r.startDate||''}</td><td class="p-3 text-gray-700">${r.endDate||''}</td><td class="p-3 text-gray-700">${r.resumeDate||''}</td><td class="p-3 font-bold text-gray-900">${r.days} days</td><td class="p-3"><span class="px-3 py-1 rounded-full text-xs font-bold ${statusBadge[r.status] || 'bg-gray-100 text-gray-800'}">${r.status}</span></td></tr>`).join('');
+        }
+
+        document.addEventListener('click', function(e){ if(e.target && e.target.matches && e.target.matches('#leaveListRefresh')) loadLeaveRequests(); });
+
+        document.addEventListener('submit', function(e){ if(e.target && e.target.id === 'leaveFormEl'){ e.preventDefault(); const id = getNextId('leaveRequests'); const start = document.getElementById('leaveStartDate').value; const end = document.getElementById('leaveEndDate').value; const resume = document.getElementById('leaveResumeDate').value; const daysCalculated = calculateLeaveDays(); if(daysCalculated <= 0){ alert('Invalid leave range or zero working days selected.'); return; } const req = { id, name: localStorage.getItem('branchUserName')||'', email: localStorage.getItem('branchUserEmail')||localStorage.getItem('userEmail'), type: document.getElementById('leaveType').value, days: daysCalculated, startDate: start, endDate: end, resumeDate: resume, reason: document.getElementById('leaveReason').value||'', status: 'Pending', approverDept: 'Admin', timestamp: new Date().toISOString() }; const reqs = JSON.parse(localStorage.getItem('leaveRequests')||'[]'); reqs.push(req); localStorage.setItem('leaveRequests', JSON.stringify(reqs)); hideNewLeaveForm(); e.target.reset(); loadLeaveRequests(); alert('Leave request submitted: '+id); } });
+
+        function updateLeaveTypeBalanceDisplay(){ const type = (document.getElementById('leaveType').value||'').toLowerCase(); const email = (localStorage.getItem('branchUserEmail')||localStorage.getItem('userEmail')||'').toLowerCase(); const employees = JSON.parse(localStorage.getItem('employees')||'[]'); const u = employees.find(e=> (e.email||'').toLowerCase()===email); let val = 0; if(u && u.leaveBalances){ if(type==='annual') val = u.leaveBalances.annual||0; else if(type==='sick') val = u.leaveBalances.sick||0; else if(type==='personal') val = u.leaveBalances.personal||0; } let helper = document.getElementById('leaveTypeHelper'); if(!helper){ helper = document.createElement('p'); helper.id = 'leaveTypeHelper'; helper.className = 'text-xs text-gray-500 mt-1'; document.getElementById('leaveType').parentNode.appendChild(helper); } helper.textContent = 'Available balance: ' + val + ' days'; }
+        try{ document.getElementById('leaveType').addEventListener('change', updateLeaveTypeBalanceDisplay); } catch(e){}
+
+        // --- Expense Claims Functions ---
+        function showNewClaimForm(){ 
+            document.getElementById('claimName').value = localStorage.getItem('branchUserName')||'';
+            document.getElementById('claimEmail').value = localStorage.getItem('branchUserEmail')||'';
+            document.getElementById('newClaimForm').classList.remove('hidden'); 
+        }
+        function hideNewClaimForm(){ document.getElementById('newClaimForm').classList.add('hidden'); }
+
+        function loadClaims(){ 
+            const claims = JSON.parse(localStorage.getItem('claims')||'[]'); 
+            const isAdmin = localStorage.getItem('isAdmin')==='true'; 
+            const userEmail = localStorage.getItem('branchUserEmail')||localStorage.getItem('userEmail'); 
+            const filtered = isAdmin?claims:claims.filter(c=>c.email===userEmail); 
+            const tbody = document.getElementById('claimsList'); 
+            if(filtered.length===0){ tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-400">No claims</td></tr>'; return; } 
+            const statusColors = {'Pending': 'bg-yellow-50 border-l-4 border-yellow-600', 'Approved by Finance Officer': 'bg-blue-50 border-l-4 border-blue-600', 'Approved by Head of Finance': 'bg-green-50 border-l-4 border-green-600', 'Rejected': 'bg-red-50 border-l-4 border-red-600', 'Disbursed': 'bg-purple-50 border-l-4 border-purple-600'}; 
+            const statusBadge = {'Pending': 'bg-yellow-100 text-yellow-800', 'Approved by Finance Officer': 'bg-blue-100 text-blue-800', 'Approved by Head of Finance': 'bg-green-100 text-green-800', 'Rejected': 'bg-red-100 text-red-800', 'Disbursed': 'bg-purple-100 text-purple-800'}; 
+            const typeEmojis = {'Travel': '✈️', 'Accommodation': '🏨', 'Meals': '🍽️', 'Equipment': '🖥️', 'Other': '📦'}; 
+            tbody.innerHTML = filtered.map(c=>`<tr class="${statusColors[c.status] || 'bg-white'} hover:shadow-md transition border-b\"><td class="p-3 font-bold text-gray-900">${c.id}</td><td class="p-3 text-gray-800">${c.name||''}</td><td class="p-3 text-gray-600 text-sm">${c.email||''}</td><td class="p-3"><span class="text-lg">${typeEmojis[c.type] || '💰'}</span> ${c.type}</td><td class="p-3 font-bold text-lg text-green-700">KSH ${parseFloat(c.amount).toLocaleString('en-US', {minimumFractionDigits:2})}</td><td class="p-3 text-gray-700">${c.date||''}</td><td class="p-3"><span class="px-3 py-1 rounded-full text-xs font-bold ${statusBadge[c.status] || 'bg-gray-100 text-gray-800'}">${c.status}</span></td></tr>`).join(''); 
+        }
+
+        document.getElementById('claimFormEl').addEventListener('submit', function(e){
+            e.preventDefault();
+            const nextIds = JSON.parse(localStorage.getItem('claimNextId') || '{"id": 1}');
+            const id = String(nextIds.id);
+            nextIds.id++;
+            localStorage.setItem('claimNextId', JSON.stringify(nextIds));
+            const type = document.getElementById('claimType').value;
+            const amount = parseFloat(document.getElementById('claimAmount').value)||0;
+            const date = document.getElementById('claimDate').value;
+            const receiptInput = document.getElementById('claimReceipt');
+            const receiptName = receiptInput && receiptInput.files && receiptInput.files[0] ? receiptInput.files[0].name : null;
+            const desc = document.getElementById('claimDescription').value||'';
+            if(amount <= 0){ alert('Enter a valid amount'); return; }
+            
+            const claimName = localStorage.getItem('branchUserName')||'';
+            const claimEmail = localStorage.getItem('branchUserEmail')||'';
+            
+            const claim = { id, name: claimName, email: claimEmail, type, amount, date, receipt: receiptName, description: desc, status: 'Pending', approverDept: 'Finance', timestamp: new Date().toISOString() };
+            const claims = JSON.parse(localStorage.getItem('claims')||'[]'); 
+            claims.push(claim); 
+            localStorage.setItem('claims', JSON.stringify(claims));
+
+            // Create notification for claimant
+            const notifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+            notifications.push({
+                id: 'NOTIF-' + Date.now(),
+                userEmail: claimEmail,
+                claimId: id,
+                message: `Claim submitted: ${id}\nStatus: Awaiting Finance Officer Review`,
+                type: 'claim_submitted',
+                createdAt: new Date().toISOString(),
+                read: false
+            });
+
+            // Notify all finance users so assigned officers get alerted
+            const financeUsers = JSON.parse(localStorage.getItem('financeUsers') || '[]');
+            financeUsers.forEach(fu => {
+                notifications.push({
+                    id: 'NOTIF-' + Date.now() + '-' + (fu.email||'').replace(/[^a-z0-9@.]/gi,''),
+                    userEmail: fu.email,
+                    claimId: id,
+                    message: `New claim ${id} submitted by ${claimName} - awaiting your review`,
+                    type: 'new_claim_assigned',
+                    createdAt: new Date().toISOString(),
+                    read: false
+                });
+            });
+
+            localStorage.setItem('userNotifications', JSON.stringify(notifications));
+
+            // Create approval workflow for this claim so Finance users can approve/reject
+            try {
+                if (typeof ApprovalWorkflow !== 'undefined' && ApprovalWorkflow) {
+                    const workflowConfig = {
+                        moduleName: 'expense',
+                        steps: [
+                            { stepId: 'finance-officer-review', role: 'Finance Officer', department: 'Finance', approver: 'Finance Officer' },
+                            { stepId: 'head-of-finance-review', role: 'Head of Finance', department: 'Finance', approver: 'Head of Finance' }
+                        ]
+                    };
+                    const branchWorkflow = new ApprovalWorkflow(workflowConfig);
+                    const claimData = {
+                        id,
+                        claimant: claimName,
+                        email: claimEmail,
+                        type,
+                        amount,
+                        description: desc,
+                        status: 'SUBMITTED'
+                    };
+                    branchWorkflow.createWorkflow(id, 'expense', claimData, claimEmail);
+                    
+                    // Also store workflow reference
+                    const workflows = JSON.parse(localStorage.getItem('approvalWorkflows') || '[]');
+                    const newWorkflow = {
+                        id: 'WF-' + id,
+                        requestId: id,
+                        moduleName: 'expense',
+                        data: claimData,
+                        status: 'pending',
+                        currentStep: 0,
+                        steps: [
+                            { stepId: 'finance-officer-review', role: 'Finance Officer', department: 'Finance', status: 'pending', approvedBy: null, comment: null },
+                            { stepId: 'head-of-finance-review', role: 'Head of Finance', department: 'Finance', status: 'pending', approvedBy: null, comment: null }
+                        ],
+                        createdAt: new Date().toISOString(),
+                        createdBy: claimEmail
+                    };
+                    workflows.push(newWorkflow);
+                    localStorage.setItem('approvalWorkflows', JSON.stringify(workflows));
+                }
+            } catch(e) {
+                console.warn('Could not create approval workflow:', e.message);
+            }
+
+            hideNewClaimForm(); 
+            this.reset(); 
+            loadClaims();
+            alert('Claim submitted: ' + id);
+        });
+
+        // Auto-create demo users on first load if needed
         window.addEventListener('load', function() {
             const branchUsers = JSON.parse(localStorage.getItem('branchUsers') || '[]');
             if (branchUsers.length === 0) {
@@ -662,5 +1208,6 @@
             }
         });
     </script>
+    <script src="approval-workflow.js"></script>
 </body>
 </html>

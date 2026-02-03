@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Ticket - Bank Ticketing System</title>
+    <link rel="icon" href="assets/onit-logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="modern-ui.css">
     <style>
@@ -93,6 +94,7 @@
                     <option value="Finance" class="text-gray-900">Finance</option>
                     <option value="Security" class="text-gray-900">Security</option>
                     <option value="Operations" class="text-gray-900">Operations</option>
+                    <option value="ICT" class="text-gray-900">ICT</option>
                     <option value="Risk & Compliance" class="text-gray-900">Risk & Compliance</option>
                     <option value="Internal Audit" class="text-gray-900">Internal Audit</option>
                     <option value="Management" class="text-gray-900">Management</option>
@@ -137,6 +139,15 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label for="submissionType" class="block text-sm font-medium text-gray-700">Submitting For <span class="text-red-500">*</span></label>
+                        <select id="submissionType" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <option value="">Select type</option>
+                            <option value="Customer">Customer</option>
+                            <option value="User">User</option>
+                        </select>
+                    </div>
+
                     <input type="hidden" id="fromDept">
                     
                     <div id="toDeptContainer">
@@ -145,15 +156,10 @@
                             <div class="flex-1">
                                 <select id="toDept" required class="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     <option value="">Select department</option>
-                                    <option value="Customer Service">Customer Service</option>
-                                    <option value="IT">IT</option>
+                                    <option value="Branch">Branch</option>
+                                    <option value="ICT">ICT</option>
                                     <option value="Finance">Finance</option>
-                                    <option value="Security">Security</option>
-                                    <option value="Operations">Operations</option>
-                                    <option value="Risk & Compliance">Risk & Compliance</option>
-                                    <option value="Internal Audit">Internal Audit</option>
-                                    <option value="Management">Management</option>
-                                    <option value="Data Analysis">Data Analysis</option>
+                                    <option value="Admin">Admin</option>
                                 </select>
                             </div>
                         </div>
