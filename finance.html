@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Portal - Claim Management</title>
+    <title>Finance Portal </title>
     <link rel="icon" href="assets/onit-logo.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -26,7 +26,9 @@
             <form id="financeLoginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold mb-2">Email</label>
-                    <input type="email" id="financeUserEmail" placeholder="your@email.com" required class="w-full p-3 border rounded focus:outline-none focus:border-blue-500" />
+                    <select id="financeUserEmail" required class="w-full p-3 border rounded focus:outline-none focus:border-blue-500">
+                        <option value="">Select Email</option>
+                    </select>
                 </div>
                 
                 <div>
@@ -34,19 +36,35 @@
                     <input type="password" id="financeUserPassword" placeholder="Password" required class="w-full p-3 border rounded focus:outline-none focus:border-blue-500" />
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Role</label>
-                    <select id="financeUserRole" required class="w-full p-3 border rounded focus:outline-none focus:border-blue-500">
-                        <option value="">Select Role</option>
-                        <option value="Finance Officer">Finance Officer</option>
-                        <option value="Head of Finance">Head of Finance</option>
-                    </select>
-                </div>
+                <!-- Role removed: will be validated automatically from selected user -->
                 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded">Login</button>
             </form>
         </div>
     </div>
+
+    <script>
+    (async function loadFinanceUsers(){
+        try{
+            const resp = await fetch('/api/users');
+            if(!resp || resp.status!==200) return;
+            const data = await resp.json();
+            let users = data.users || data || [];
+            // Only finance department
+            users = users.filter(u => (u.department||'').toLowerCase() === 'finance');
+            const emailSel = document.getElementById('financeUserEmail');
+            if(!emailSel) return;
+            emailSel.innerHTML = '<option value="">Select Email</option>';
+            users.forEach(u=>{
+                const opt = document.createElement('option');
+                opt.value = u.email;
+                opt.textContent = u.email;
+                opt.dataset.role = u.role || '';
+                emailSel.appendChild(opt);
+            });
+        }catch(e){ console.warn('loadFinanceUsers failed', e); }
+    })();
+    </script>
 
     <!-- Finance Portal Dashboard -->
     <div id="financePortal" class="hidden flex h-screen">
@@ -571,34 +589,52 @@
                     }
                 }
 
-        // Finance Portal Login
-        document.getElementById('financeLoginForm').addEventListener('submit', function(e) {
+        // Finance Portal Login (authenticate against backend)
+        document.getElementById('financeLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             try {
                 console.log('Finance login handler starting');
                 const email = document.getElementById('financeUserEmail').value.trim();
                 const password = document.getElementById('financeUserPassword').value;
-                const selectedRole = document.getElementById('financeUserRole').value;
+                const emailOpt = document.getElementById('financeUserEmail').options[document.getElementById('financeUserEmail').selectedIndex];
+                const selectedRole = emailOpt ? (emailOpt.dataset.role || '') : '';
 
                 if(!email || !password || !selectedRole) {
                     alert('Please fill all fields');
                     return;
                 }
 
-                // Check if user exists in financeUsers
-                const financeUsers = JSON.parse(localStorage.getItem('financeUsers')||'[]');
-                const user = financeUsers.find(u => u.email === email && u.password === password && u.role === selectedRole);
+                // Authenticate with backend
+                const resp = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                }).catch(err => null);
 
-                if(!user) {
-                    alert('Invalid email, password, or role. Please check your credentials.\n\nDemo Users:\nFinance Officer: john.finance@onit.local / 1234\nHead of Finance: sarah.hof@onit.local / 1234');
+                if(!resp || resp.status !== 200) {
+                    alert('Unable to contact authentication server.');
                     return;
                 }
 
-                // Save finance login
-                localStorage.setItem('financeUserName', user.name);
+                const data = await resp.json();
+                if(!data || !data.success || !data.user) {
+                    alert('Invalid email or password. Use seeded credentials (e.g. Password123!).');
+                    return;
+                }
+
+                const user = data.user;
+
+                // Ensure role and department match Finance portal
+                if(user.role !== selectedRole || (user.department || '').toLowerCase() !== 'finance') {
+                    alert('User does not have the selected role or is not in the Finance department.');
+                    return;
+                }
+
+                // Save finance login (email-only username)
+                localStorage.setItem('financeUserName', user.email);
                 localStorage.setItem('financeUserEmail', user.email);
                 localStorage.setItem('financeUserRole', user.role);
-                localStorage.setItem('financeUserDept', user.department);
+                localStorage.setItem('financeUserDept', user.department || 'Finance');
 
                 // Show portal, hide login
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -615,8 +651,8 @@
                 try { financeWorkflow = new ApprovalWorkflow(claimWorkflowConfig); } catch (_) { console.warn('ApprovalWorkflow not available'); }
 
                 // Display user info
-                document.getElementById('financeUserDisplay').textContent = user.name;
-                document.getElementById('financeRoleDisplay').textContent = user.role;
+                document.getElementById('financeUserDisplay').textContent = localStorage.getItem('financeUserName') || '';
+                document.getElementById('financeRoleDisplay').textContent = localStorage.getItem('financeUserRole') || '';
 
                 // Load claims
                 loadFinanceClaims();
@@ -637,46 +673,26 @@
             else if(id === 'tickets') loadFinanceTickets();
         }
 
-        function loadFinanceClaims() {
-            const userRole = localStorage.getItem('financeUserRole') || '';
-
-            // Get approval workflows routed to Finance
-            const allWorkflows = JSON.parse(localStorage.getItem('approvalWorkflows')||'[]');
-            
-            // Filter: show workflows where current user's role matches current step role
-            let claimsToReview = allWorkflows.filter(wf => {
-                if(wf.status !== 'in-progress' && wf.status !== 'pending') return false;
-                const currentStep = wf.steps[wf.currentStep];
-                if(!currentStep) return false;
-                return currentStep.role === userRole && currentStep.status === 'pending';
-            });
-
-            const tbody = document.getElementById('financeClaimsList');
-
-            if(claimsToReview.length === 0) {
-                tbody.innerHTML = '<tr><td class="p-4 text-center" colspan="7">No claims to review</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = claimsToReview.map(wf => {
-                const currentStep = wf.steps[wf.currentStep];
-                const stepDisplay = currentStep.stepId === 'finance-officer-review' ? 'Finance Officer Review' : 'Head of Finance Review';
-                return `<tr class="border-b hover:bg-gray-50">
-                    <td class="p-3">${wf.data.id}</td>
-                    <td class="p-3">${wf.data.claimant}</td>
-                    <td class="p-3">${wf.data.type}</td>
-                    <td class="p-3">₦${parseFloat(wf.data.amount).toFixed(2)}</td>
-                    <td class="p-3"><span class="px-2 py-1 bg-yellow-100 rounded text-xs font-semibold">${stepDisplay}</span></td>
-                    <td class="p-3"><span class="px-2 py-1 bg-blue-100 rounded text-xs">${wf.status}</span></td>
-                    <td class="p-3"><button onclick="viewFinanceClaimDetails('${wf.data.id}', '${wf.id}')" class="text-blue-600 hover:underline font-semibold">Review</button></td>
-                </tr>`;
-            }).join('');
-        }
-
-        function viewFinanceClaimDetails(claimId, workflowId) {
-            // Try expense-specific storage first, then fall back to generic claims
-            let claim = null;
-            const expenseClaims = JSON.parse(localStorage.getItem('expenseClaims')||'[]');
+        (async function loadFinanceUsers(){
+            try{
+                const resp = await fetch('/api/users');
+                if(!resp || resp.status!==200) return;
+                const data = await resp.json();
+                let users = data.users || data || [];
+                // Only finance department
+                users = users.filter(u => (u.department||'').toLowerCase() === 'finance');
+                const emailSel = document.getElementById('financeUserEmail');
+                if(!emailSel) return;
+                emailSel.innerHTML = '<option value="">Select Email</option>';
+                users.forEach(u=>{
+                    const opt = document.createElement('option');
+                    opt.value = u.email;
+                    opt.textContent = u.email;
+                    opt.dataset.role = u.role || '';
+                    emailSel.appendChild(opt);
+                });
+            }catch(e){ console.warn('loadFinanceUsers failed', e); }
+        })();
             claim = expenseClaims.find(c => c.id === claimId);
             if(!claim) {
                 const genericClaims = JSON.parse(localStorage.getItem('claims')||'[]');

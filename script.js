@@ -995,52 +995,67 @@ function enforcePageAccess() {
 function initializeEmployees() {
     let employees = JSON.parse(localStorage.getItem('employees') || '[]');
     if (employees.length === 0) {
-        employees = [
-            // IT Department
-            { id: 'EMP001', name: 'Stevaniah Kavela', department: 'IT', email: 'stevaniah.kavela@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP002', name: 'Mercy Mukhwana', department: 'IT', email: 'mercy.mukhwana@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // IT / ICT Department
-            { id: 'EMP003', name: 'Eric Mokaya', department: 'IT / ICT', email: 'eric.mokaya@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP004', name: 'Caroline Ngugi', department: 'IT / ICT', email: 'caroline.ngugi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Finance Department
-            { id: 'EMP005', name: 'Lilian Kimani', department: 'Finance', email: 'lilian.kimani@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP006', name: 'Maureen Kerubo', department: 'Finance', email: 'maureen.kerubo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Operations Department
-            { id: 'EMP007', name: 'Alice Muthoni', department: 'Operations', email: 'alice.muthoni@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP008', name: 'Michael Mureithi', department: 'Operations', email: 'michael.mureithi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Risk & Compliance Department
-            { id: 'EMP009', name: 'Patrick Ndegwa', department: 'Risk & Compliance', email: 'patrick.ndegwa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP010', name: 'Margaret Njeri', department: 'Risk & Compliance', email: 'margaret.njeri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Internal Audit Department
-            { id: 'EMP011', name: 'Elizabeth Mungai', department: 'Internal Audit', email: 'elizabeth.mungai@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP012', name: 'Ebby Gesare', department: 'Internal Audit', email: 'ebby.gesare@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Customer Service Department
-            { id: 'EMP013', name: 'Vivian Orisa', department: 'Customer Service', email: 'vivian.orisa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP014', name: 'Juliana Jeptoo', department: 'Customer Service', email: 'juliana.jeptoo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Management Department
-            { id: 'EMP015', name: 'Faith Bonareri', department: 'Management', email: 'faith.bonareri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP016', name: 'Patience Mutunga', department: 'Management', email: 'patience.mutunga@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Security Department
-            { id: 'EMP017', name: 'Eva Mukami', department: 'Security', email: 'eva.mukami@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP018', name: 'Peter Kariuki', department: 'Security', email: 'peter.kariuki@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Data Analysis Department
-            { id: 'EMP019', name: 'Ken Okwero', department: 'Data Analysis', email: 'ken.okwero@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-            { id: 'EMP020', name: 'Bonface Kioko', department: 'Data Analysis', email: 'bonface.kioko@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
-
-            // Admin
-            { id: 'EMP021', name: 'Clive Odame', department: 'admin', email: 'clive.odame@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } }
-        ];
-        localStorage.setItem('employees', JSON.stringify(employees));
+        // Try to fetch users from backend and populate employees
+        try {
+            fetch('/api/users').then(r => r.json()).then(data => {
+                if (data && data.success && Array.isArray(data.users) && data.users.length > 0) {
+                    const fetched = data.users.map(u => {
+                        const numId = Number(u.id) || 0;
+                        const empId = 'EMP' + String(numId).padStart(3, '0');
+                        return {
+                            id: empId,
+                            name: u.full_name,
+                            department: u.department || 'Unknown',
+                            email: u.email,
+                            leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 }
+                        };
+                    });
+                    localStorage.setItem('employees', JSON.stringify(fetched));
+                    employees = fetched;
+                } else {
+                    // fallback to built-in list if backend empty
+                    employees = getDefaultEmployees();
+                    localStorage.setItem('employees', JSON.stringify(employees));
+                }
+            }).catch(e => {
+                console.warn('[EMP] Failed to fetch users from backend, using defaults', e);
+                employees = getDefaultEmployees();
+                localStorage.setItem('employees', JSON.stringify(employees));
+            });
+        } catch (e) {
+            console.warn('[EMP] Error initializing employees:', e);
+            employees = getDefaultEmployees();
+            localStorage.setItem('employees', JSON.stringify(employees));
+        }
     }
+
+
+// Default employees fallback (previous hardcoded list)
+function getDefaultEmployees() {
+    return [
+        { id: 'EMP001', name: 'Stevaniah Kavela', department: 'IT', email: 'stevaniah.kavela@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP002', name: 'Mercy Mukhwana', department: 'IT', email: 'mercy.mukhwana@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP003', name: 'Eric Mokaya', department: 'IT / ICT', email: 'eric.mokaya@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP004', name: 'Caroline Ngugi', department: 'IT / ICT', email: 'caroline.ngugi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP005', name: 'Lilian Kimani', department: 'Finance', email: 'lilian.kimani@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP006', name: 'Maureen Kerubo', department: 'Finance', email: 'maureen.kerubo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP007', name: 'Alice Muthoni', department: 'Operations', email: 'alice.muthoni@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP008', name: 'Michael Mureithi', department: 'Operations', email: 'michael.mureithi@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP009', name: 'Patrick Ndegwa', department: 'Risk & Compliance', email: 'patrick.ndegwa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP010', name: 'Margaret Njeri', department: 'Risk & Compliance', email: 'margaret.njeri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP011', name: 'Elizabeth Mungai', department: 'Internal Audit', email: 'elizabeth.mungai@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP012', name: 'Ebby Gesare', department: 'Internal Audit', email: 'ebby.gesare@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP013', name: 'Vivian Orisa', department: 'Customer Service', email: 'vivian.orisa@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP014', name: 'Juliana Jeptoo', department: 'Customer Service', email: 'juliana.jeptoo@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP015', name: 'Faith Bonareri', department: 'Management', email: 'faith.bonareri@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP016', name: 'Patience Mutunga', department: 'Management', email: 'patience.mutunga@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP017', name: 'Eva Mukami', department: 'Security', email: 'eva.mukami@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP018', name: 'Peter Kariuki', department: 'Security', email: 'peter.kariuki@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP019', name: 'Ken Okwero', department: 'Data Analysis', email: 'ken.okwero@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP020', name: 'Bonface Kioko', department: 'Data Analysis', email: 'bonface.kioko@maishabank.com', leaveBalances: { annual: 25, sick: 10, personal: 5, maternity: 0, paternity: 0 } },
+        { id: 'EMP021', name: 'Clive Odame', department: 'admin', email: 'clive.odame@maishabank.com', leaveBalances: { annual: 30, sick: 15, personal: 10, maternity: 0, paternity: 0 } }
+    ];
+}
 }
 
 // Initialize employees on page load
@@ -1051,6 +1066,9 @@ document.addEventListener('DOMContentLoaded', function() {
     revealAllowedModules();
     enforcePageAccess();
 
+    // Load users on page load
+    loadUsers();
+
     // Logout functionality
     const logoutBtn = document.getElementById('logout');
     if (logoutBtn) {
@@ -1058,5 +1076,201 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.removeItem('userDept');
             window.location.href = 'index.html';
         });
+    }
+});
+
+// ===== USER MANAGEMENT FUNCTIONS =====
+
+// Load users from server
+async function loadUsers() {
+    try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        
+        if (data.success) {
+            displayUsers(data.users);
+        }
+    } catch (error) {
+        console.error('[ERROR] Loading users:', error);
+    }
+}
+
+// Display users in table
+function displayUsers(users) {
+    const usersList = document.getElementById('usersList');
+    if (!usersList) return;
+
+    if (users.length === 0) {
+        usersList.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No users</td></tr>';
+        return;
+    }
+
+    usersList.innerHTML = users.map(user => `
+        <tr>
+            <td class="px-6 py-4 text-sm">${user.id}</td>
+            <td class="px-6 py-4 text-sm font-medium">${user.full_name}</td>
+            <td class="px-6 py-4 text-sm">${user.email}</td>
+            <td class="px-6 py-4 text-sm">${user.department}</td>
+            <td class="px-6 py-4 text-sm"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded">${user.role}</span></td>
+            <td class="px-6 py-4 text-sm">
+                <button onclick="editUser('${user.id}')" class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+                <button onclick="deleteUser('${user.id}')" class="text-red-600 hover:text-red-800">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+
+    // Update admin dashboard total users if present
+    try {
+        const totalEl = document.getElementById('totalUsers');
+        if (totalEl) totalEl.textContent = users.length;
+    } catch (e) {
+        // ignore
+    }
+}
+
+// Show new user form
+function showNewUserForm() {
+    const form = document.getElementById('newUserForm');
+    if (form) {
+        form.classList.remove('hidden');
+        document.getElementById('userEditId').value = '';
+        document.getElementById('userForm').reset();
+    }
+}
+
+// Hide new user form
+function hideNewUserForm() {
+    const form = document.getElementById('newUserForm');
+    if (form) {
+        form.classList.add('hidden');
+    }
+}
+
+// Edit user
+async function editUser(userId) {
+    try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        
+        if (data.success) {
+            const user = data.users.find(u => String(u.id) === String(userId));
+            if (user) {
+                document.getElementById('userEditId').value = user.id;
+                document.getElementById('userFullName').value = user.full_name;
+                document.getElementById('userEmailInput').value = user.email;
+                document.getElementById('userUsernameInput').value = user.username;
+                document.getElementById('userDeptInput').value = user.department;
+                document.getElementById('userTypeInput').value = user.role;
+                document.getElementById('userPasswordInput').value = '';
+                showNewUserForm();
+            }
+        }
+    } catch (error) {
+        console.error('[ERROR] Loading user:', error);
+    }
+}
+
+// Save user
+async function saveUser(event) {
+    event.preventDefault();
+    
+    const fullName = document.getElementById('userFullName').value;
+    const email = document.getElementById('userEmailInput').value;
+    const username = document.getElementById('userUsernameInput').value;
+    const department = document.getElementById('userDeptInput').value;
+    const role = document.getElementById('userTypeInput').value;
+    const password = document.getElementById('userPasswordInput').value;
+    const userId = document.getElementById('userEditId').value;
+    
+    // Generate username from full name if not provided
+    const finalUsername = username || fullName.toLowerCase().replace(/\s+/g, '');
+    
+    try {
+        const response = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: userId || undefined,
+                full_name: fullName,
+                username: finalUsername,
+                email: email,
+                department: department,
+                role: role,
+                password: password || 'Password123!'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('User saved successfully!');
+            hideNewUserForm();
+            loadUsers();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('[ERROR] Saving user:', error);
+        alert('Failed to save user');
+    }
+}
+
+// Delete user
+async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to delete this user?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('User deleted successfully');
+            loadUsers();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('[ERROR] Deleting user:', error);
+        alert('Failed to delete user');
+    }
+}
+
+// Seed users from backend
+async function seedUsersFromBackend() {
+    if (!confirm('This will load initial users. Continue?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/seed-users', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(data.message);
+            loadUsers();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('[ERROR] Seeding users:', error);
+        alert('Failed to seed users');
+    }
+}
+
+// Form submission handler
+document.addEventListener('DOMContentLoaded', function() {
+    const userForm = document.getElementById('userForm');
+    if (userForm) {
+        userForm.addEventListener('submit', saveUser);
     }
 });

@@ -1,0 +1,116 @@
+[
+  {
+    "owner_id": 1,
+    "owner_name": "Stevaniah Kavela",
+    "owner_email": "stevaniah.kavela@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 2,
+    "owner_name": "Mercy Mukhwana",
+    "owner_email": "mercy.mukhwana@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 3,
+    "owner_name": "Eric Mokaya",
+    "owner_email": "eric.mokaya@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 4,
+    "owner_name": "Caroline Ngugi",
+    "owner_email": "caroline.ngugi@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 5,
+    "owner_name": "Lilian Kimani",
+    "owner_email": "lilian.kimani@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 6,
+    "owner_name": "Maureen Kerubo",
+    "owner_email": "maureen.kerubo@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 7,
+    "owner_name": "Alice Muthoni",
+    "owner_email": "alice.muthoni@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 8,
+    "owner_name": "Michael Mureithi",
+    "owner_email": "michael.mureithi@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 9,
+    "owner_name": "Patrick Ndegwa",
+    "owner_email": "patrick.ndegwa@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 10,
+    "owner_name": "Margaret Njeri",
+    "owner_email": "margaret.njeri@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 11,
+    "owner_name": "Elizabeth Mungai",
+    "owner_email": "elizabeth.mungai@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 12,
+    "owner_name": "Ebby Gesare",
+    "owner_email": "ebby.gesare@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 13,
+    "owner_name": "Vivian Orisa",
+    "owner_email": "vivian.orisa@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 14,
+    "owner_name": "Juliana Jeptoo",
+    "owner_email": "juliana.jeptoo@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 15,
+    "owner_name": "Faith Bonareri",
+    "owner_email": "faith.bonareri@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 16,
+    "owner_name": "Patience Mutunga",
+    "owner_email": "patience.mutunga@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 17,
+    "owner_name": "Eva Mukami",
+    "owner_email": "eva.mukami@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 18,
+    "owner_name": "Peter Kariuki",
+    "owner_email": "peter.kariuki@maishabank.com",
+    "assets": []
+  },
+  {
+    "owner_id": 19,
+    "owner_name": "Admin",
+    "owner_email": "admin.admin@maishabank.com",
+    "assets": []
+  }
+]

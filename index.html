@@ -151,7 +151,7 @@
             <form id="adminLoginFormEl">
                 <div class="mb-4">
                     <label for="adminUsername" class="block text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" id="adminUsername" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" value="Admin" readonly>
+                    <input type="text" id="adminUsername" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="admin@maishabank.com">
                 </div>
                 <div class="mb-4">
                     <label for="adminPassword" class="block text-sm font-medium text-gray-700">Password</label>
@@ -289,36 +289,29 @@
                 return;
             }
 
-            const employees = JSON.parse(localStorage.getItem('employees') || '[]');
-            const user = employees.find(u => u.type === 'user' && (u.email || '').toLowerCase() === email);
-            if (!user) {
-                document.getElementById('userLoginMessage').textContent = 'User not found';
-                return;
-            }
+            // Authenticate via backend
+            fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: pass })
+            }).then(r => r.json()).then(data => {
+                if (!data || !data.success) {
+                    document.getElementById('userLoginMessage').textContent = (data && data.message) ? data.message : 'Invalid credentials';
+                    return;
+                }
 
-            // Support per-user password (if set) otherwise fall back to legacy global password '1234'
-            const expected = (user.password && String(user.password)) ? String(user.password) : '1234';
-            if (pass !== expected) {
-                document.getElementById('userLoginMessage').textContent = 'Invalid password';
-                return;
-            }
+                const u = data.user;
+                localStorage.setItem('userId', u.id);
+                localStorage.setItem('userName', u.full_name || u.username || u.email);
+                localStorage.setItem('userEmail', u.email);
+                localStorage.setItem('userDept', u.department || 'Unknown');
+                localStorage.setItem('isAdmin', (u.role || '').toLowerCase() === 'admin' ? 'true' : 'false');
 
-            // If the user is required to change password, store a pending marker and redirect to change page
-            if (user.mustChangePassword) {
-                // Save pending user email to allow change-password.html to validate
-                localStorage.setItem('pendingUserEmail', user.email);
-                // We still allow the temporary password to authenticate; redirect to change screen
-                window.location.href = 'change-password.html';
-                return;
-            }
-
-            localStorage.setItem('userId', user.id);
-            localStorage.setItem('userName', user.name);
-            localStorage.setItem('userEmail', user.email);
-            localStorage.setItem('userType', user.type);
-            localStorage.setItem('isAdmin', 'false');
-
-            window.location.href = 'system-clean.html';
+                window.location.href = 'system-clean.html';
+            }).catch(err => {
+                console.error('[AUTH] Login failed', err);
+                document.getElementById('userLoginMessage').textContent = 'Login error';
+            });
         }
 
         function handleAdminLogin(e) {
@@ -326,25 +319,31 @@
             const username = (document.getElementById('adminUsername').value || '').trim();
             const pass = document.getElementById('adminPassword').value;
 
-            if (username !== 'Admin') {
-                document.getElementById('adminLoginMessage').textContent = 'Invalid admin username';
-                return;
-            }
+            // Use backend auth; if username contains @ treat as email, otherwise try admin@maishabank.com
+            const email = username.includes('@') ? username : 'admin@maishabank.com';
 
-            if (pass !== '1234') {
-                document.getElementById('adminLoginMessage').textContent = 'Invalid password';
-                return;
-            }
+            fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: pass })
+            }).then(r => r.json()).then(data => {
+                if (!data || !data.success) {
+                    document.getElementById('adminLoginMessage').textContent = (data && data.message) ? data.message : 'Invalid credentials';
+                    return;
+                }
 
-            // Set admin session (simple client-side representation)
-            localStorage.setItem('userId', 'ADMIN');
-            localStorage.setItem('userName', 'Admin');
-            localStorage.setItem('userEmail', 'admin@onit.local');
-            localStorage.setItem('userType', 'admin');
-            localStorage.setItem('isAdmin', 'true');
+                const u = data.user;
+                localStorage.setItem('userId', u.id);
+                localStorage.setItem('userName', u.full_name || u.username || u.email);
+                localStorage.setItem('userEmail', u.email);
+                localStorage.setItem('userDept', u.department || 'Admin');
+                localStorage.setItem('isAdmin', (u.role || '').toLowerCase() === 'admin' ? 'true' : 'false');
 
-            // Redirect to admin management panel
-            window.location.href = 'admin.html';
+                window.location.href = 'admin.html';
+            }).catch(err => {
+                console.error('[AUTH] Admin login failed', err);
+                document.getElementById('adminLoginMessage').textContent = 'Login error';
+            });
         }
     </script>
 </body>

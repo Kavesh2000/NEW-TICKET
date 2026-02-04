@@ -1307,24 +1307,16 @@
         
         // ===== CHANGE OF RIGHTS FUNCTIONS =====
         function loadApprovalUsers() {
+            const financeUsers = JSON.parse(localStorage.getItem('financeUsers') || '[]');
+            const branchUsers = JSON.parse(localStorage.getItem('branchUsers') || '[]');
+            const allUsers = [...financeUsers, ...branchUsers];
+            
             const fromSelect = document.getElementById('delegateFromUser');
             const toSelect = document.getElementById('delegateToUser');
-
-            // Fetch real users from backend
-            fetch('/api/users').then(r => r.json()).then(data => {
-                if (data && data.success && Array.isArray(data.users)) {
-                    const html = data.users.map(u => `<option value="${u.email}">${u.full_name} (${u.role})</option>`).join('');
-                    fromSelect.innerHTML = '<option value="">Select user...</option>' + html;
-                    toSelect.innerHTML = '<option value="">Select user...</option>' + html;
-                } else {
-                    fromSelect.innerHTML = '<option value="">No users</option>';
-                    toSelect.innerHTML = '<option value="">No users</option>';
-                }
-            }).catch(e => {
-                console.warn('[RIGHTS] Failed to load users', e);
-                fromSelect.innerHTML = '<option value="">No users</option>';
-                toSelect.innerHTML = '<option value="">No users</option>';
-            });
+            
+            const html = allUsers.map(u => `<option value="${u.email}">${u.name} (${u.role})</option>`).join('');
+            fromSelect.innerHTML = '<option value="">Select user...</option>' + html;
+            toSelect.innerHTML = '<option value="">Select user...</option>' + html;
         }
         
         function loadDelegations() {

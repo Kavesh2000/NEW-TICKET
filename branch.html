@@ -26,7 +26,9 @@
             <form id="branchLoginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold mb-2">Email</label>
-                    <input type="email" id="branchUserEmail" placeholder="your@email.com" required class="w-full p-3 border rounded focus:outline-none focus:border-purple-500" />
+                    <select id="branchUserEmail" required class="w-full p-3 border rounded focus:outline-none focus:border-purple-500">
+                        <option value="">Loading users...</option>
+                    </select>
                 </div>
                 
                 <div>
@@ -34,14 +36,7 @@
                     <input type="password" id="branchUserPassword" placeholder="Password" required class="w-full p-3 border rounded focus:outline-none focus:border-purple-500" />
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Role</label>
-                    <select id="branchUserRole" required class="w-full p-3 border rounded focus:outline-none focus:border-purple-500">
-                        <option value="">Select Role</option>
-                        <option value="Teller">Teller</option>
-                        <option value="Operations">Operations</option>
-                    </select>
-                </div>
+                <!-- Role removed: will be validated automatically from selected user -->
                 
                 <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded">Login</button>
             </form>
@@ -574,42 +569,64 @@
             window.location.href = 'index.html';
         }
 
-        // Login Handler
-        document.getElementById('branchLoginForm').addEventListener('submit', function(e) {
+        // Populate Branch users into email select (department = Branch)
+        (async function loadBranchUsers(){
+            try{
+                const resp = await fetch('/api/users');
+                if(!resp || resp.status!==200) return;
+                const data = await resp.json();
+                let users = data.users || [];
+                users = users.filter(u => (u.department||'').toLowerCase() === 'branch');
+                const sel = document.getElementById('branchUserEmail');
+                if(!sel) return;
+                sel.innerHTML = '<option value="">Select user...</option>' + users.map(u => `<option value="${u.email}" data-role="${(u.role||'').replace(/\"/g,'')}">${u.email}</option>`).join('');
+                // role is stored on each option's data-role and will be validated on submit
+            }catch(e){ console.warn('loadBranchUsers failed', e); }
+        })();
+
+        // Login Handler (authenticate against backend)
+        document.getElementById('branchLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('branchUserEmail').value;
-            const password = document.getElementById('branchUserPassword').value;
-            const selectedRole = document.getElementById('branchUserRole').value;
+            try{
+                const email = document.getElementById('branchUserEmail').value;
+                const password = document.getElementById('branchUserPassword').value;
+                const emailOpt = document.getElementById('branchUserEmail').options[document.getElementById('branchUserEmail').selectedIndex];
+                const selectedRole = emailOpt ? (emailOpt.dataset.role || '') : '';
 
-            const branchUsers = JSON.parse(localStorage.getItem('branchUsers') || '[]');
-            const user = branchUsers.find(u => u.email === email && u.password === password && u.role === selectedRole);
+                if(!email || !password || !selectedRole){
+                    document.getElementById('branchLoginError').textContent = 'Please fill all fields';
+                    document.getElementById('branchLoginError').classList.remove('hidden');
+                    return;
+                }
 
-            if (!user) {
-                document.getElementById('branchLoginError').textContent = 'Invalid credentials. Demo: teller.branch@onit.local / 1234 or ops.branch@onit.local / 1234';
-                document.getElementById('branchLoginError').classList.remove('hidden');
-                return;
-            }
+                const resp = await fetch('/api/auth', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
+                if(!resp || resp.status!==200){ document.getElementById('branchLoginError').textContent = 'Unable to contact auth server'; document.getElementById('branchLoginError').classList.remove('hidden'); return; }
+                const data = await resp.json();
+                if(!data || !data.success || !data.user){ document.getElementById('branchLoginError').textContent = 'Invalid email or password'; document.getElementById('branchLoginError').classList.remove('hidden'); return; }
 
-            localStorage.setItem('branchUserName', user.name);
-            localStorage.setItem('branchUserEmail', user.email);
-            localStorage.setItem('branchUserRole', user.role);
+                const user = data.user;
+                if(user.role !== selectedRole || (user.department||'').toLowerCase() !== 'branch'){
+                    document.getElementById('branchLoginError').textContent = 'User role or department mismatch'; document.getElementById('branchLoginError').classList.remove('hidden'); return;
+                }
 
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('branchPortal').classList.remove('hidden');
+                localStorage.setItem('branchUserName', user.email);
+                localStorage.setItem('branchUserEmail', user.email);
+                localStorage.setItem('branchUserRole', user.role);
 
-            document.getElementById('branchUserDisplay').textContent = user.name;
-            document.getElementById('branchRoleDisplay').textContent = user.role;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('branchPortal').classList.remove('hidden');
 
-            // Show form buttons based on role
-            const tellerOnly = document.getElementById('newTransactionBtn');
-            const opsOnly = document.getElementById('newOperationBtn');
-            if (user.role === 'Teller') {
-                tellerOnly.classList.remove('hidden');
-            } else if (user.role === 'Operations') {
-                opsOnly.classList.remove('hidden');
-            }
+                document.getElementById('branchUserDisplay').textContent = localStorage.getItem('branchUserName');
+                document.getElementById('branchRoleDisplay').textContent = localStorage.getItem('branchUserRole');
 
-            loadBranchDashboard();
+                // Show form buttons based on role
+                const tellerOnly = document.getElementById('newTransactionBtn');
+                const opsOnly = document.getElementById('newOperationBtn');
+                if (user.role === 'Teller') { if(tellerOnly) tellerOnly.classList.remove('hidden'); }
+                else if (user.role === 'Operations') { if(opsOnly) opsOnly.classList.remove('hidden'); }
+
+                loadBranchDashboard();
+            }catch(err){ console.error('Branch login error', err); document.getElementById('branchLoginError').textContent = 'Login error'; document.getElementById('branchLoginError').classList.remove('hidden'); }
         });
 
         function loadBranchDashboard() {

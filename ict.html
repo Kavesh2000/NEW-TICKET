@@ -26,7 +26,9 @@
             <form id="ictLoginForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold mb-2">Email</label>
-                    <input type="email" id="ictUserEmail" placeholder="your@email.com" required class="w-full p-3 border rounded focus:outline-none focus:border-cyan-500" />
+                    <select id="ictUserEmail" required class="w-full p-3 border rounded focus:outline-none focus:border-cyan-500">
+                        <option value="">Loading users...</option>
+                    </select>
                 </div>
                 
                 <div>
@@ -544,45 +546,65 @@
     </div>
 
     <script>
-        // Login handler
+        // Populate ICT users dropdown from backend
+        (function populateIctUsers(){
+            const select = document.getElementById('ictUserEmail');
+            if (!select) return;
+            fetch('/api/users').then(r=>r.json()).then(data=>{
+                if (!data || !data.success) {
+                    select.innerHTML = '<option value="">No users</option>';
+                    return;
+                }
+                const usersAll = data.users || [];
+                const users = usersAll.filter(u => (u.department||'').toLowerCase() === 'ict');
+                if (users.length === 0) {
+                    select.innerHTML = '<option value="">No ICT users</option>';
+                    return;
+                }
+                select.innerHTML = '<option value="">Select user...</option>' + users.map(u=>`<option value="${u.email}" data-role="${(u.role||'').replace(/\"/g,'')}">${u.email}</option>`).join('');
+            }).catch(e=>{ console.warn('[ICT] Failed to load users', e); select.innerHTML = '<option value="">No users</option>'; });
+        })();
+        // Login handler - authenticate against backend
         document.getElementById('ictLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            try {
-                console.log('ICT login handler starting');
-                const email = document.getElementById('ictUserEmail').value;
-                const password = document.getElementById('ictUserPassword').value;
+            (async ()=>{
+                try {
+                    const email = document.getElementById('ictUserEmail').value;
+                    const password = document.getElementById('ictUserPassword').value;
 
-                if (!email || !password) {
-                    document.getElementById('ictLoginError').textContent = 'Please fill in all fields';
+                    if (!email || !password) {
+                        document.getElementById('ictLoginError').textContent = 'Please fill in all fields';
+                        document.getElementById('ictLoginError').classList.remove('hidden');
+                        return;
+                    }
+
+                    const resp = await fetch('/api/auth', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) });
+                    const data = await resp.json();
+                    if (!data || !data.success) {
+                        document.getElementById('ictLoginError').textContent = (data && data.message) ? data.message : 'Invalid credentials';
+                        document.getElementById('ictLoginError').classList.remove('hidden');
+                        return;
+                    }
+
+                    const user = data.user;
+                    localStorage.setItem('ictUserName', user.email);
+                    localStorage.setItem('ictUserEmail', user.email);
+                    localStorage.setItem('ictUserRole', user.role || '');
+                    localStorage.setItem('userDept', user.department || 'ICT');
+
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('ictPortal').classList.remove('hidden');
+                    document.getElementById('ictUserDisplay').textContent = user.full_name || user.username || user.email;
+                    document.getElementById('ictRoleDisplay').textContent = user.role || user.department || 'ICT';
+
+                    try { loadIctDashboard(); } catch(_) { console.warn('loadIctDashboard failed'); }
+                    try { loadAssets(); } catch(_) { console.warn('loadAssets failed'); }
+                } catch(err) {
+                    console.error('ICT login error', err);
+                    document.getElementById('ictLoginError').textContent = 'Login error';
                     document.getElementById('ictLoginError').classList.remove('hidden');
-                    return;
                 }
-
-                // Verify credentials against stored users
-                const ictUsers = JSON.parse(localStorage.getItem('ictUsers') || '[]');
-                const user = ictUsers.find(u => u.email === email && u.password === password);
-
-                if (!user) {
-                    document.getElementById('ictLoginError').textContent = 'Invalid credentials';
-                    document.getElementById('ictLoginError').classList.remove('hidden');
-                    return;
-                }
-
-                // Login successful
-                localStorage.setItem('ictUserName', user.name);
-                localStorage.setItem('ictUserEmail', email);
-
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('ictPortal').classList.remove('hidden');
-                document.getElementById('ictUserDisplay').textContent = user.name;
-                document.getElementById('ictRoleDisplay').textContent = user.department || 'ICT';
-
-                try { loadIctDashboard(); } catch(_) { console.warn('loadIctDashboard failed'); }
-                try { loadAssets(); } catch(_) { console.warn('loadAssets failed'); }
-            } catch(err) {
-                alert('Login error: ' + (err && err.message ? err.message : err));
-                console.error(err);
-            }
+            })();
         });
 
         function switchIctSection(section) {
